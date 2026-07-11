@@ -26,6 +26,7 @@ def category_client(tmp_path):
     hasher = PasswordHasher(time_cost=1, memory_cost=1024, parallelism=1)
     tokens = {"me": "token-me", "partner": "token-partner"}
     user_ids = {"me": uuid4(), "partner": uuid4()}
+    category_ids = {"me_inbox": uuid4(), "partner_inbox": uuid4(), "deleted": uuid4()}
     with TestingSessionLocal() as db:
         db.add_all(
             [
@@ -48,6 +49,7 @@ def category_client(tmp_path):
         db.add_all(
             [
                 TodoCategory(
+                    id=category_ids["me_inbox"],
                     user_id=user_ids["me"],
                     name="Inbox",
                     color="#64748b",
@@ -56,6 +58,7 @@ def category_client(tmp_path):
                     sort_order=0,
                 ),
                 TodoCategory(
+                    id=category_ids["partner_inbox"],
                     user_id=user_ids["partner"],
                     name="Partner Inbox",
                     color="#64748b",
@@ -64,6 +67,7 @@ def category_client(tmp_path):
                     sort_order=0,
                 ),
                 TodoCategory(
+                    id=category_ids["deleted"],
                     user_id=user_ids["me"],
                     name="Deleted",
                     is_inbox=False,
@@ -86,6 +90,7 @@ def category_client(tmp_path):
     with TestClient(app) as test_client:
         test_client.tokens = tokens
         test_client.user_ids = user_ids
+        test_client.category_ids = category_ids
         test_client.session_factory = TestingSessionLocal
         yield test_client
 
@@ -248,3 +253,257 @@ def test_create_category_allows_reusing_soft_deleted_name(category_client):
         ).scalars().all()
         assert len(rows) == 2
         assert sum(row.deleted_at is None for row in rows) == 1
+
+
+def test_update_category_updates_allowed_fields_and_writes_sync_change(category_client):
+    create = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Work"},
+    )
+    category_id = create.json()["data"]["id"]
+
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_id}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Office", "color": "#111827", "icon": "briefcase", "sort_order": 7},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["name"] == "Office"
+    assert body["data"]["color"] == "#111827"
+    assert body["data"]["icon"] == "briefcase"
+    assert body["data"]["sort_order"] == 7
+    assert body["sync"]["cursor"] == 2
+    assert "user_id" not in body["data"]
+
+    with category_client.session_factory() as db:
+        sync_changes = db.execute(select(SyncChange).order_by(SyncChange.cursor)).scalars().all()
+        assert [change.change_type for change in sync_changes] == [
+            "category.created",
+            "category.updated",
+        ]
+
+
+def test_update_category_requires_idempotency_key(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client),
+        json={"color": "#000000"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "idempotency_key_required"
+
+
+def test_update_category_rejects_forbidden_system_fields(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"is_inbox": False},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "validation_error"
+
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"user_id": str(uuid4())},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "validation_error"
+
+
+def test_update_category_rejects_null_name_and_sort_order(category_client):
+    name_response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": None},
+    )
+    sort_order_response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"sort_order": None},
+    )
+
+    assert name_response.status_code == 400
+    assert name_response.json()["error"]["code"] == "validation_error"
+    assert sort_order_response.status_code == 400
+    assert sort_order_response.json()["error"]["code"] == "validation_error"
+
+
+def test_update_category_allows_null_color_and_icon_to_clear_fields(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"color": None, "icon": None},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["color"] is None
+    assert body["data"]["icon"] is None
+
+
+def test_update_inbox_display_fields_but_not_identity(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Main Inbox", "color": "#ffffff", "icon": "tray", "sort_order": 4},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["name"] == "Main Inbox"
+    assert body["data"]["is_inbox"] is True
+
+
+def test_update_category_rejects_duplicate_active_name(category_client):
+    create = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Work"},
+    )
+    category_id = create.json()["data"]["id"]
+
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_id}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Inbox"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "validation_error"
+    assert response.json()["error"]["message"] == "category name already exists"
+
+
+def test_update_category_returns_404_for_cross_user_category(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['partner_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"color": "#000000"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"
+
+
+def test_update_deleted_category_returns_deleted_resource(category_client):
+    response = category_client.patch(
+        f"/api/v1/todo-categories/{category_client.category_ids['deleted']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Recovered"},
+    )
+
+    assert response.status_code == 410
+    assert response.json()["error"]["code"] == "deleted_resource"
+
+
+def test_update_category_replays_same_idempotency_key_and_rejects_conflict(category_client):
+    key = str(uuid4())
+    url = f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}"
+    headers = auth_headers(category_client, idempotency_key=key)
+
+    first = category_client.patch(url, headers=headers, json={"color": "#111111"})
+    replay = category_client.patch(url, headers=headers, json={"color": "#111111"})
+    conflict = category_client.patch(url, headers=headers, json={"color": "#222222"})
+
+    assert first.status_code == 200
+    assert replay.status_code == 200
+    assert replay.json() == first.json()
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "idempotency_key_conflict"
+
+
+def test_delete_category_soft_deletes_and_writes_sync_change(category_client):
+    create = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Temp"},
+    )
+    category_id = create.json()["data"]["id"]
+
+    response = category_client.delete(
+        f"/api/v1/todo-categories/{category_id}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["id"] == category_id
+    assert body["data"]["deleted"] is True
+    assert body["sync"]["cursor"] == 2
+
+    with category_client.session_factory() as db:
+        category = db.execute(select(TodoCategory).where(TodoCategory.id == category_id)).scalar_one()
+        assert category.deleted_at is not None
+        sync_changes = db.execute(select(SyncChange).order_by(SyncChange.cursor)).scalars().all()
+        assert [change.change_type for change in sync_changes] == [
+            "category.created",
+            "category.deleted",
+        ]
+
+
+def test_delete_category_requires_idempotency_key(category_client):
+    response = category_client.delete(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client),
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "idempotency_key_required"
+
+
+def test_delete_inbox_category_is_rejected(category_client):
+    response = category_client.delete(
+        f"/api/v1/todo-categories/{category_client.category_ids['me_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_state_transition"
+
+
+def test_delete_category_returns_404_for_cross_user_category(category_client):
+    response = category_client.delete(
+        f"/api/v1/todo-categories/{category_client.category_ids['partner_inbox']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+    )
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"
+
+
+def test_delete_deleted_category_returns_deleted_resource(category_client):
+    response = category_client.delete(
+        f"/api/v1/todo-categories/{category_client.category_ids['deleted']}",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+    )
+
+    assert response.status_code == 410
+    assert response.json()["error"]["code"] == "deleted_resource"
+
+
+def test_delete_category_replays_same_idempotency_key_and_rejects_conflict(category_client):
+    create = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Disposable"},
+    )
+    category_id = create.json()["data"]["id"]
+    key = str(uuid4())
+    url = f"/api/v1/todo-categories/{category_id}"
+    headers = auth_headers(category_client, idempotency_key=key)
+
+    first = category_client.delete(url, headers=headers)
+    replay = category_client.delete(url, headers=headers)
+    conflict = category_client.delete(f"{url}?reason=again", headers=headers)
+
+    assert first.status_code == 200
+    assert replay.status_code == 200
+    assert replay.json() == first.json()
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "idempotency_key_conflict"

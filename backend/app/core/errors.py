@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from app.core.envelope import error_envelope
@@ -36,7 +37,7 @@ async def validation_error_handler(
         content=error_envelope(
             "validation_error",
             "request validation failed",
-            {"errors": exc.errors()},
+            {"errors": jsonable_encoder(exc.errors())},
         ),
     )
 

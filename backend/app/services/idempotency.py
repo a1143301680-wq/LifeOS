@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 from uuid import UUID
 
 from fastapi import Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -100,3 +101,32 @@ def store_idempotency_response(
     )
     db.add(record)
     return record
+
+
+async def get_idempotency_context(
+    db: Session,
+    *,
+    request: Request,
+    user_id: UUID,
+    raw_key: str | None,
+) -> tuple[UUID, str, JSONResponse | None]:
+    key = require_idempotency_key(raw_key)
+    body = await request.body()
+    request_hash = request_fingerprint(
+        request.method,
+        request.url.path,
+        canonical_query(request),
+        body,
+    )
+    existing = find_idempotency_record(
+        db,
+        user_id=user_id,
+        key=key,
+        request_hash=request_hash,
+    )
+    if existing is None:
+        return key, request_hash, None
+    return key, request_hash, JSONResponse(
+        status_code=existing.response_status,
+        content=existing.response_body,
+    )

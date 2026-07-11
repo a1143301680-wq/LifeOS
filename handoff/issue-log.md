@@ -22,6 +22,24 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ## Issues
 
+### ISSUE-20260711-004: Reject null PATCH fields for Todo Category update
+
+- Status: verified
+- Severity: P1
+- Found by: Review window
+- Found at: 2026-07-11 13:34 +08:00
+- Related task: Phase 1A Todo Category update/delete endpoints
+- Files:
+  - `D:\LifeOS\backend\app\schemas\todo_category.py:16`
+  - `D:\LifeOS\backend\app\api\v1\todo_categories.py:180`
+  - `D:\LifeOS\backend\app\api\v1\todo_categories.py:190`
+- Description: `TodoCategoryUpdate` accepts explicit `null` values for `name` and `sort_order`, but the endpoint treats them as update values. `{"name": null}` calls `.strip()` on `None`; `{"sort_order": null}` assigns `None` to a non-null database column.
+- Expected: Invalid explicit null update fields should return `400 validation_error`.
+- Actual: Fixed by coding window. Explicit `{"name": null}` and `{"sort_order": null}` now return `400 validation_error`; `{"color": null, "icon": null}` remains valid and clears optional display fields.
+- Fix owner/window: Coding window.
+- Fix notes: Make nullable update semantics explicit. For this API, reject `null` for `name` and `sort_order` when present, and add regression tests for both cases. Keep `color` and `icon` nullable only if clearing those display fields is intended.
+- Verification: Verified by Review window on 2026-07-11. Reviewed `TodoCategoryUpdate` null-field validator, `jsonable_encoder(exc.errors())` validation error handling, and regression tests. `python -m pytest` passed with 29 tests; `python -m alembic current` and `python -m alembic heads` both reported `20260711_0003 (head)`.
+
 ### ISSUE-20260711-001: Verify sync cursor sequence on PostgreSQL
 
 - Status: verified
