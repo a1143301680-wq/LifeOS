@@ -39,6 +39,39 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: Run `python -m alembic upgrade head` against PostgreSQL, create two sync changes through `create_sync_change()`, and verify cursor values increase monotonically.
 - Verification: Pending PostgreSQL-backed verification.
 
+### ISSUE-20260711-002: Add database-level active category name uniqueness
+
+- Status: open
+- Severity: P2
+- Found by: Review window
+- Found at: 2026-07-11 09:13 +08:00
+- Related task: Phase 1A Todo Category list/create foundation
+- Files:
+  - `D:\LifeOS\backend\app\api\v1\todo_categories.py:41`
+  - `D:\LifeOS\backend\alembic\versions\20260711_0002_add_todo_categories.py:21`
+- Description: Category create checks active duplicate names in application code, but the `todo_categories` migration does not enforce uniqueness at the database level.
+- Expected: Active category names should remain unique per user even under concurrent requests.
+- Actual: Concurrent requests can both pass `ensure_unique_active_name()` before either insert commits, allowing duplicate active names.
+- Fix owner/window: Coding window.
+- Fix notes: Add a PostgreSQL partial unique index on `(user_id, name)` where `deleted_at IS NULL`, or explicitly defer and document best-effort uniqueness for this phase.
+- Verification: Pending.
+
+### ISSUE-20260711-003: Keep current task handoff status in sync
+
+- Status: open
+- Severity: P3
+- Found by: Review window
+- Found at: 2026-07-11 09:13 +08:00
+- Related task: Phase 1A Todo Category list/create foundation
+- Files:
+  - `D:\LifeOS\handoff\current-task.md:7`
+- Description: The coding window reported the category slice as complete and ready for review, but `current-task.md` still says `Status: not_started`.
+- Expected: Shared handoff state should reflect the actual workflow state, such as `ready_for_review` before review or `ready_for_git` after a passing review.
+- Actual: The task file has stale status.
+- Fix owner/window: Coding window or Git window after publishing.
+- Fix notes: Update `handoff/current-task.md` as part of the next workflow state transition.
+- Verification: Pending.
+
 ## Entry Template
 
 ```text

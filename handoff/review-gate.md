@@ -10,46 +10,62 @@ Commit allowed: yes
 
 Reviewed by: Review window
 
-Reviewed at: 2026-07-11 01:57 +08:00
+Reviewed at: 2026-07-11 09:13 +08:00
 
-Reviewed changes: Phase 1A backend foundation re-review after sync cursor allocation fix; includes `allocate_sync_cursor()`, `create_sync_change()`, PostgreSQL `sync_changes_cursor_seq` migration support, and sync cursor test coverage.
+Reviewed changes: Phase 1A Todo Category list/create foundation; includes `todo_categories` model/migration, category DTOs, `GET /api/v1/todo-categories`, `POST /api/v1/todo-categories`, idempotency execution helpers, sync change creation, and focused tests.
 
 ## Latest Review Summary
 
-The previous P2 finding about `get_latest_cursor()` only reading `max(cursor)` has been addressed. The backend now has an explicit server-side sync cursor allocation boundary:
+The slice satisfies the stated task goal. Category list filters by bearer-token user and excludes soft-deleted categories. Category create rejects missing `Idempotency-Key`, rejects client-supplied `user_id`, stores and replays idempotent responses, returns `409 idempotency_key_conflict` for same key with different request body, and writes a `sync_changes` row through `create_sync_change()` in the same database transaction.
 
-- PostgreSQL path uses `nextval('sync_changes_cursor_seq')`.
-- SQLite/test fallback allocates monotonically from existing and pending `SyncChange` rows.
-- `create_sync_change()` centralizes sync change creation so future write endpoints do not hand-fill cursor values.
-
-No P0/P1 issues were found. No obvious Phase 1A scope drift was found. Commit is allowed with the residual risks below.
+No P0/P1 issues were found. No obvious Phase 1A scope drift was found. Commit is allowed with the risks below.
 
 ## Findings
 
-No blocking findings.
+### P2: Category name uniqueness is enforced only in application code
+
+- File: `D:\LifeOS\backend\app\api\v1\todo_categories.py:41`
+- Issue: `ensure_unique_active_name()` checks for duplicate active category names before insert, but the migration does not add a database-level unique constraint or partial unique index for active names.
+- Why it matters: The API contract says category names should be unique among active categories for a user. Without database enforcement, concurrent requests can pass the pre-insert check and create duplicates.
+- Suggested fix: Add a PostgreSQL partial unique index on `(user_id, name)` where `deleted_at IS NULL`, or document why uniqueness is intentionally best-effort for this phase and add a follow-up before broader write API work.
+
+### P3: Current task handoff status was not advanced to ready_for_review
+
+- File: `D:\LifeOS\handoff\current-task.md:7`
+- Issue: The coding window completed the task, but `Task Status` still says `not_started`.
+- Why it matters: The workflow relies on shared files as cross-window state. Stale task status can confuse the Git window or the next coding/review loop.
+- Suggested fix: Update `current-task.md` to reflect the completed review/gate state after this review, or have the Git window update it after publishing.
 
 ## Scope Check
 
-- This remains a Phase 1A backend foundation slice, not the full Phase 1A Todo loop.
-- No Reminder API, Recurring Todo API, Strong reminder API, Android offline pending replay API, or full login/account system was introduced.
-- The change supports the Phase 1A sync requirement that `sync_changes.cursor` be server-generated, monotonic, and stable.
+- In scope: Todo category list/create, bearer-token user isolation, idempotency foundation, sync change write foundation.
+- Out of scope items were not implemented: Reminder API, Recurring Todo API, Strong reminder API, Android offline pending operation replay API, full login/account system.
+- No endpoint exposes or accepts `user_id` as an allowed DTO field; client-supplied `user_id` is rejected by request validation.
+- SSE was not implemented in this slice, so no SSE snapshot contract issue was introduced.
 
 ## Verification Performed
 
-- Read required project docs and shared handoff state.
-- Inspected `D:\LifeOS\backend\app\services\sync.py`.
-- Inspected `D:\LifeOS\backend\app\models\sync.py`.
-- Inspected `D:\LifeOS\backend\alembic\versions\20260710_0001_phase1a_backend_foundation.py`.
-- Inspected `D:\LifeOS\backend\tests\test_sync.py`.
-- Ran `python -m pytest` in `D:\LifeOS\backend`: 4 passed.
-- Ran `python -m alembic heads` in `D:\LifeOS\backend`: `20260710_0001 (head)`.
-- `git status` / `git diff` were not available because this was still a first-time project before git initialization; user confirmed that context.
+- Read required shared state files and Phase 1A docs.
+- Checked `git status --short` and `git diff --stat`.
+- Inspected changed backend files:
+  - `D:\LifeOS\backend\app\api\v1\todo_categories.py`
+  - `D:\LifeOS\backend\app\models\todo_category.py`
+  - `D:\LifeOS\backend\app\schemas\todo_category.py`
+  - `D:\LifeOS\backend\app\services\idempotency.py`
+  - `D:\LifeOS\backend\app\api\v1\router.py`
+  - `D:\LifeOS\backend\app\models\__init__.py`
+  - `D:\LifeOS\backend\alembic\env.py`
+  - `D:\LifeOS\backend\alembic\versions\20260711_0002_add_todo_categories.py`
+  - `D:\LifeOS\backend\tests\test_todo_categories.py`
+- Ran `python -m pytest` in `D:\LifeOS\backend`: 10 passed.
+- Ran `python -m alembic heads` in `D:\LifeOS\backend`: `20260711_0002 (head)`.
 
 ## Residual Risk
 
-- PostgreSQL-specific `nextval('sync_changes_cursor_seq')` behavior has been reviewed in code and migration, but not verified against a live PostgreSQL database in this review.
-- Future write endpoints must call `create_sync_change()` inside the same database transaction as the entity mutation.
+- PostgreSQL-backed verification for `sync_changes_cursor_seq` remains open because local PostgreSQL on `localhost:5432` was unavailable.
+- Category name uniqueness currently has application-level coverage only; database-level race protection is not present.
+- The review did not run a live PostgreSQL migration upgrade; Alembic head was verified only.
 
 ## Instructions For Git Window
 
-Commit/push is allowed after the Git window initializes or confirms the repository, checks status/diff, stages only intended files, and confirms ignored local artifacts such as `__pycache__`, `.pyc`, `.env`, and virtual environments are not committed.
+Commit/push is allowed. Before committing, verify the final staged file set includes the intended backend category/idempotency/migration/test files and the review handoff files, and excludes local artifacts or secrets.

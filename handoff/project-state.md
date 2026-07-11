@@ -25,9 +25,14 @@ Read these before implementation, review, or Git publishing:
 - Phase 1A API implementation decisions are closed in `docs/api-phase1a.md`.
 - Multi-window workflow templates were added on 2026-07-11.
 - Coding, Review, and Git windows should coordinate through files under `handoff/`.
+- Initial project baseline was committed and pushed to `origin/main` on 2026-07-11.
 
 ## Recently Completed
 
+- Published initial baseline commit `6a85b4a`:
+  - Phase 1A backend skeleton.
+  - Stable product/API/docs baseline.
+  - Multi-window workflow and handoff files.
 - Confirmed Phase 1A API decisions:
   - Soft-deleted current-user Todo detail returns `410 deleted_resource`.
   - Missing or cross-user Todo detail returns `404 not_found`.
@@ -39,12 +44,24 @@ Read these before implementation, review, or Git publishing:
 
 ## Current Blockers
 
-- GitHub remote status must be checked by the Git window before push.
-- Review gate must be written to `handoff/review-gate.md` before Git commit/push.
+- PostgreSQL-backed verification for `sync_changes_cursor_seq` remains open in `handoff/issue-log.md`.
+- Future Git commits still require `handoff/review-gate.md` approval or explicit user override.
 
 ## Next Recommended Step
 
-Use the coding window to continue Phase 1A backend implementation. After each coding task, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window.
+Use the Coding window for the next Phase 1A backend slice:
+
+- Implement Todo Category list/create API foundation.
+- Add `todo_categories` model and migration.
+- Implement `GET /api/v1/todo-categories`.
+- Implement `POST /api/v1/todo-categories` with required `Idempotency-Key`.
+- Store/replay idempotency responses for category create.
+- Write `sync_changes` through `create_sync_change()` in the same transaction as category creation.
+- Add focused tests.
+
+If a local PostgreSQL database is available, also verify `ISSUE-20260711-001`. If not, keep it open as P3 and continue.
+
+After coding, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window only if review allows commit/push.
 
 ## Notes For Windows
 

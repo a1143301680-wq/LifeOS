@@ -4,7 +4,7 @@ Last updated: 2026-07-11
 
 ## Task Status
 
-Status: ready_for_review
+Status: ready_for_git
 
 Allowed values:
 
@@ -18,41 +18,46 @@ Allowed values:
 
 ## Task Summary
 
-Set up project workflow state templates so Coding, Review, and Git windows can coordinate through files instead of chat history.
+Phase 1A backend next slice: implement Todo Category list/create API foundation.
 
 ## Task Goal
 
-- Create shared project state templates under `handoff/`.
-- Create a project workflow document under `docs/`.
-- Update Review/Git window prompts so they read/write shared state.
+- Add `todo_categories` backend model and Alembic migration.
+- Implement `GET /api/v1/todo-categories`.
+- Implement `POST /api/v1/todo-categories`.
+- Enforce bearer-token user isolation; clients must not send `user_id`.
+- Enforce `Idempotency-Key` for `POST /api/v1/todo-categories`.
+- Use canonical request hashing and stored idempotency response replay.
+- Write `sync_changes` through `create_sync_change()` in the same transaction as category creation.
+- Add focused tests for list/create, user isolation, missing idempotency key, idempotent replay, and key conflict.
 
 ## Implementation Notes
 
-- Added `docs/workflow.md`.
-- Added `handoff/project-state.md`.
-- Added `handoff/current-task.md`.
-- Added `handoff/review-gate.md`.
-- Added `handoff/issue-log.md`.
-- Added `docs/adr/README.md`.
-- Updated Review/Git window prompt files in `handoff/`.
+Decision window assessment on 2026-07-11:
+
+- Current backend has Phase 1A foundation and `GET /api/v1/me`.
+- Current backend has `users`, `idempotency_keys`, and `sync_changes` models/migration.
+- Current backend has idempotency fingerprint helper but no write endpoint idempotency execution boundary yet.
+- Current backend has `create_sync_change()` and sync cursor allocation helper.
+- No Todo Category, Todo, Today, sync pull, or SSE endpoints are implemented yet.
+- PostgreSQL sequence verification remains a P3 follow-up in `handoff/issue-log.md`.
 
 ## Verification Notes
 
-- Verified that the shared state files exist under `handoff/`.
-- Verified that `docs/workflow.md` exists and references the shared state files.
-- Verified that `docs/adr/README.md` exists.
-- Verified that Review/Git prompt files exist under `handoff/`.
-- Verified that the temp Review/Git prompt files were updated from the project prompt files.
-- Verified that key gate terms are searchable: `review-gate.md`, `Commit allowed`, `Review result`, and `issue-log.md`.
+Decision window ran backend tests on 2026-07-11:
+
+- Command: `python -m pytest`
+- Working directory: `D:\LifeOS\backend`
+- Result: 4 passed
 
 ## Review Status
 
-Review required before Git commit/push.
+Review completed. `handoff/review-gate.md` allows Git commit/push with residual risks.
 
 ## Git Status
 
-Git window must check repository state and remote configuration.
+Ready for Git window commit/push.
 
 ## Next Step
 
-Run Review window against the workflow template changes, then Git window if review allows commit/push.
+Git window should commit and push this reviewed slice. After publishing, continue with the next Phase 1A backend slice through the Coding window.
