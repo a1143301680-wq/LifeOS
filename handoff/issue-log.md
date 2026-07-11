@@ -24,7 +24,7 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ### ISSUE-20260711-001: Verify sync cursor sequence on PostgreSQL
 
-- Status: open
+- Status: verified
 - Severity: P3
 - Found by: Review window
 - Found at: 2026-07-11 01:57 +08:00
@@ -34,10 +34,10 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
   - `D:\LifeOS\backend\alembic\versions\20260710_0001_phase1a_backend_foundation.py:21`
 - Description: The sync cursor allocation fix adds PostgreSQL sequence-backed allocation through `sync_changes_cursor_seq`, with SQLite fallback test coverage.
 - Expected: A live PostgreSQL migration and insert path should confirm that `nextval('sync_changes_cursor_seq')` allocates global monotonic cursors and that `sync_changes.cursor` remains unique.
-- Actual: Review verified the code, migration, Alembic head, and SQLite fallback test, but did not run against a configured PostgreSQL database.
+- Actual: Verified against local PostgreSQL on 2026-07-11. Connection to `lifeos/lifeos@localhost:5432/lifeos` succeeded. `python -m alembic upgrade head` reached `20260711_0002`; `sync_changes_cursor_seq` exists; `sync_changes.cursor` defaults to `nextval('sync_changes_cursor_seq'::regclass)`; two real `create_sync_change()` writes allocated monotonic cursors `3` and `4`.
 - Fix owner/window: Coding window or Git/verification window when PostgreSQL is available.
 - Fix notes: Run `python -m alembic upgrade head` against PostgreSQL, create two sync changes through `create_sync_change()`, and verify cursor values increase monotonically.
-- Verification: Pending PostgreSQL-backed verification.
+- Verification: Verified by coding window and review window. Review independently ran `python -m pytest` with 10 passed, `python -m alembic current` showing `20260711_0002 (head)` with `PostgresqlImpl`, and direct SQL checks confirming sequence/default state plus cleanup of `verify.%` sync rows and `issue-%` users.
 
 ### ISSUE-20260711-002: Add database-level active category name uniqueness
 
@@ -58,7 +58,7 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ### ISSUE-20260711-003: Keep current task handoff status in sync
 
-- Status: open
+- Status: verified
 - Severity: P3
 - Found by: Review window
 - Found at: 2026-07-11 09:13 +08:00
@@ -67,10 +67,10 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
   - `D:\LifeOS\handoff\current-task.md:7`
 - Description: The coding window reported the category slice as complete and ready for review, but `current-task.md` still says `Status: not_started`.
 - Expected: Shared handoff state should reflect the actual workflow state, such as `ready_for_review` before review or `ready_for_git` after a passing review.
-- Actual: The task file has stale status.
+- Actual: The task file now shows `Status: published`, with commit `52a701f`, remote `origin`, branch `main`, and push target recorded.
 - Fix owner/window: Coding window or Git window after publishing.
 - Fix notes: Update `handoff/current-task.md` as part of the next workflow state transition.
-- Verification: Pending.
+- Verification: Verified by review window on 2026-07-11.
 
 ## Entry Template
 

@@ -4,7 +4,7 @@ Last updated: 2026-07-11
 
 ## Task Status
 
-Status: ready_for_git
+Status: published
 
 Allowed values:
 
@@ -56,8 +56,13 @@ Review completed. `handoff/review-gate.md` allows Git commit/push with residual 
 
 ## Git Status
 
-Ready for Git window commit/push.
+Published by Git window.
+
+- Commit: `52a701f`
+- Remote: `origin`
+- Branch: `main`
+- Push target: `https://github.com/a1143301680-wq/LifeOS.git`
 
 ## Next Step
 
-Git window should commit and push this reviewed slice. After publishing, continue with the next Phase 1A backend slice through the Coding window.
+Continue with the next Phase 1A backend slice through the Coding window. Keep `ISSUE-20260711-002` visible because review marked it as P2 residual risk.

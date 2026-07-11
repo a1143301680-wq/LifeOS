@@ -26,9 +26,15 @@ Read these before implementation, review, or Git publishing:
 - Multi-window workflow templates were added on 2026-07-11.
 - Coding, Review, and Git windows should coordinate through files under `handoff/`.
 - Initial project baseline was committed and pushed to `origin/main` on 2026-07-11.
+- Todo Category list/create API foundation was committed and pushed to `origin/main` on 2026-07-11.
 
 ## Recently Completed
 
+- Published Todo Category API foundation commit `52a701f`:
+  - Added `todo_categories` model and Alembic migration.
+  - Added category list/create endpoints.
+  - Added write idempotency execution helpers.
+  - Added focused category API tests.
 - Published initial baseline commit `6a85b4a`:
   - Phase 1A backend skeleton.
   - Stable product/API/docs baseline.
@@ -44,22 +50,18 @@ Read these before implementation, review, or Git publishing:
 
 ## Current Blockers
 
-- PostgreSQL-backed verification for `sync_changes_cursor_seq` remains open in `handoff/issue-log.md`.
+- No current P0/P1 blockers are recorded.
 - Future Git commits still require `handoff/review-gate.md` approval or explicit user override.
 
 ## Next Recommended Step
 
-Use the Coding window for the next Phase 1A backend slice:
+Use the Coding window for the next Phase 1A backend slice. Recommended options:
 
-- Implement Todo Category list/create API foundation.
-- Add `todo_categories` model and migration.
-- Implement `GET /api/v1/todo-categories`.
-- Implement `POST /api/v1/todo-categories` with required `Idempotency-Key`.
-- Store/replay idempotency responses for category create.
-- Write `sync_changes` through `create_sync_change()` in the same transaction as category creation.
-- Add focused tests.
+- Address `ISSUE-20260711-002` by adding database-level active category name uniqueness.
+- Continue Todo Category update/delete endpoints.
+- Continue Todo API foundation.
 
-If a local PostgreSQL database is available, also verify `ISSUE-20260711-001`. If not, keep it open as P3 and continue.
+`ISSUE-20260711-001` has been verified against local PostgreSQL and is no longer a blocker.
 
 After coding, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window only if review allows commit/push.
 
