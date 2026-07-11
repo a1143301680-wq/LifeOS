@@ -25,6 +25,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `idempotency_keys` model | done | Commit `6a85b4a` |
 | Idempotency execution boundary | partial | Implemented for category create; needs reuse across future writes |
 | `sync_changes` model/helper | done | PostgreSQL sequence verified in `ISSUE-20260711-001` |
+| Default Todo category seeding | next | Required before Todo create can safely default to Inbox |
 | SSE fanout foundation | pending | Not started |
 
 ## Phase 1A Endpoint Progress
@@ -34,8 +35,8 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `GET /api/v1/me` | done | Implemented, tested, published |
 | `GET /api/v1/todo-categories` | done | Implemented, tested, published in `52a701f` |
 | `POST /api/v1/todo-categories` | done | Implemented, tested, and protected by DB-level active-name uniqueness |
-| `PATCH /api/v1/todo-categories/{id}` | next | Requires category update rules, idempotency, sync change, and DB uniqueness handling |
-| `DELETE /api/v1/todo-categories/{id}` | next | Requires soft delete, Inbox protection, idempotency, and sync change |
+| `PATCH /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
+| `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
 | `POST /api/v1/todos` | pending | Requires `todos` model/migration |
@@ -56,7 +57,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Finish Todo Category CRUD: `PATCH` and `DELETE`.
+1. Add default Todo category seeding and Inbox invariant checks.
 2. Add `todos` model/migration and `POST /api/v1/todos`.
 3. Add Todo detail/update/complete/reopen/delete.
 4. Add Todo list cursor pagination and filters.

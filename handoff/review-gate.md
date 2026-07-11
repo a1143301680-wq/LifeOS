@@ -10,37 +10,35 @@ Commit allowed: yes
 
 Reviewed by: Review window
 
-Reviewed at: 2026-07-11 13:45 +08:00
+Reviewed at: 2026-07-11 14:05 +08:00
 
-Reviewed changes: Todo Category update/delete endpoints plus null-field validation fix for `PATCH /api/v1/todo-categories/{id}`.
+Reviewed changes: Decision task-state update for default Todo category seeding.
 
 ## Latest Review Summary
 
-The previous P1 finding is fixed. `PATCH /api/v1/todo-categories/{id}` now rejects explicit `null` for `name` and `sort_order` with `400 validation_error`, while still allowing `color: null` and `icon: null` to clear optional display fields.
+This review covers only the current state-document update in these files:
 
-The validation error handler now serializes Pydantic v2 error details through `jsonable_encoder()`, preventing validator `ValueError` objects in `ctx.error` from causing a secondary 500 response.
+- `D:\LifeOS\docs\phase1a-progress.md`
+- `D:\LifeOS\handoff\current-task.md`
+- `D:\LifeOS\handoff\project-state.md`
+- `D:\LifeOS\handoff\review-gate.md`
+
+Todo Category `PATCH` / `DELETE` is correctly marked as done with published evidence commit `83ac3eb`.
+
+The next task is correctly switched to default Todo category seeding and Inbox invariant.
+
+The previous code-review PASS was reset before this review to `Review result: PENDING` and `Commit allowed: no`, preventing accidental reuse for the next coding task.
 
 ## Findings
 
-No P0/P1/P2/P3 findings in the reviewed backend changes.
-
-## Verified Closed Issues
-
-### ISSUE-20260711-004: Reject null PATCH fields for Todo Category update
-
-- Status: verified
-- Severity: P1
-- Verification: Reviewed schema validator, validation error handler, and regression tests. Re-ran `python -m pytest`: 29 passed.
+No P0/P1/P2/P3 findings for this state-document update.
 
 ## Scope Check
 
-- Changes remain inside Phase 1A Todo Category CRUD.
-- No Reminder API, Recurring Todo API, Strong reminder API, Android offline replay API, or full login/account system was introduced.
-- Client-supplied `user_id` remains rejected through DTO `extra="forbid"` behavior.
-- PATCH and DELETE require `Idempotency-Key`, reuse canonical request hashing, replay stored responses, and reject conflicts.
-- Cross-user categories return `404 not_found`; current-user deleted categories return `410 deleted_resource`.
-- DELETE uses soft delete and protects Inbox with `400 invalid_state_transition`.
-- Category update/delete write `category.updated` / `category.deleted` sync changes in the same transaction as the entity mutation.
+- This is a task-state documentation update only.
+- No backend, frontend, Android, migration, or test code was reviewed in this pass.
+- No Phase 1A scope drift was found.
+- This approval does not approve implementation of default Todo category seeding.
 
 ## Verification Performed
 
@@ -50,26 +48,22 @@ No P0/P1/P2/P3 findings in the reviewed backend changes.
   - `D:\LifeOS\docs\mvp.md`
   - `D:\LifeOS\docs\data-model-phase1.md`
   - `D:\LifeOS\docs\api-phase1a.md`
-- Read shared state files:
-  - `D:\LifeOS\handoff\current-task.md`
-  - `D:\LifeOS\handoff\project-state.md`
-  - `D:\LifeOS\handoff\review-gate.md`
-  - `D:\LifeOS\handoff\issue-log.md`
-- Checked `git status --short` and `git diff --stat`.
-- Inspected changed backend files:
-  - `D:\LifeOS\backend\app\api\v1\todo_categories.py`
-  - `D:\LifeOS\backend\app\core\errors.py`
-  - `D:\LifeOS\backend\app\schemas\todo_category.py`
-  - `D:\LifeOS\backend\app\services\idempotency.py`
-  - `D:\LifeOS\backend\tests\test_todo_categories.py`
-- Ran `python -m pytest` in `D:\LifeOS\backend`: 29 passed.
-- Ran `python -m alembic current` and `python -m alembic heads` in `D:\LifeOS\backend`: both `20260711_0003 (head)`.
+- Reviewed only the requested four changed files.
+- Checked `git status --short -- docs/phase1a-progress.md handoff/current-task.md handoff/project-state.md handoff/review-gate.md`.
+- Checked `git diff -- docs/phase1a-progress.md handoff/current-task.md handoff/project-state.md handoff/review-gate.md`.
+- Verified commit evidence with `git show --stat --oneline 83ac3eb`.
 
 ## Residual Risk
 
-- No blocking residual risk found for this slice.
-- `handoff/current-task.md` still says `Status: not_started`; Git window may update workflow state as part of publishing, but this does not block commit because this review gate is explicit.
+This review does not validate any code behavior. The next coding task must receive a separate review before any implementation commit/push.
 
 ## Instructions For Git Window
 
-Git window may commit and push the current Todo Category update/delete slice, including this review gate update and the verified issue-log update.
+Git window may commit and push only this independent task-state documentation update:
+
+- `D:\LifeOS\docs\phase1a-progress.md`
+- `D:\LifeOS\handoff\current-task.md`
+- `D:\LifeOS\handoff\project-state.md`
+- `D:\LifeOS\handoff\review-gate.md`
+
+Do not include code files in this commit.

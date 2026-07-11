@@ -30,10 +30,17 @@ Read these before implementation, review, or Git publishing:
 - Todo Category list/create API foundation was committed and pushed to `origin/main` on 2026-07-11.
 - PostgreSQL sync cursor verification was committed and pushed to `origin/main` on 2026-07-11.
 - Active Todo Category name uniqueness was committed and pushed to `origin/main` on 2026-07-11.
+- Todo Category update/delete endpoints were committed and pushed to `origin/main` on 2026-07-11.
 - Phase 1A progress tracking is now documented in `docs/phase1a-progress.md`.
 
 ## Recently Completed
 
+- Published Todo Category update/delete commit `83ac3eb`:
+  - Added `PATCH /api/v1/todo-categories/{id}`.
+  - Added `DELETE /api/v1/todo-categories/{id}`.
+  - Added idempotency replay/conflict coverage.
+  - Added sync changes for category update/delete.
+  - Verified backend tests: 29 passed.
 - Published active Todo Category name uniqueness commit `eca0af8`:
   - Added PostgreSQL partial unique index migration.
   - Added model index metadata.
@@ -66,17 +73,14 @@ Read these before implementation, review, or Git publishing:
 
 Use the Coding window for the next Phase 1A backend slice:
 
-- Finish Todo Category update/delete endpoints:
-  - `PATCH /api/v1/todo-categories/{id}`
-  - `DELETE /api/v1/todo-categories/{id}`
-- Require idempotency for both write endpoints.
-- Keep Inbox protection and soft-delete semantics.
-- Write sync changes for category update/delete.
-- Add focused tests.
+- Add default Todo category seeding and Inbox invariant:
+  - Default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
+  - Bootstrap should be idempotent.
+  - Existing users should receive missing default categories.
+  - Exactly one active Inbox should exist per user.
+  - Add focused tests.
 
-Continue Todo API foundation only after category CRUD is complete.
-
-`ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
+Continue Todo API foundation only after default category seeding is complete. `ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
 
 After coding, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window only if review allows commit/push.
 

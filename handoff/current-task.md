@@ -18,23 +18,19 @@ Allowed values:
 
 ## Task Summary
 
-Phase 1A backend next slice: finish Todo Category update/delete endpoints.
+Phase 1A backend next slice: add default Todo category seeding and Inbox invariant.
 
 ## Task Goal
 
-- Implement `PATCH /api/v1/todo-categories/{id}`.
-- Implement `DELETE /api/v1/todo-categories/{id}`.
-- Keep bearer-token user isolation; clients must not send `user_id`.
-- Require `Idempotency-Key` for both write endpoints.
-- Reuse canonical request hashing and stored idempotency response replay.
-- On update, allow only `name`, `color`, `icon`, and `sort_order`.
-- Reject attempts to modify `is_inbox`, `user_id`, timestamps, or other system fields.
-- Allow Inbox display fields to be updated, but never allow Inbox deletion or conversion.
-- Prevent non-Inbox categories from becoming Inbox.
-- Soft-delete non-Inbox categories by setting `deleted_at`; do not hard delete.
-- Existing Todos should keep `category_id` later; no Todo implementation is required in this slice.
-- Write `category.updated` and `category.deleted` sync changes through `create_sync_change()` in the same transaction.
-- Add focused tests for update, delete, Inbox protection, cross-user isolation, idempotent replay, idempotency conflict, deleted category behavior, and duplicate active-name handling.
+- Update bootstrap/initialization so each user gets the default Todo categories.
+- Required default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
+- Ensure exactly one active Inbox category per user.
+- Make bootstrap idempotent: rerunning should not duplicate users or categories.
+- Existing users without categories should receive missing default categories.
+- Existing users with an active Inbox should not receive a second Inbox.
+- Keep category-name uniqueness and soft-delete semantics intact.
+- Add focused tests for new user bootstrap, rerun idempotency, missing-category backfill, and Inbox invariant.
+- Do not implement Todo endpoints in this slice.
 
 ## Implementation Notes
 
@@ -44,10 +40,12 @@ Decision window assessment on 2026-07-11:
 - Todo Category list/create API foundation is published in commit `52a701f`.
 - PostgreSQL sync cursor verification is published in commit `6eea5e8`.
 - Active category name uniqueness is published in commit `eca0af8`.
-- Backend tests passed locally in the Decision window: 13 passed.
+- Todo Category update/delete endpoints are published in commit `83ac3eb`.
+- Backend tests passed locally in the Decision window: 29 passed.
 - `ISSUE-20260711-001` and `ISSUE-20260711-002` are verified.
 - Added `docs/phase1a-progress.md` to make Phase 1A sequencing explicit.
-- Next progress step is to finish Todo Category CRUD before starting Todo endpoints.
+- Category CRUD is complete enough to proceed.
+- Next prerequisite before Todo create is default category seeding, because Todo create defaults to the user's Inbox when `category_id` is omitted.
 
 ## Verification Notes
 
@@ -55,11 +53,11 @@ Decision window ran backend tests on 2026-07-11:
 
 - Command: `python -m pytest`
 - Working directory: `D:\LifeOS\backend`
-- Result: 13 passed
+- Result: 29 passed
 
 ## Review Status
 
-Not started for this new task. Review required after coding window completes update/delete endpoints.
+Not started for this new task. Review required after coding window completes default category seeding.
 
 ## Git Status
 
