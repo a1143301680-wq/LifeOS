@@ -5,6 +5,7 @@ import pytest
 from argon2 import PasswordHasher
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, get_db
@@ -198,3 +199,52 @@ def test_create_category_rejects_client_supplied_user_id(category_client):
 
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "validation_error"
+
+
+def test_create_category_rejects_active_duplicate_name_with_friendly_error(category_client):
+    response = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Inbox"},
+    )
+
+    assert response.status_code == 400
+    body = response.json()
+    assert body["error"]["code"] == "validation_error"
+    assert body["error"]["message"] == "category name already exists"
+
+
+def test_database_rejects_active_duplicate_category_name(category_client):
+    with category_client.session_factory() as db:
+        db.add(
+            TodoCategory(
+                user_id=category_client.user_ids["me"],
+                name="Inbox",
+                is_inbox=False,
+                sort_order=10,
+            )
+        )
+
+        with pytest.raises(IntegrityError):
+            db.commit()
+
+
+def test_create_category_allows_reusing_soft_deleted_name(category_client):
+    response = category_client.post(
+        "/api/v1/todo-categories",
+        headers=auth_headers(category_client, idempotency_key=str(uuid4())),
+        json={"name": "Deleted"},
+    )
+
+    assert response.status_code == 201
+    assert response.json()["data"]["name"] == "Deleted"
+
+    with category_client.session_factory() as db:
+        rows = db.execute(
+            select(TodoCategory).where(
+                TodoCategory.user_id == category_client.user_ids["me"],
+                TodoCategory.name == "Deleted",
+            )
+        ).scalars().all()
+        assert len(rows) == 2
+        assert sum(row.deleted_at is None for row in rows) == 1

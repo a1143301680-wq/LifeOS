@@ -4,7 +4,7 @@ Last updated: 2026-07-11
 
 ## Task Status
 
-Status: published
+Status: ready_for_git
 
 Allowed values:
 
@@ -18,29 +18,28 @@ Allowed values:
 
 ## Task Summary
 
-Phase 1A backend next slice: implement Todo Category list/create API foundation.
+Phase 1A backend next slice: fix database-level active category name uniqueness.
 
 ## Task Goal
 
-- Add `todo_categories` backend model and Alembic migration.
-- Implement `GET /api/v1/todo-categories`.
-- Implement `POST /api/v1/todo-categories`.
-- Enforce bearer-token user isolation; clients must not send `user_id`.
-- Enforce `Idempotency-Key` for `POST /api/v1/todo-categories`.
-- Use canonical request hashing and stored idempotency response replay.
-- Write `sync_changes` through `create_sync_change()` in the same transaction as category creation.
-- Add focused tests for list/create, user isolation, missing idempotency key, idempotent replay, and key conflict.
+- Resolve `ISSUE-20260711-002`.
+- Add a database-level uniqueness guard for active category names per user.
+- Prefer a PostgreSQL partial unique index on `(user_id, name)` where `deleted_at IS NULL`.
+- Keep soft-deleted categories reusable by name.
+- Keep existing application-level validation for friendly errors.
+- Add or update tests that prove duplicate active names are rejected and soft-deleted names can be reused.
+- If SQLite test coverage cannot express the PostgreSQL partial-index behavior exactly, document the gap and add PostgreSQL verification if available.
 
 ## Implementation Notes
 
 Decision window assessment on 2026-07-11:
 
 - Current backend has Phase 1A foundation and `GET /api/v1/me`.
-- Current backend has `users`, `idempotency_keys`, and `sync_changes` models/migration.
-- Current backend has idempotency fingerprint helper but no write endpoint idempotency execution boundary yet.
-- Current backend has `create_sync_change()` and sync cursor allocation helper.
-- No Todo Category, Todo, Today, sync pull, or SSE endpoints are implemented yet.
-- PostgreSQL sequence verification remains a P3 follow-up in `handoff/issue-log.md`.
+- Todo Category list/create API foundation is published in commit `52a701f`.
+- PostgreSQL sync cursor verification is published in commit `6eea5e8`.
+- Backend tests passed locally in the Decision window: 10 passed.
+- `ISSUE-20260711-002` remains open as P2 and should be fixed before expanding category CRUD.
+- Added `docs/phase1a-progress.md` to make Phase 1A sequencing explicit.
 
 ## Verification Notes
 
@@ -48,21 +47,26 @@ Decision window ran backend tests on 2026-07-11:
 
 - Command: `python -m pytest`
 - Working directory: `D:\LifeOS\backend`
-- Result: 4 passed
+- Result: 10 passed
+
+Coding window ran verification on 2026-07-11:
+
+- Command: `python -m pytest`
+- Working directory: `D:\LifeOS\backend`
+- Result: 13 passed
+- Command: `python -m alembic upgrade head`
+- Working directory: `D:\LifeOS\backend`
+- Result: upgraded PostgreSQL from `20260711_0002` to `20260711_0003`
+- PostgreSQL check: `uq_todo_categories_user_active_name` exists as a unique partial index on `(user_id, name) WHERE deleted_at IS NULL`; active duplicate insert raised `UniqueViolation`; soft-deleted name reuse succeeded.
 
 ## Review Status
 
-Review completed. `handoff/review-gate.md` allows Git commit/push with residual risks.
+Review completed. `handoff/review-gate.md` allows Git commit/push.
 
 ## Git Status
 
-Published by Git window.
-
-- Commit: `52a701f`
-- Remote: `origin`
-- Branch: `main`
-- Push target: `https://github.com/a1143301680-wq/LifeOS.git`
+Ready for Git window commit/push.
 
 ## Next Step
 
-Continue with the next Phase 1A backend slice through the Coding window. Keep `ISSUE-20260711-002` visible because review marked it as P2 residual risk.
+Git window should commit and push this reviewed slice. After publishing, continue Todo Category update/delete endpoints or the next Phase 1A backend slice.

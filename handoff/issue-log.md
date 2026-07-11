@@ -41,7 +41,7 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ### ISSUE-20260711-002: Add database-level active category name uniqueness
 
-- Status: open
+- Status: verified
 - Severity: P2
 - Found by: Review window
 - Found at: 2026-07-11 09:13 +08:00
@@ -51,10 +51,10 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
   - `D:\LifeOS\backend\alembic\versions\20260711_0002_add_todo_categories.py:21`
 - Description: Category create checks active duplicate names in application code, but the `todo_categories` migration does not enforce uniqueness at the database level.
 - Expected: Active category names should remain unique per user even under concurrent requests.
-- Actual: Concurrent requests can both pass `ensure_unique_active_name()` before either insert commits, allowing duplicate active names.
+- Actual: Fixed in coding window by adding migration `20260711_0003_add_active_category_name_unique_index.py` and model metadata for `uq_todo_categories_user_active_name`, a unique partial index on `(user_id, name)` where `deleted_at IS NULL`.
 - Fix owner/window: Coding window.
 - Fix notes: Add a PostgreSQL partial unique index on `(user_id, name)` where `deleted_at IS NULL`, or explicitly defer and document best-effort uniqueness for this phase.
-- Verification: Pending.
+- Verification: Verified by Review window on 2026-07-11. `python -m pytest` passed with 13 tests. PostgreSQL is at `20260711_0003 (head)`. Direct PostgreSQL checks confirmed index definition as `CREATE UNIQUE INDEX uq_todo_categories_user_active_name ON public.todo_categories USING btree (user_id, name) WHERE (deleted_at IS NULL)`, active duplicate insert raises an integrity violation, and soft-deleted name reuse succeeds.
 
 ### ISSUE-20260711-003: Keep current task handoff status in sync
 

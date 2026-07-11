@@ -10,17 +10,15 @@ Commit allowed: yes
 
 Reviewed by: Review window
 
-Reviewed at: 2026-07-11 10:54 +08:00
+Reviewed at: 2026-07-11 11:32 +08:00
 
-Reviewed changes: PostgreSQL-backed verification for `ISSUE-20260711-001`; confirms Alembic head on PostgreSQL, `sync_changes_cursor_seq` existence, `sync_changes.cursor` default, monotonic cursor allocation through `create_sync_change()`, and cleanup of verification data.
+Reviewed changes: `ISSUE-20260711-002` fix for database-level active Todo Category name uniqueness; includes `uq_todo_categories_user_active_name` partial unique index metadata, Alembic migration `20260711_0003`, focused tests, and PostgreSQL verification.
 
 ## Latest Review Summary
 
-The PostgreSQL verification is sufficient to close `ISSUE-20260711-001`. The backend connects to `lifeos/lifeos@localhost:5432/lifeos`, Alembic is at `20260711_0002`, the sequence exists, and `sync_changes.cursor` defaults to `nextval('sync_changes_cursor_seq'::regclass)`.
+The P2 issue is fixed. Active Todo Category names are now protected by a PostgreSQL partial unique index on `(user_id, name) WHERE deleted_at IS NULL`, while soft-deleted category names remain reusable. The existing application-level duplicate-name check still provides a friendly API validation error for normal create attempts.
 
-The coding window reported that two real PostgreSQL sync changes allocated cursors `3` and `4` through `create_sync_change()`, then cleaned up the two `verify.*` sync changes and one temporary `issue-*` user. Review independently confirmed that no `verify.%` sync rows and no `issue-%` users remain.
-
-No P0/P1/P2/P3 findings were found for this verification-only task.
+No P0/P1/P2/P3 findings were found for this task.
 
 ## Findings
 
@@ -28,29 +26,32 @@ No findings.
 
 ## Scope Check
 
-- This was verification-only work for the Phase 1A sync cursor foundation.
+- In scope: database-level uniqueness for active Todo Category names.
 - No Phase 1A out-of-scope API was introduced.
-- No application code change was reviewed in this task.
-- Existing open follow-up remains: `ISSUE-20260711-002` for database-level active category name uniqueness.
+- No Reminder API, Recurring Todo API, Strong reminder API, Android offline replay API, or full login/account system was introduced.
+- The change preserves soft-delete semantics for category name reuse.
 
 ## Verification Performed
 
 - Read required shared state files and Phase 1A docs.
 - Checked `git status --short` and `git diff --stat`.
-- Ran `python -m pytest` in `D:\LifeOS\backend`: 10 passed.
-- Ran `python -m alembic current` in `D:\LifeOS\backend`: `20260711_0002 (head)` using `PostgresqlImpl`.
-- Ran direct SQLAlchemy PostgreSQL probe:
-  - `to_regclass('public.sync_changes_cursor_seq')` returned `sync_changes_cursor_seq`.
-  - `sync_changes.cursor` default is `nextval('sync_changes_cursor_seq'::regclass)`.
-  - Verification rows count for `change_type like 'verify.%'` is `0`.
-  - Temporary issue users count for `alias like 'issue-%'` is `0`.
-  - `alembic_version` is `20260711_0002`.
+- Inspected changed backend files:
+  - `D:\LifeOS\backend\app\models\todo_category.py`
+  - `D:\LifeOS\backend\alembic\versions\20260711_0003_add_active_category_name_unique_index.py`
+  - `D:\LifeOS\backend\tests\test_todo_categories.py`
+- Ran `python -m pytest` in `D:\LifeOS\backend`: 13 passed.
+- Ran `python -m alembic current` in `D:\LifeOS\backend`: `20260711_0003 (head)` using PostgreSQL.
+- Ran direct PostgreSQL checks:
+  - Index definition: `CREATE UNIQUE INDEX uq_todo_categories_user_active_name ON public.todo_categories USING btree (user_id, name) WHERE (deleted_at IS NULL)`.
+  - Active duplicate insert raised an integrity violation.
+  - Soft-deleted name reuse succeeded.
 
 ## Residual Risk
 
-- None for `ISSUE-20260711-001`.
-- `ISSUE-20260711-002` remains open and should be handled before relying on category-name uniqueness under concurrent writes.
+No residual risk for `ISSUE-20260711-002`.
+
+Future category write endpoints should continue to rely on the database constraint for race safety and keep API-level validation for friendly user-facing errors.
 
 ## Instructions For Git Window
 
-Commit/push is allowed for the handoff documentation updates that mark PostgreSQL sync cursor verification as complete. Stage only intended handoff files and exclude local artifacts or secrets.
+Commit/push is allowed. Stage only intended files for this reviewed slice and the review/state updates. Exclude local artifacts and secrets.

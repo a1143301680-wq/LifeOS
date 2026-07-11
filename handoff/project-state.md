@@ -15,6 +15,7 @@ Read these before implementation, review, or Git publishing:
 - `docs/mvp.md`
 - `docs/data-model-phase1.md`
 - `docs/api-phase1a.md`
+- `docs/phase1a-progress.md`
 - `docs/workflow.md`
 - `handoff/current-task.md`
 - `handoff/review-gate.md`
@@ -27,6 +28,8 @@ Read these before implementation, review, or Git publishing:
 - Coding, Review, and Git windows should coordinate through files under `handoff/`.
 - Initial project baseline was committed and pushed to `origin/main` on 2026-07-11.
 - Todo Category list/create API foundation was committed and pushed to `origin/main` on 2026-07-11.
+- PostgreSQL sync cursor verification was committed and pushed to `origin/main` on 2026-07-11.
+- Phase 1A progress tracking is now documented in `docs/phase1a-progress.md`.
 
 ## Recently Completed
 
@@ -55,13 +58,12 @@ Read these before implementation, review, or Git publishing:
 
 ## Next Recommended Step
 
-Use the Coding window for the next Phase 1A backend slice. Recommended options:
+Use the Coding window for the next Phase 1A backend slice:
 
-- Address `ISSUE-20260711-002` by adding database-level active category name uniqueness.
 - Continue Todo Category update/delete endpoints.
-- Continue Todo API foundation.
+- Continue Todo API foundation after category CRUD is complete.
 
-`ISSUE-20260711-001` has been verified against local PostgreSQL and is no longer a blocker.
+`ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
 
 After coding, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window only if review allows commit/push.
 

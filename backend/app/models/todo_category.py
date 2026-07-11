@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -10,6 +10,16 @@ from app.core.types import GUID
 
 class TodoCategory(Base):
     __tablename__ = "todo_categories"
+    __table_args__ = (
+        Index(
+            "uq_todo_categories_user_active_name",
+            "user_id",
+            "name",
+            unique=True,
+            sqlite_where=text("deleted_at IS NULL"),
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+    )
 
     id: Mapped[str] = mapped_column(GUID(), primary_key=True, default=uuid4)
     user_id: Mapped[str] = mapped_column(
