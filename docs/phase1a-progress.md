@@ -34,8 +34,8 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `GET /api/v1/me` | done | Implemented, tested, published |
 | `GET /api/v1/todo-categories` | done | Implemented, tested, published in `52a701f` |
 | `POST /api/v1/todo-categories` | done | Implemented, tested, and protected by DB-level active-name uniqueness |
-| `PATCH /api/v1/todo-categories/{id}` | pending | Requires category update rules and idempotency |
-| `DELETE /api/v1/todo-categories/{id}` | pending | Requires soft delete and Inbox protection |
+| `PATCH /api/v1/todo-categories/{id}` | next | Requires category update rules, idempotency, sync change, and DB uniqueness handling |
+| `DELETE /api/v1/todo-categories/{id}` | next | Requires soft delete, Inbox protection, idempotency, and sync change |
 | `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
 | `POST /api/v1/todos` | pending | Requires `todos` model/migration |

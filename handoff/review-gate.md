@@ -10,15 +10,23 @@ Commit allowed: yes
 
 Reviewed by: Review window
 
-Reviewed at: 2026-07-11 11:32 +08:00
+Reviewed at: 2026-07-11 13:26 +08:00
 
-Reviewed changes: `ISSUE-20260711-002` fix for database-level active Todo Category name uniqueness; includes `uq_todo_categories_user_active_name` partial unique index metadata, Alembic migration `20260711_0003`, focused tests, and PostgreSQL verification.
+Reviewed changes: State-document update for the next task handoff only: `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `handoff/review-gate.md`.
 
 ## Latest Review Summary
 
-The P2 issue is fixed. Active Todo Category names are now protected by a PostgreSQL partial unique index on `(user_id, name) WHERE deleted_at IS NULL`, while soft-deleted category names remain reusable. The existing application-level duplicate-name check still provides a friendly API validation error for normal create attempts.
+The reviewed state documents correctly move the next coding task to Todo Category update/delete endpoints:
 
-No P0/P1/P2/P3 findings were found for this task.
+- `PATCH /api/v1/todo-categories/{id}`
+- `DELETE /api/v1/todo-categories/{id}`
+
+The documents also correctly mark prior sequencing blockers as closed:
+
+- `ISSUE-20260711-001` is verified.
+- `ISSUE-20260711-002` is verified.
+
+Before this review, `review-gate.md` was reset to `Review result: PENDING` and `Commit allowed: no` for the new update/delete task, preventing the Git window from reusing the previous PASS. This review now allows committing this state-document update only.
 
 ## Findings
 
@@ -26,32 +34,34 @@ No findings.
 
 ## Scope Check
 
-- In scope: database-level uniqueness for active Todo Category names.
-- No Phase 1A out-of-scope API was introduced.
-- No Reminder API, Recurring Todo API, Strong reminder API, Android offline replay API, or full login/account system was introduced.
-- The change preserves soft-delete semantics for category name reuse.
+- Reviewed only the requested state documents.
+- Did not review backend implementation changes in this pass.
+- The next task remains inside Phase 1A scope.
+- No out-of-scope Reminder, Recurring Todo, Strong reminder, Android offline replay, or full login work is requested by the next task.
 
 ## Verification Performed
 
-- Read required shared state files and Phase 1A docs.
-- Checked `git status --short` and `git diff --stat`.
-- Inspected changed backend files:
-  - `D:\LifeOS\backend\app\models\todo_category.py`
-  - `D:\LifeOS\backend\alembic\versions\20260711_0003_add_active_category_name_unique_index.py`
-  - `D:\LifeOS\backend\tests\test_todo_categories.py`
-- Ran `python -m pytest` in `D:\LifeOS\backend`: 13 passed.
-- Ran `python -m alembic current` in `D:\LifeOS\backend`: `20260711_0003 (head)` using PostgreSQL.
-- Ran direct PostgreSQL checks:
-  - Index definition: `CREATE UNIQUE INDEX uq_todo_categories_user_active_name ON public.todo_categories USING btree (user_id, name) WHERE (deleted_at IS NULL)`.
-  - Active duplicate insert raised an integrity violation.
-  - Soft-deleted name reuse succeeded.
+- Read `docs/workflow.md`.
+- Read and reviewed:
+  - `D:\LifeOS\docs\phase1a-progress.md`
+  - `D:\LifeOS\handoff\current-task.md`
+  - `D:\LifeOS\handoff\project-state.md`
+  - `D:\LifeOS\handoff\review-gate.md`
+- Checked `git status --short`.
+- Checked `git diff --stat -- docs/phase1a-progress.md handoff/current-task.md handoff/project-state.md handoff/review-gate.md`.
+- Checked the limited diff for the same four files.
 
 ## Residual Risk
 
-No residual risk for `ISSUE-20260711-002`.
-
-Future category write endpoints should continue to rely on the database constraint for race safety and keep API-level validation for friendly user-facing errors.
+`git status` currently shows backend file changes outside this review scope. Those backend changes are not reviewed by this gate and must not be included in the state-document update commit unless separately reviewed.
 
 ## Instructions For Git Window
 
-Commit/push is allowed. Stage only intended files for this reviewed slice and the review/state updates. Exclude local artifacts and secrets.
+Commit/push is allowed only for this reviewed state-document update. Stage only:
+
+- `docs/phase1a-progress.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `handoff/review-gate.md`
+
+Do not stage backend files under this gate.
