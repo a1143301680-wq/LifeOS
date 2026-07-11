@@ -2,67 +2,110 @@
 
 Last updated: 2026-07-11
 
-## Task Status
+## Metadata
 
-Status: not_started
+- Task ID: TASK-006
+- Task Name: Default Todo category seeding and Inbox invariant
+- Status: PLANNED
+- Priority: P1
+- Parent Task: Phase 1A backend
+- Dependencies:
+  - Todo Category CRUD published in `83ac3eb`
+  - Active category name uniqueness published in `eca0af8`
 
-Allowed values:
+## Background
 
-- `not_started`
-- `in_progress`
-- `ready_for_review`
-- `review_failed`
-- `ready_for_git`
-- `published`
-- `blocked`
+`POST /api/v1/todos` will default to the user's Inbox when `category_id` is omitted. The current bootstrap path creates users but does not guarantee default Todo categories or the Inbox invariant.
 
-## Task Summary
+## Goal
 
-Phase 1A backend next slice: add default Todo category seeding and Inbox invariant.
+Each seeded user has the required default Todo categories, including exactly one active Inbox, before Todo creation work begins.
 
-## Task Goal
+## Scope
 
-- Update bootstrap/initialization so each user gets the default Todo categories.
-- Required default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
-- Ensure exactly one active Inbox category per user.
-- Make bootstrap idempotent: rerunning should not duplicate users or categories.
-- Existing users without categories should receive missing default categories.
-- Existing users with an active Inbox should not receive a second Inbox.
-- Keep category-name uniqueness and soft-delete semantics intact.
-- Add focused tests for new user bootstrap, rerun idempotency, missing-category backfill, and Inbox invariant.
-- Do not implement Todo endpoints in this slice.
+### In Scope
 
-## Implementation Notes
+- Bootstrap/initialization logic for default Todo categories.
+- Default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
+- Idempotent rerun behavior.
+- Backfill missing default categories for existing users.
+- Tests for seeding and Inbox invariant.
 
-Decision window assessment on 2026-07-11:
+### Out of Scope
 
-- Current backend has Phase 1A foundation and `GET /api/v1/me`.
-- Todo Category list/create API foundation is published in commit `52a701f`.
-- PostgreSQL sync cursor verification is published in commit `6eea5e8`.
-- Active category name uniqueness is published in commit `eca0af8`.
-- Todo Category update/delete endpoints are published in commit `83ac3eb`.
-- Backend tests passed locally in the Decision window: 29 passed.
-- `ISSUE-20260711-001` and `ISSUE-20260711-002` are verified.
-- Added `docs/phase1a-progress.md` to make Phase 1A sequencing explicit.
-- Category CRUD is complete enough to proceed.
-- Next prerequisite before Todo create is default category seeding, because Todo create defaults to the user's Inbox when `category_id` is omitted.
+- Todo API endpoints.
+- Reminder, recurring Todo, strong reminder, Android offline replay, or full login.
+- UI work.
+- Changing published Category CRUD API behavior beyond what seeding requires.
 
-## Verification Notes
+## Related Files
 
-Decision window ran backend tests on 2026-07-11:
+### Expected Read Files
 
-- Command: `python -m pytest`
-- Working directory: `D:\LifeOS\backend`
-- Result: 29 passed
+- `docs/workflow.md`
+- `docs/phase1a-progress.md`
+- `docs/api-phase1a.md`
+- `docs/data-model-phase1.md`
+- `backend/app/scripts/bootstrap_users.py`
+- `backend/app/models/todo_category.py`
+- `backend/tests/`
 
-## Review Status
+### Allowed Modify Files
 
-Not started for this new task. Review required after coding window completes default category seeding.
+- `backend/app/scripts/bootstrap_users.py`
+- New backend service/helper files if needed for category defaults.
+- Backend tests related to bootstrap/category seeding.
+- Handoff/progress files for task status updates.
 
-## Git Status
+### Forbidden Modify Files
 
-Do not commit/push this next slice until Review window updates `handoff/review-gate.md`.
+- Frontend or Android files.
+- Todo endpoint implementation files, unless only importing existing models is required for tests.
+- Reminder/recurring/offline replay files.
 
-## Next Step
+## Implementation Requirements
 
-Send this task to the Coding window. After coding, run the Review window and then the Git window only if review allows commit/push.
+- Bootstrap rerun must not duplicate users or categories.
+- Existing users without categories receive missing default categories.
+- Existing users with an active Inbox do not receive a second active Inbox.
+- Category-name uniqueness and soft-delete semantics remain intact.
+- Do not implement Todo endpoints.
+
+## Acceptance Criteria
+
+- [ ] New user bootstrap creates both users and all default categories for each user.
+- [ ] Rerunning bootstrap does not duplicate users or categories.
+- [ ] Existing users missing default categories are backfilled.
+- [ ] Each user has exactly one active Inbox after bootstrap.
+- [ ] Existing active Inbox is preserved and not duplicated.
+- [ ] Backend tests cover the above behavior.
+
+## Verification Plan
+
+- Automated tests: `python -m pytest`
+- Static check: not required unless implementation changes packaging or typing-sensitive APIs.
+- Build check: not required.
+- Manual verification: optional script run against local database if safe.
+
+## Risks
+
+- Duplicate active categories if seeding checks are incomplete.
+- Soft-deleted categories may interact with name reuse; expected behavior must be explicit in tests.
+- Bootstrap output must not reveal existing raw tokens.
+
+## Coding Output Requirements
+
+Coding must report:
+
+- modified files
+- implementation summary
+- acceptance criteria results
+- test commands and results
+- unresolved issues
+- task-outside findings
+
+## Current Stage
+
+Next role: Task Review
+
+Required next action: review this task for readiness. Coding must not start until Task Review passes and Git Snapshot completes.

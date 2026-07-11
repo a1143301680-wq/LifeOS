@@ -8,7 +8,7 @@ Phase 1A: Todo CRUD + Todo category CRUD + two-user isolation + PC/Android sync 
 
 ## Source Of Truth
 
-Read these before implementation, review, or Git publishing:
+These files are project sources of truth, not a mandatory full-read list for every window. Each role follows the reading policy in `docs/workflow.md`; task-specific product, architecture, code, and test inputs are routed by `handoff/current-task.md`.
 
 - `docs/requirements.md`
 - `docs/architecture.md`
@@ -18,7 +18,10 @@ Read these before implementation, review, or Git publishing:
 - `docs/phase1a-progress.md`
 - `docs/workflow.md`
 - `handoff/current-task.md`
-- `handoff/review-gate.md`
+- `handoff/task-review-gate.md`
+- `handoff/code-review-gate.md`
+- `handoff/git-snapshot.md`
+- `handoff/git-commit.md`
 - `handoff/issue-log.md`
 
 ## Current Status
@@ -32,6 +35,7 @@ Read these before implementation, review, or Git publishing:
 - Active Todo Category name uniqueness was committed and pushed to `origin/main` on 2026-07-11.
 - Todo Category update/delete endpoints were committed and pushed to `origin/main` on 2026-07-11.
 - Phase 1A progress tracking is now documented in `docs/phase1a-progress.md`.
+- Workflow migration split Task Review from Code Review, and Git Snapshot from Git Commit.
 
 ## Recently Completed
 
@@ -67,11 +71,14 @@ Read these before implementation, review, or Git publishing:
 ## Current Blockers
 
 - No current P0/P1 blockers are recorded.
-- Future Git commits still require `handoff/review-gate.md` approval or explicit user override.
+- Future development tasks must follow `Decision -> Task Review -> Git Snapshot -> Coding -> Code Review -> Git Commit -> Decision`.
+- `handoff/review-gate.md` is deprecated for new tasks; use `handoff/task-review-gate.md` and `handoff/code-review-gate.md`.
 
 ## Next Recommended Step
 
-Use the Coding window for the next Phase 1A backend slice:
+Next role: Task Review for `TASK-006`.
+
+The next Phase 1A backend slice is:
 
 - Add default Todo category seeding and Inbox invariant:
   - Default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
@@ -82,7 +89,7 @@ Use the Coding window for the next Phase 1A backend slice:
 
 Continue Todo API foundation only after default category seeding is complete. `ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
 
-After coding, run the Review window and have it update `handoff/review-gate.md`. Then run the Git window only if review allows commit/push.
+Before coding, run Task Review. If Task Review passes, run Git Snapshot. After Coding, run Code Review. If Code Review passes, run Git Commit.
 
 ## Notes For Windows
 
