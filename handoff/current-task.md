@@ -6,7 +6,7 @@ Last updated: 2026-07-11
 
 - Task ID: TASK-006
 - Task Name: Default Todo category seeding and Inbox invariant
-- Status: PLANNED
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -68,6 +68,9 @@ Each seeded user has the required default Todo categories, including exactly one
 - Bootstrap rerun must not duplicate users or categories.
 - Existing users without categories receive missing default categories.
 - Existing users with an active Inbox do not receive a second active Inbox.
+- Only active categories (`deleted_at IS NULL`) count as present during default seeding.
+- A soft-deleted default category, including a historical Inbox row, counts as missing and receives a new active row.
+- Soft-deleted historical rows must be preserved as tombstones; bootstrap must not restore, rename, or otherwise modify them.
 - Category-name uniqueness and soft-delete semantics remain intact.
 - Do not implement Todo endpoints.
 
@@ -78,6 +81,8 @@ Each seeded user has the required default Todo categories, including exactly one
 - [ ] Existing users missing default categories are backfilled.
 - [ ] Each user has exactly one active Inbox after bootstrap.
 - [ ] Existing active Inbox is preserved and not duplicated.
+- [ ] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
+- [ ] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
 - [ ] Backend tests cover the above behavior.
 
 ## Verification Plan
@@ -106,6 +111,6 @@ Coding must report:
 
 ## Current Stage
 
-Next role: Task Review
+Next role: Git Snapshot
 
-Required next action: review this task for readiness. Coding must not start until Task Review passes and Git Snapshot completes.
+Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
