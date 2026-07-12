@@ -6,7 +6,7 @@ Last updated: 2026-07-11
 
 - Task ID: TASK-006
 - Task Name: Default Todo category seeding and Inbox invariant
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -111,6 +111,6 @@ Coding must report:
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: commit and push TASK-006 only if `handoff/code-review-gate.md` still says `Result: PASS`.

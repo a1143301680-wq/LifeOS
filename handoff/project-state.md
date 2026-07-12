@@ -36,6 +36,7 @@ These files are project sources of truth, not a mandatory full-read list for eve
 - Todo Category update/delete endpoints were committed and pushed to `origin/main` on 2026-07-11.
 - Phase 1A progress tracking is now documented in `docs/phase1a-progress.md`.
 - Workflow migration split Task Review from Code Review, and Git Snapshot from Git Commit.
+- TASK-006 passed Task Review and entered `IN_PROGRESS` after snapshot commit `a395f37`.
 
 ## Recently Completed
 
@@ -76,7 +77,13 @@ These files are project sources of truth, not a mandatory full-read list for eve
 
 ## Next Recommended Step
 
-Next role: Task Review for `TASK-006`.
+Current task: `TASK-006` Default Todo category seeding and Inbox invariant.
+
+Current status: `IN_PROGRESS`.
+
+Next role: Coding.
+
+Development baseline: snapshot commit `a395f37`.
 
 The next Phase 1A backend slice is:
 
@@ -89,7 +96,7 @@ The next Phase 1A backend slice is:
 
 Continue Todo API foundation only after default category seeding is complete. `ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
 
-Before coding, run Task Review. If Task Review passes, run Git Snapshot. After Coding, run Code Review. If Code Review passes, run Git Commit.
+Task Review and Git Snapshot are complete. Coding must implement only the approved TASK-006 scope. After Coding, run Code Review. If Code Review passes, run Git Commit.
 
 ## Notes For Windows
 

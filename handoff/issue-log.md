@@ -22,6 +22,25 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ## Issues
 
+### ISSUE-20260711-005: TASK-006 bootstrap must handle multiple active Inbox rows
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-07-11 17:40 +08:00
+- Related task: TASK-006 Default Todo category seeding and Inbox invariant
+- Files:
+  - `D:\LifeOS\backend\app\services\default_categories.py:32`
+  - `D:\LifeOS\backend\app\services\default_categories.py:39`
+  - `D:\LifeOS\backend\app\services\default_categories.py:54`
+- Description: `get_active_inbox()` uses `scalar_one_or_none()` for active `is_inbox = true` rows. If historical data already contains two active Inbox-flagged categories for the same user, bootstrap raises `MultipleResultsFound`.
+- Impact: TASK-006 is supposed to ensure each seeded user has exactly one active Inbox before Todo creation begins. In this abnormal but relevant historical data state, bootstrap neither repairs the invariant nor fails with a controlled domain-specific result.
+- Expected: Bootstrap should deterministically handle multiple active Inbox rows according to an approved rule, or explicitly return to Decision if changing user category semantics is not safe.
+- Actual: Fixed by Coding window. Bootstrap now loads active Inbox rows deterministically, keeps the first row by `sort_order ASC, created_at ASC, id ASC`, demotes remaining active Inbox rows to normal active categories, and continues seeding.
+- Fix owner/window: Coding window, unless repair semantics need Decision approval.
+- Fix notes: Replace the cardinality assumption with logic that loads all active Inbox rows, define deterministic handling, and add focused regression coverage. Re-run `python -m pytest tests/test_default_category_seeding.py` and `python -m pytest`.
+- Verification: Verified by Code Review window on 2026-07-11. Reviewed `normalize_active_inboxes()`, regression test `test_multiple_active_inboxes_are_normalized_to_one_deterministic_inbox`, and ran an independent probe with two active Inbox rows. `python -m pytest tests/test_default_category_seeding.py` passed with 9 tests; `python -m pytest` passed with 38 tests.
+
 ### ISSUE-20260711-004: Reject null PATCH fields for Todo Category update
 
 - Status: verified
