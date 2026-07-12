@@ -4,7 +4,7 @@
 
 - Task ID: TASK-006
 - Task Name: Default Todo category seeding and Inbox invariant
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -219,11 +219,14 @@ None.
 
 ## Git Commit
 
-Pending.
+- Result: PASS
+- Result Commit: d1c0dbf66d3988aa246e30530cbaa6e934b5af9c
+- Commit Message: feat(category): seed default Todo categories
+- Push Target: origin/main
 
 ## Closure
 
-Pending.
+Pending Decision closure check.
 
 ## Follow-up Tasks
 
