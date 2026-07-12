@@ -25,7 +25,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `idempotency_keys` model | done | Commit `6a85b4a` |
 | Idempotency execution boundary | partial | Implemented for category create; needs reuse across future writes |
 | `sync_changes` model/helper | done | PostgreSQL sequence verified in `ISSUE-20260711-001` |
-| Default Todo category seeding | next | Required before Todo create can safely default to Inbox |
+| Default Todo category seeding | done | Published in `d1c0dbf`; Code Review PASS; 38 backend tests passed |
 | SSE fanout foundation | pending | Not started |
 
 ## Phase 1A Endpoint Progress
@@ -57,13 +57,12 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add default Todo category seeding and Inbox invariant checks.
-2. Add `todos` model/migration and `POST /api/v1/todos`.
-3. Add Todo detail/update/complete/reopen/delete.
-4. Add Todo list cursor pagination and filters.
-5. Add Today Todo aggregation.
-6. Add `GET /api/v1/sync/changes`.
-7. Add `GET /api/v1/sync/events`.
+1. Add `todos` model/migration and `POST /api/v1/todos`.
+2. Add Todo detail/update/complete/reopen/delete.
+3. Add Todo list cursor pagination and filters.
+4. Add Today Todo aggregation.
+5. Add `GET /api/v1/sync/changes`.
+6. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule
 

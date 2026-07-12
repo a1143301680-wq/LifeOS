@@ -70,14 +70,14 @@ Each seeded user has the required default Todo categories, including exactly one
 
 ### Acceptance Criteria
 
-- [ ] New user bootstrap creates both users and all default categories for each user.
-- [ ] Rerunning bootstrap does not duplicate users or categories.
-- [ ] Existing users missing default categories are backfilled.
-- [ ] Each user has exactly one active Inbox after bootstrap.
-- [ ] Existing active Inbox is preserved and not duplicated.
-- [ ] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
-- [ ] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
-- [ ] Backend tests cover the above behavior.
+- [x] New user bootstrap creates both users and all default categories for each user.
+- [x] Rerunning bootstrap does not duplicate users or categories.
+- [x] Existing users missing default categories are backfilled.
+- [x] Each user has exactly one active Inbox after bootstrap.
+- [x] Existing active Inbox is preserved and not duplicated.
+- [x] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
+- [x] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
+- [x] Backend tests cover the above behavior.
 
 ### Verification Plan
 
@@ -226,8 +226,15 @@ None.
 
 ## Closure
 
-Pending Decision closure check.
+Decision Closure Check: PASS on 2026-07-12.
+
+- Result commit `d1c0dbf66d3988aa246e30530cbaa6e934b5af9c` is published to `origin/main`.
+- Completion record commit `e92249bb6ae414e562ae1d73a17cc2217b7c48fb` is published to `origin/main`.
+- Local HEAD, `origin/main`, and the remote branch all matched `e92249b` during closure verification.
+- Working tree was clean before closure documentation updates.
+- Code Review passed and the full backend suite reported 38 passed.
+- Blocking issue `ISSUE-20260711-005` is verified.
 
 ## Follow-up Tasks
 
-None yet.
+- Future hardening: consider a database-level partial unique invariant for one active Inbox after its long-term semantics are approved.

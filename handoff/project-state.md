@@ -41,6 +41,12 @@ These files are project sources of truth, not a mandatory full-read list for eve
 
 ## Recently Completed
 
+- Published TASK-006 default category seeding result commit `d1c0dbf` and completion record `e92249b`:
+  - Added idempotent default category seeding and backfill.
+  - Enforced one active Inbox during bootstrap, including historical-data normalization.
+  - Preserved soft-deleted category tombstones while recreating missing active defaults.
+  - Code Review passed; full backend tests: 38 passed.
+  - Decision Closure Check passed on 2026-07-12.
 - Published Todo Category update/delete commit `83ac3eb`:
   - Added `PATCH /api/v1/todo-categories/{id}`.
   - Added `DELETE /api/v1/todo-categories/{id}`.
@@ -84,20 +90,11 @@ Current status: `COMPLETED`.
 
 Next role: Decision.
 
-Development baseline: snapshot commit `a395f37`.
+TASK-006 Closure Check: PASS.
 
-The next Phase 1A backend slice is:
+Before the next business task, run the planned workflow-health hardening for Task Review evidence, dual task-state synchronization, and explicit closure ownership.
 
-- Add default Todo category seeding and Inbox invariant:
-  - Default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
-  - Bootstrap should be idempotent.
-  - Existing users should receive missing default categories.
-  - Exactly one active Inbox should exist per user.
-  - Add focused tests.
-
-Continue Todo API foundation only after default category seeding is complete. `ISSUE-20260711-001` and `ISSUE-20260711-002` have both been verified and are no longer blockers.
-
-TASK-006 result commit is complete. Run TASK-006 closure check before publishing another task.
+After workflow hardening, the next Phase 1A business slice is the `todos` model/migration plus `POST /api/v1/todos`.
 
 ## Notes For Windows
 

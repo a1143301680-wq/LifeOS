@@ -76,14 +76,14 @@ Each seeded user has the required default Todo categories, including exactly one
 
 ## Acceptance Criteria
 
-- [ ] New user bootstrap creates both users and all default categories for each user.
-- [ ] Rerunning bootstrap does not duplicate users or categories.
-- [ ] Existing users missing default categories are backfilled.
-- [ ] Each user has exactly one active Inbox after bootstrap.
-- [ ] Existing active Inbox is preserved and not duplicated.
-- [ ] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
-- [ ] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
-- [ ] Backend tests cover the above behavior.
+- [x] New user bootstrap creates both users and all default categories for each user.
+- [x] Rerunning bootstrap does not duplicate users or categories.
+- [x] Existing users missing default categories are backfilled.
+- [x] Each user has exactly one active Inbox after bootstrap.
+- [x] Existing active Inbox is preserved and not duplicated.
+- [x] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
+- [x] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
+- [x] Backend tests cover the above behavior.
 
 ## Verification Plan
 
@@ -113,4 +113,4 @@ Coding must report:
 
 Next role: Decision
 
-Required next action: run TASK-006 closure check and select the next task.
+Closure check: PASS on 2026-07-12. Required next action: harden workflow health before publishing the next business task.
