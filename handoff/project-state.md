@@ -84,15 +84,9 @@ These files are project sources of truth, not a mandatory full-read list for eve
 
 ## Next Recommended Step
 
-Current task: `TASK-006` Default Todo category seeding and Inbox invariant.
+Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Current status: `COMPLETED`.
-
-Next role: Decision.
-
-TASK-006 Closure Check: PASS.
-
-Before the next business task, run the planned workflow-health hardening for Task Review evidence, dual task-state synchronization, and explicit closure ownership.
+The workflow-health hardening task is `TASK-007`.
 
 After workflow hardening, the next Phase 1A business slice is the `todos` model/migration plus `POST /api/v1/todos`.
 

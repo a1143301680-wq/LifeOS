@@ -1,38 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-11
+Last updated: 2026-07-12
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-006
+Task ID: TASK-007
 
-Branch: main
+Branch: unknown
 
-Base Commit: ecae463403ac98a19ad30b2d85e5c58c63d144b0
+Base Commit: unknown
 
-Working Tree: 3 approved task readiness documents committed separately; no business code
+Working Tree: unknown
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: unknown
 
-Snapshot Commit: a395f37235c7c28155f69da8866e0ebe4d1763d2
+Snapshot Commit: none
 
-Reason: approved TASK-006 readiness documents required a durable pre-Coding baseline
+Reason: not run
 
 ## Instructions
 
 Run after Task Review passes and before Coding starts.
-
-If current HEAD is already a clean, traceable baseline, record:
-
-```text
-Snapshot Commit Created: No
-Reason: current HEAD is a clean, traceable baseline
-```
-
-If a snapshot commit is required, use:
-
-```text
-chore(task): snapshot before <Task ID>
-```

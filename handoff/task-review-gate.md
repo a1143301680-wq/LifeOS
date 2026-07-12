@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-07-11
+Last updated: 2026-07-12
 
 ## Gate Status
 
@@ -10,9 +10,9 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-07-11 17:08 +08:00
+Reviewed at: 2026-07-12 10:07 +08:00
 
-Reviewed task: TASK-006 Default Todo category seeding and Inbox invariant
+Reviewed task: TASK-007 Workflow health and closure hardening
 
 ## Scope Check
 
@@ -46,12 +46,24 @@ Reviewed task: TASK-006 Default Todo category seeding and Inbox invariant
 
 ## Issues
 
-Previous blocking issue resolved by Decision. No blocking issues remain.
+No blocking issues.
 
-- Only active categories count as present during seeding.
-- Soft-deleted defaults count as missing and receive new active rows.
-- Historical soft-deleted rows are preserved and never restored or modified.
-- Soft-deleted non-Inbox default category and soft-deleted Inbox cases are required test coverage.
+## Review Evidence
+
+- Branch: `main`
+- HEAD: `df50309` (`docs(task): close TASK-006`)
+- Worktree: seven TASK-007 publication-state changes; no staged changes identified.
+- Changed files:
+  - `handoff/code-review-gate.md`
+  - `handoff/current-task.md`
+  - `handoff/git-commit.md`
+  - `handoff/git-snapshot.md`
+  - `handoff/project-state.md`
+  - `handoff/task-review-gate.md`
+  - `tasks/TASK-007-workflow-health-hardening.md`
+- Scope: workflow gates, Git records, project/task routing, and TASK-007 archive only; no business code or product documents.
+- `git diff --check`: PASS (exit code 0; non-blocking LF/CRLF conversion warnings only).
+- Git Snapshot: can establish a baseline from the approved TASK-007 publication-state files.
 
 ## Instructions
 

@@ -1,116 +1,110 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-11
+Last updated: 2026-07-12
 
 ## Metadata
 
-- Task ID: TASK-006
-- Task Name: Default Todo category seeding and Inbox invariant
-- Status: COMPLETED
+- Task ID: TASK-007
+- Task Name: Workflow health and closure hardening
+- Status: READY
 - Priority: P1
-- Parent Task: Phase 1A backend
-- Dependencies:
-  - Todo Category CRUD published in `83ac3eb`
-  - Active category name uniqueness published in `eca0af8`
+- Parent Task: LifeOS multi-window workflow
+- Dependencies: workflow migration `ecae463`; TASK-006 closure `df50309`
 
 ## Background
 
-`POST /api/v1/todos` will default to the user's Inbox when `category_id` is omitted. The current bootstrap path creates users but does not guarantee default Todo categories or the Inbox invariant.
+The first complete workflow run succeeded but exposed auditability and state-ownership gaps: Task Review evidence was partly chat-only, task status synchronization was implicit, `project-state.md` duplicated volatile routing, and Decision Closure required an undocumented final documentation commit.
 
 ## Goal
 
-Each seeded user has the required default Todo categories, including exactly one active Inbox, before Todo creation work begins.
+Make the multi-window workflow self-auditing and unambiguous before the next business task starts.
 
 ## Scope
 
 ### In Scope
 
-- Bootstrap/initialization logic for default Todo categories.
-- Default categories: Inbox, Work, Study, Life, Partner, Pet, Health, Interest, AI, Project.
-- Idempotent rerun behavior.
-- Backfill missing default categories for existing users.
-- Tests for seeding and Inbox invariant.
+- Persist Task Review branch, HEAD, worktree summary, changed files, and `git diff --check` evidence.
+- Require each state transition to synchronize `handoff/current-task.md` and the active `tasks/TASK-xxx.md` file.
+- Make `current-task.md` authoritative for live routing; keep `project-state.md` milestone-oriented.
+- Define Decision Closure Check ownership, evidence, durable output, and terminal Closure Commit behavior.
+- Audit related Git Snapshot, Coding, Code Review, and Git Commit rules for equivalent state/evidence gaps.
+- Preserve role-specific minimum-read behavior.
 
 ### Out of Scope
 
-- Todo API endpoints.
-- Reminder, recurring Todo, strong reminder, Android offline replay, or full login.
-- UI work.
-- Changing published Category CRUD API behavior beyond what seeding requires.
+- Business code, tests, APIs, databases, frontend, or Android.
+- Product scope and endpoint-order changes.
+- External workflow services.
+- Rewriting completed TASK-005 or TASK-006 records.
+- A separate Closure Check chat window unless implementation review proves it necessary.
 
 ## Related Files
 
 ### Expected Read Files
 
 - `docs/workflow.md`
-- `docs/phase1a-progress.md`
-- `docs/api-phase1a.md`
-- `docs/data-model-phase1.md`
-- `backend/app/scripts/bootstrap_users.py`
-- `backend/app/models/todo_category.py`
-- `backend/tests/`
+- `handoff/*-window-prompt.md`
+- Current gate and Git record templates under `handoff/`
+- `handoff/project-state.md`
+- `tasks/TASK-005-workflow-migration.md`
+- `tasks/TASK-006-default-category-seeding.md`
 
 ### Allowed Modify Files
 
-- `backend/app/scripts/bootstrap_users.py`
-- New backend service/helper files if needed for category defaults.
-- Backend tests related to bootstrap/category seeding.
-- Handoff/progress files for task status updates.
+- `docs/workflow.md`
+- Role prompts and gate/record templates under `handoff/`
+- `handoff/project-state.md`
+- `handoff/current-task.md`
+- `tasks/TASK-007-workflow-health-hardening.md`
+- Workflow documentation directly required for consistent references
 
 ### Forbidden Modify Files
 
-- Frontend or Android files.
-- Todo endpoint implementation files, unless only importing existing models is required for tests.
-- Reminder/recurring/offline replay files.
+- `backend/`
+- Frontend or Android files
+- Product requirements, API contract, architecture, and data-model documents
+- Completed TASK-005 and TASK-006 files
 
 ## Implementation Requirements
 
-- Bootstrap rerun must not duplicate users or categories.
-- Existing users without categories receive missing default categories.
-- Existing users with an active Inbox do not receive a second active Inbox.
-- Only active categories (`deleted_at IS NULL`) count as present during default seeding.
-- A soft-deleted default category, including a historical Inbox row, counts as missing and receives a new active row.
-- Soft-deleted historical rows must be preserved as tombstones; bootstrap must not restore, rename, or otherwise modify them.
-- Category-name uniqueness and soft-delete semantics remain intact.
-- Do not implement Todo endpoints.
+- Another window must be able to verify every gate without chat history.
+- Both active-task status files must match after every transition.
+- `project-state.md` must point to `current-task.md` for live status and routing.
+- Closure must verify commits, remote parity, clean worktree, review/tests, acceptance criteria, and issue disposition.
+- Closure Check and terminal Closure Commit ownership must be explicit.
+- The final Closure Commit must not trigger another closure loop.
+- Minimum-read rules must remain role-specific.
 
 ## Acceptance Criteria
 
-- [x] New user bootstrap creates both users and all default categories for each user.
-- [x] Rerunning bootstrap does not duplicate users or categories.
-- [x] Existing users missing default categories are backfilled.
-- [x] Each user has exactly one active Inbox after bootstrap.
-- [x] Existing active Inbox is preserved and not duplicated.
-- [x] A soft-deleted non-Inbox default category produces a new active category with the default name while the deleted row remains unchanged.
-- [x] A historical soft-deleted Inbox does not satisfy the Inbox invariant; a new active Inbox is created and the deleted row remains unchanged.
-- [x] Backend tests cover the above behavior.
+- [ ] Task Review gate and prompt persist branch, HEAD, worktree, changed files, and diff-check evidence.
+- [ ] Every workflow transition names both task-status files to synchronize.
+- [ ] `project-state.md` cannot conflict with live routing in `current-task.md`.
+- [ ] Decision Closure Check has an explicit checklist, output location, and PASS/BLOCKED result.
+- [ ] Closure Commit has exact-scope publishing rules and is explicitly terminal.
+- [ ] Related prompts and `docs/workflow.md` contain no contradictory ownership or status rules.
+- [ ] No business or product files are modified.
+- [ ] `git diff --check` passes.
 
 ## Verification Plan
 
-- Automated tests: `python -m pytest`
-- Static check: not required unless implementation changes packaging or typing-sensitive APIs.
-- Build check: not required.
-- Manual verification: optional script run against local database if safe.
+- Search all workflow files for state transitions, ownership, reads, and Closure rules.
+- Compare role prompts against `docs/workflow.md`.
+- Verify modified files against Allowed/Forbidden lists.
+- Run `git diff --check`; backend tests are not required.
 
 ## Risks
 
-- Duplicate active categories if seeding checks are incomplete.
-- Soft-deleted categories may interact with name reuse; expected behavior must be explicit in tests.
-- Bootstrap output must not reveal existing raw tokens.
+- Excess mandatory reads could undo token-efficiency improvements.
+- Ambiguous transition ownership can recreate state drift.
+- An incorrectly defined Closure Commit can create an infinite loop.
 
 ## Coding Output Requirements
 
-Coding must report:
-
-- modified files
-- implementation summary
-- acceptance criteria results
-- test commands and results
-- unresolved issues
-- task-outside findings
+Report modified files, rule changes, transition coverage, verification results, unresolved conflicts, and task-outside findings.
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Snapshot
 
-Closure check: PASS on 2026-07-12. Required next action: harden workflow health before publishing the next business task.
+Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
