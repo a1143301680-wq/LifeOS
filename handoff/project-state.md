@@ -40,6 +40,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - Workflow migration split Task Review from Code Review, and Git Snapshot from Git Commit.
 - TASK-006 passed Task Review and entered `IN_PROGRESS` after snapshot commit `a395f37`.
 - TASK-006 implementation completed in result commit `d1c0dbf66d3988aa246e30530cbaa6e934b5af9c`; Code Review: PASS; tests: 38 passed.
+- TASK-007 workflow health hardening completed in result commit `3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c`; Code Review: PASS; workflow verification passed.
 
 ## Recently Completed
 
@@ -90,7 +91,7 @@ Active task status and live routing are maintained in `handoff/current-task.md`.
 
 The workflow-health hardening task is `TASK-007`.
 
-After workflow hardening, the next Phase 1A business slice is the `todos` model/migration plus `POST /api/v1/todos`.
+Run TASK-007 Decision Closure Check before publishing the next task. After closure, the next Phase 1A business slice is the `todos` model/migration plus `POST /api/v1/todos`.
 
 ## Notes For Windows
 

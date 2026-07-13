@@ -6,7 +6,7 @@ Last updated: 2026-07-13
 
 - Task ID: TASK-007
 - Task Name: Workflow health and closure hardening
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: LifeOS multi-window workflow
 - Dependencies: workflow migration `ecae463`; TASK-006 closure `df50309`
@@ -105,6 +105,6 @@ Report modified files, rule changes, transition coverage, verification results, 
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push TASK-007 only if `handoff/code-review-gate.md` still says `Result: PASS`.
+Required next action: run TASK-007 closure check before publishing the next business task.

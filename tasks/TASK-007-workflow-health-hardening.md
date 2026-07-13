@@ -4,7 +4,7 @@
 
 - Task ID: TASK-007
 - Task Name: Workflow health and closure hardening
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: LifeOS multi-window workflow
 - Dependencies: workflow migration `ecae463`; TASK-006 closure `df50309`
@@ -165,7 +165,10 @@ None.
 
 ## Git Commit
 
-Pending.
+- Result: PASS
+- Result Commit: 3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c
+- Commit Message: docs(workflow): harden task evidence and closure flow
+- Push Target: origin/main
 
 ## Closure
 
