@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 
 ## Metadata
 
 - Task ID: TASK-007
 - Task Name: Workflow health and closure hardening
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: LifeOS multi-window workflow
 - Dependencies: workflow migration `ecae463`; TASK-006 closure `df50309`
@@ -77,14 +77,14 @@ Make the multi-window workflow self-auditing and unambiguous before the next bus
 
 ## Acceptance Criteria
 
-- [ ] Task Review gate and prompt persist branch, HEAD, worktree, changed files, and diff-check evidence.
-- [ ] Every workflow transition names both task-status files to synchronize.
-- [ ] `project-state.md` cannot conflict with live routing in `current-task.md`.
-- [ ] Decision Closure Check has an explicit checklist, output location, and PASS/BLOCKED result.
-- [ ] Closure Commit has exact-scope publishing rules and is explicitly terminal.
-- [ ] Related prompts and `docs/workflow.md` contain no contradictory ownership or status rules.
-- [ ] No business or product files are modified.
-- [ ] `git diff --check` passes.
+- [x] Task Review gate and prompt persist branch, HEAD, worktree, changed files, and diff-check evidence.
+- [x] Every workflow transition names both task-status files to synchronize.
+- [x] `project-state.md` cannot conflict with live routing in `current-task.md`.
+- [x] Decision Closure Check has an explicit checklist, output location, and PASS/BLOCKED result.
+- [x] Closure Commit has exact-scope publishing rules and is explicitly terminal.
+- [x] Related prompts and `docs/workflow.md` contain no contradictory ownership or status rules.
+- [x] No business or product files are modified.
+- [x] `git diff --check` passes.
 
 ## Verification Plan
 
@@ -105,6 +105,6 @@ Report modified files, rule changes, transition coverage, verification results, 
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: commit and push TASK-007 only if `handoff/code-review-gate.md` still says `Result: PASS`.

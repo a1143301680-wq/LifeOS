@@ -12,9 +12,10 @@ Shared files:
 
 - `docs/workflow.md`: workflow rules and state machine.
 - `docs/phase1a-progress.md`: Phase 1A progress tracker.
-- `handoff/project-state.md`: current project status and recent commits.
-- `handoff/current-task.md`: active task specification.
-- `handoff/task-review-gate.md`: Task Review result.
+- `handoff/project-state.md`: phase, milestone, published-result, blocker, and next business-direction summary. It is not the live routing source.
+- `handoff/current-task.md`: the only live source for current Task ID, current Status, Next Role, and Required Next Action.
+- `tasks/TASK-xxx.md`: complete archive for a task. Its Status must match `handoff/current-task.md` for the active task.
+- `handoff/task-review-gate.md`: Task Review result and durable start-readiness evidence.
 - `handoff/code-review-gate.md`: Code Review result.
 - `handoff/git-snapshot.md`: development baseline record.
 - `handoff/git-commit.md`: result commit record.
@@ -44,6 +45,14 @@ Reading policy:
 - Git Snapshot and Git Commit do not read product or architecture documents unless a gate or task explicitly requires them.
 - Search `handoff/issue-log.md` by active Task ID and unresolved status before reading the full history.
 - A role prompt may require additional files when they are direct gates or outputs for that role.
+- Do not restore a rule that every window must read every shared file. Read broadly only when the role or active task needs it.
+
+Ownership policy:
+
+- `handoff/current-task.md` is authoritative for active Task ID, live Status, Next Role, and Required Next Action.
+- The active `tasks/TASK-xxx.md` is authoritative for the full task archive and must carry the same Status as `handoff/current-task.md`.
+- `handoff/project-state.md` records phase status, milestones, published results, blockers, and next business direction. It must not duplicate volatile live Status, Next Role, or Required Next Action.
+- Ordinary state transitions do not require `handoff/project-state.md` updates. Decision task publication, Git result publication, and Decision Closure may update milestone/progress summaries as needed.
 
 ## 2. Standard Task Status
 
@@ -83,6 +92,8 @@ IN_PROGRESS
   -> Coding complete
 REVIEWING
   -> Code Review PASS
+REVIEWING
+  -> Git Commit publishes reviewed result
 COMPLETED
 ```
 
@@ -116,6 +127,12 @@ Cancellation:
 ```text
 Any unfinished status -> Decision cancels -> CANCELLED
 ```
+
+Status synchronization rule:
+
+- Every transition that changes the active task Status must update both `handoff/current-task.md` and the active `tasks/TASK-xxx.md`.
+- This rule applies to `PLANNED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> REVIEWING`, `REVIEWING -> CHANGES_REQUESTED`, `CHANGES_REQUESTED -> IN_PROGRESS`, any in-progress status -> `BLOCKED`, `BLOCKED` recovery, Git Commit success -> `COMPLETED`, and Decision cancellation -> `CANCELLED`.
+- If either file cannot be updated, the transition is not complete and the acting window must report `BLOCKED` or leave the prior status intact with evidence.
 
 ## 4. Role Responsibilities
 
@@ -154,12 +171,20 @@ Decision writes `handoff/current-task.md` with:
 - risks
 - Coding output requirements
 
+Decision also creates or updates the active `tasks/TASK-xxx.md` with the same Task ID and Status.
+
 Decision must reset:
 
 - `handoff/task-review-gate.md` to `PENDING`
 - `handoff/code-review-gate.md` to `PENDING`
 - `handoff/git-snapshot.md` to pending state
 - `handoff/git-commit.md` to pending state
+
+Decision must update both task-status files for:
+
+- publishing a new task as `PLANNED`
+- cancelling any unfinished task as `CANCELLED`
+- resolving a `BLOCKED` task back to `READY` or `IN_PROGRESS`
 
 Decision must not ask Coding to start until Task Review passes and Git Snapshot is complete.
 
@@ -181,15 +206,32 @@ Required checks:
 - current worktree state is understood
 - no unrelated modifications will be overwritten
 - Git Snapshot can establish a baseline
+- branch and HEAD are captured
+- worktree summary is captured
+- changed files and staged changes are captured
+- `git diff --check` result is captured
 
 Task Review writes `handoff/task-review-gate.md`.
+
+Task Review evidence is mandatory for both PASS and REJECT. It must persist:
+
+- Branch
+- HEAD
+- Worktree Summary
+- Changed Files
+- Staged Changes
+- `git diff --check` result
+- Git Snapshot readiness
+- Reviewed task
+- Reviewed at
 
 Valid results:
 
 - `Result: PASS`, `Target Status: READY`
 - `Result: REJECT`, `Target Status: PLANNED`
 
-If Task Review passes, update `handoff/current-task.md` status to `READY`.
+If Task Review passes, update both `handoff/current-task.md` and the active `tasks/TASK-xxx.md` status to `READY`.
+If Task Review rejects, keep or set both task-status files to `PLANNED`.
 
 ## 4.3 Git Snapshot
 
@@ -223,6 +265,7 @@ After Git Snapshot completes, update:
 
 - `handoff/git-snapshot.md`
 - `handoff/current-task.md` status to `IN_PROGRESS`
+- active `tasks/TASK-xxx.md` status to `IN_PROGRESS`
 
 ## 4.4 Coding
 
@@ -235,9 +278,9 @@ Rules:
 - record task-outside findings in `handoff/issue-log.md`
 - run required verification
 - inspect git diff before reporting completion
-- set task status to `REVIEWING` when complete
+- set both active task-status files to `REVIEWING` when complete
 
-If blocked, set task status to `BLOCKED` and write a Blocked Report in `handoff/current-task.md`.
+If blocked, set both active task-status files to `BLOCKED` and write a Blocked Report in `handoff/current-task.md` and the task archive.
 
 Coding completion must include:
 
@@ -276,7 +319,10 @@ Valid results:
 - `Result: PASS`, `Target Status: COMPLETED`
 - `Result: CHANGES_REQUESTED`, `Target Status: CHANGES_REQUESTED`
 
+`Target Status: COMPLETED` means the intended status after Git Commit publishes the reviewed result. Code Review PASS authorizes Git Commit; it does not update either task-status file to `COMPLETED`.
+
 If Code Review requests changes, Coding resumes from `CHANGES_REQUESTED -> IN_PROGRESS`.
+Code Review PASS does not itself change task status to `COMPLETED`; Git Commit does that after publishing. Code Review CHANGES_REQUESTED must update both task-status files to `CHANGES_REQUESTED`.
 
 ## 4.6 Git Commit
 
@@ -304,8 +350,68 @@ Examples:
 Git Commit writes:
 
 - `handoff/git-commit.md`
-- `handoff/project-state.md`
 - `handoff/current-task.md` status to `COMPLETED`
+- active `tasks/TASK-xxx.md` status to `COMPLETED`
+- `handoff/project-state.md` milestone/progress summary when the published result changes project state
+
+Git Commit must not claim completion if either task-status file fails to update.
+
+## 4.7 Decision Closure Check
+
+Decision Closure Check is performed by the Decision window. There is no separate Closure Check window.
+
+Timing:
+
+- Run after Git Commit successfully commits and pushes the implementation result.
+- Run before Decision publishes the next task.
+
+Required checks:
+
+- Result Commit exists.
+- Completion metadata commit exists when Git Commit produced one.
+- Local HEAD, `origin/<branch>`, and the remote branch are aligned.
+- Working tree is clean before Closure documentation edits.
+- Code Review result is PASS.
+- Test results are recorded.
+- Acceptance Criteria are all confirmed or explicitly dispositioned.
+- Blocking issues are closed, verified, deferred, or moved into follow-up tasks.
+- Phase/progress documents are correct when the task affects them.
+- Active task status is `COMPLETED` in both `handoff/current-task.md` and the active `tasks/TASK-xxx.md`.
+
+Output:
+
+- `Closure Check: PASS / BLOCKED`
+- `Checked At`
+- `Result Commit`
+- `Completion Commit`
+- `Remote Verification`
+- `Working Tree Before Closure Docs`
+- `Review/Test Evidence`
+- `Acceptance Criteria Result`
+- `Issue Disposition`
+- `Remaining Follow-ups`
+
+Durable locations:
+
+- active `tasks/TASK-xxx.md` Closure section
+- `handoff/current-task.md`
+- phase/progress and `handoff/project-state.md` milestone documents only when needed
+
+If Closure Check is BLOCKED, Decision must not publish a new task.
+
+## 4.8 Terminal Closure Commit
+
+After Decision Closure Check PASS, Git Commit performs a terminal Closure Commit.
+
+Rules:
+
+- The Closure Commit only commits the documentation files explicitly approved by Decision Closure Check.
+- Recommended commit message: `docs(task): close TASK-xxx`.
+- After the Closure Commit is pushed and remote parity is verified, the workflow for that task ends.
+- The Closure Commit does not trigger another Closure Check.
+- The Closure Commit must not create new uncommitted state files.
+- Closure Commit success returns control to Decision to publish the next task.
+- Closure Commit failure is BLOCKED; Decision must not publish a new task.
 
 ## 5. Exception Rules
 
@@ -369,7 +475,7 @@ When Decision is invoked:
 4. Else if current task is `IN_PROGRESS`, do not publish a new main task.
 5. Else if current task is `READY`, trigger Git Snapshot.
 6. Else if current task is `PLANNED`, trigger Task Review.
-7. Else if previous task needs closure, complete closure.
+7. Else if previous task needs closure, run Decision Closure Check or wait for terminal Closure Commit.
 8. Else publish the next task.
 
 ## 7. Phase 1A Guardrails

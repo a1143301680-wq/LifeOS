@@ -69,6 +69,24 @@ No blocking issues.
 
 Task Review must update this file before Git Snapshot or Coding starts.
 
+PASS and REJECT must both include durable Review Evidence:
+
+- Branch
+- HEAD
+- Worktree Summary
+- Changed Files
+- Staged Changes
+- `git diff --check` result
+- Git Snapshot readiness
+- Reviewed task
+- Reviewed at
+
+On PASS, Task Review must also update both `handoff/current-task.md` and the active `tasks/TASK-xxx.md` to `Status: READY`.
+
+On REJECT, Task Review must keep or set both task-status files to `Status: PLANNED`.
+
+If either task-status file cannot be updated, the transition is not complete.
+
 Valid outputs:
 
 ```text

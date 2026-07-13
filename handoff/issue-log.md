@@ -22,6 +22,43 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ## Issues
 
+### ISSUE-20260713-001: TASK-007 standard flow must not skip Git Commit
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-07-13 08:37 +08:00
+- Related task: TASK-007 Workflow health and closure hardening
+- Files:
+  - `D:\LifeOS\docs\workflow.md:94`
+  - `D:\LifeOS\docs\workflow.md:321`
+- Description: The standard state transition diagram says `REVIEWING -> Code Review PASS -> COMPLETED`, while the detailed Code Review rule says Code Review PASS does not change task status to `COMPLETED`; Git Commit does that after publishing.
+- Impact: Future windows may incorrectly mark a task completed immediately after Code Review, bypassing Git Commit publication.
+- Expected: `COMPLETED` should be caused only by Git Commit success. Code Review PASS should authorize Git Commit, not complete the task.
+- Actual: Fixed by Coding window. The standard state transition diagram now routes `REVIEWING -> Code Review PASS -> REVIEWING -> Git Commit publishes reviewed result -> COMPLETED`, and the Code Review section clarifies that `Target Status: COMPLETED` is the intended Git Commit outcome, not an immediate task-status update.
+- Fix owner/window: Coding window.
+- Fix notes: Rewrite the Standard Flow state diagram or transition labels so the route to `COMPLETED` is explicitly Git Commit success.
+- Verification: Verified by Code Review window on 2026-07-13. `docs/workflow.md` now keeps task status at `REVIEWING` after Code Review PASS and moves to `COMPLETED` only after Git Commit publishes the reviewed result. `rg` checks for Code Review PASS and Git Commit success passed.
+
+### ISSUE-20260713-002: TASK-007 Git Commit prompt needs a separate Closure Commit gate
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-07-13 08:37 +08:00
+- Related task: TASK-007 Workflow health and closure hardening
+- Files:
+  - `D:\LifeOS\handoff\git-commit-window-prompt.md:30`
+  - `D:\LifeOS\handoff\git-commit-window-prompt.md:33`
+  - `D:\LifeOS\handoff\git-commit-window-prompt.md:66`
+- Description: The Git Commit prompt has a single gate requiring both task-status files to be `Status: REVIEWING`, but terminal Closure Commit is supposed to run after Decision Closure Check PASS, where both task-status files are already `COMPLETED`.
+- Impact: Git Commit could be blocked from executing the terminal Closure Commit, making the closure flow non-executable despite being documented.
+- Expected: Git Commit prompt should define separate gates for result commit mode and terminal Closure Commit mode.
+- Actual: Fixed by Coding window. `handoff/git-commit-window-prompt.md` now has separate Result Commit and Terminal Closure Commit gates. Terminal Closure Commit mode requires Decision Closure Check PASS and both task-status files already at `COMPLETED`, and explicitly does not require `Status: REVIEWING`.
+- Fix owner/window: Coding window.
+- Fix notes: Split `handoff/git-commit-window-prompt.md` into Result Commit Gate and Terminal Closure Commit Gate. Terminal Closure Commit Gate should require Decision Closure Check PASS and exact approved doc scope, not `Status: REVIEWING`.
+- Verification: Verified by Code Review window on 2026-07-13. `handoff/git-commit-window-prompt.md` now has separate Result Commit and Terminal Closure Commit gates. Terminal Closure Commit mode requires Decision Closure Check PASS and `Status: COMPLETED`, and explicitly does not require `Status: REVIEWING`.
+
 ### ISSUE-20260711-005: TASK-006 bootstrap must handle multiple active Inbox rows
 
 - Status: verified

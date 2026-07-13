@@ -24,7 +24,9 @@ These files are project sources of truth, not a mandatory full-read list for eve
 - `handoff/git-commit.md`
 - `handoff/issue-log.md`
 
-## Current Status
+## Milestones And Published State
+
+Live active-task Status, Next Role, and Required Next Action are maintained only in `handoff/current-task.md`. The active task archive is maintained in `tasks/TASK-xxx.md`. This file records milestones, published results, blockers, and next business direction; ordinary workflow status transitions do not require updating this file.
 
 - Phase 1A API implementation decisions are closed in `docs/api-phase1a.md`.
 - Multi-window workflow templates were added on 2026-07-11.
