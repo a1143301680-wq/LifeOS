@@ -105,6 +105,8 @@ Report modified files, rule changes, transition coverage, verification results, 
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-007 closure check before publishing the next business task.
+Closure Check: PASS on 2026-07-13.
+
+Required next action: publish the Decision-approved TASK-007 Closure documents. After remote parity is verified, return to Decision to publish the next task; do not run another Closure Check.

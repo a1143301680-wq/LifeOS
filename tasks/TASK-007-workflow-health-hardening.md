@@ -172,7 +172,27 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-13 (Asia/Shanghai)
+- Result Commit: `3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c`
+- Completion Commit: `3ac3163ffe2bfec2020e90180b42ce71cdc37aab`
+- Remote Verification: local HEAD, `origin/main`, and remote `refs/heads/main` all matched `3ac3163ffe2bfec2020e90180b42ce71cdc37aab`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; blocking findings `CR-TASK-007-001` and `CR-TASK-007-002` were fixed and verified.
+- Test / Verification Evidence: documentation-only task; `git diff --check`, `git diff --cached --check`, and workflow ownership/closure `rg` checks passed. Backend tests were not required.
+- Acceptance Criteria Result: all TASK-007 acceptance criteria confirmed.
+- Issue Disposition: `ISSUE-20260713-001` and `ISSUE-20260713-002` are `verified`; no unresolved TASK-007 blocking issue remains.
+- Remaining Follow-ups: none for TASK-007.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-007-workflow-health-hardening.md`
+- Commit message: `docs(task): close TASK-007`
+- This commit is terminal and must not trigger another Closure Check or create new state files.
 
 ## Follow-up Tasks
 
