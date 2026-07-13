@@ -39,7 +39,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
-| `POST /api/v1/todos` | pending | Requires `todos` model/migration |
+| `POST /api/v1/todos` | next | TASK-008: Todo model/migration plus authenticated idempotent create |
 | `GET /api/v1/todos/{id}` | pending | Includes `410 deleted_resource` behavior |
 | `PATCH /api/v1/todos/{id}` | pending | Requires forbidden-field validation |
 | `POST /api/v1/todos/{id}/complete` | pending | Requires status transition and sync change |

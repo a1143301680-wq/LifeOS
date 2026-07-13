@@ -42,6 +42,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-006 implementation completed in result commit `d1c0dbf66d3988aa246e30530cbaa6e934b5af9c`; Code Review: PASS; tests: 38 passed.
 - TASK-007 workflow health hardening completed in result commit `3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c`; Code Review: PASS; workflow verification passed.
 - TASK-007 Decision Closure Check passed on 2026-07-13; terminal Closure Commit is the only remaining action before the next task may be published.
+- TASK-007 terminal Closure Commit `4c5c315` was published and the task workflow ended.
 
 ## Recently Completed
 
@@ -90,9 +91,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-TASK-007 implementation and Decision Closure Check are complete. Publish the terminal Closure Commit before creating the next task.
-
-After terminal closure, the next Phase 1A business slice is the `todos` model/migration plus `POST /api/v1/todos`.
+TASK-008 is the active planned business slice: Todo model/migration plus `POST /api/v1/todos`. Live status and routing are in `handoff/current-task.md`.
 
 ## Notes For Windows
 

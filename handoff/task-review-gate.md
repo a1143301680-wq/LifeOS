@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 
 ## Gate Status
 
@@ -10,9 +10,9 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-07-12 10:07 +08:00
+Reviewed at: 2026-07-13 21:32 +08:00
 
-Reviewed task: TASK-007 Workflow health and closure hardening
+Reviewed task: TASK-008 Todo model, migration, and create API
 
 ## Scope Check
 
@@ -51,19 +51,20 @@ No blocking issues.
 ## Review Evidence
 
 - Branch: `main`
-- HEAD: `df50309` (`docs(task): close TASK-006`)
-- Worktree: seven TASK-007 publication-state changes; no staged changes identified.
-- Changed files:
+- HEAD: `4c5c31565f3cab79472dfde47c8ce8cba40885d1` (`docs(task): close TASK-007`); matches `origin/main`.
+- Worktree Summary: seven modified tracked TASK-008 publication-state files and one untracked TASK-008 archive; no business implementation changes, generated artifacts, or unrelated files.
+- Changed Files:
+  - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
   - `handoff/current-task.md`
   - `handoff/git-commit.md`
   - `handoff/git-snapshot.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-007-workflow-health-hardening.md`
-- Scope: workflow gates, Git records, project/task routing, and TASK-007 archive only; no business code or product documents.
+  - `tasks/TASK-008-todo-create-foundation.md`
+- Staged Changes: none; `git diff --cached --name-status` is empty and `git diff --cached --check` exits 0.
 - `git diff --check`: PASS (exit code 0; non-blocking LF/CRLF conversion warnings only).
-- Git Snapshot: can establish a baseline from the approved TASK-007 publication-state files.
+- Git Snapshot readiness: READY; the eight approved TASK-008 publication-state files can be captured as the pre-Coding baseline. Coding has not started.
 
 ## Instructions
 
