@@ -119,6 +119,16 @@ Report modified files, endpoint behavior, acceptance results, focused/full test 
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-009 closure check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-14 21:00 +08:00
+
+Result Commit: `deb240b1a3cbe46890853499a55daf60c2a49b81`
+
+Completion Commit: `9d6cbcaae6af2c092c3618ea364da6b4e4334e73`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `9d6cbcaae6af2c092c3618ea364da6b4e4334e73` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-009 Closure documents with message `docs(task): close TASK-009`. After remote parity is verified, return to Decision; do not run another Closure Check.

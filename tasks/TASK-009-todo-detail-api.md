@@ -201,4 +201,26 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-14 21:00 +08:00
+- Result Commit: `deb240b1a3cbe46890853499a55daf60c2a49b81`
+- Completion Commit: `9d6cbcaae6af2c092c3618ea364da6b4e4334e73`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `9d6cbcaae6af2c092c3618ea364da6b4e4334e73`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo detail tests `7 passed`; full backend suite `54 passed`; route-order scan passed.
+- Acceptance Criteria Result: all TASK-009 acceptance criteria confirmed.
+- Issue Disposition: no TASK-009 issue-log entry, unresolved issue, or task-outside finding remained.
+- Remaining Follow-ups:
+  - Register future static Todo routes such as `/todos/today` before the dynamic `/{todo_id}` route.
+  - Continue with separately reviewable Todo mutation and lifecycle slices.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-009-todo-detail-api.md`
+- Commit message: `docs(task): close TASK-009`
+- This commit is terminal and must not trigger another Closure Check or create new state files.
