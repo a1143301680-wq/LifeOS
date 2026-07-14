@@ -41,10 +41,10 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-006 passed Task Review and entered `IN_PROGRESS` after snapshot commit `a395f37`.
 - TASK-006 implementation completed in result commit `d1c0dbf66d3988aa246e30530cbaa6e934b5af9c`; Code Review: PASS; tests: 38 passed.
 - TASK-007 workflow health hardening completed in result commit `3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c`; Code Review: PASS; workflow verification passed.
-- TASK-007 Decision Closure Check passed on 2026-07-13; terminal Closure Commit is the only remaining action before the next task may be published.
 - TASK-007 terminal Closure Commit `4c5c315` was published and the task workflow ended.
 - TASK-008 Todo create foundation completed in result commit `f2fe55e`; Code Review: PASS; backend tests: 47 passed; live PostgreSQL current verification remains blocked by the stopped local PostgreSQL service.
-- TASK-008 Decision Closure Check passed on 2026-07-14; terminal Closure Commit is the only remaining action.
+- TASK-008 terminal Closure Commit `2efce90` was published and the task workflow ended.
+- TASK-009 publishes the next business slice: authenticated Todo detail retrieval with ownership and soft-delete semantics.
 
 ## Recently Completed
 
@@ -93,9 +93,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-TASK-008 implementation and Decision Closure Check are complete. Publish the terminal Closure Commit before creating the next task.
-
-After terminal closure, the next Phase 1A business direction is Todo detail/update/complete/reopen/delete, subject to Decision task slicing.
+The next Phase 1A business direction is Todo detail retrieval, followed by separately reviewable Todo mutation and lifecycle slices. Live TASK-009 routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

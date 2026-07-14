@@ -4,124 +4,121 @@ Last updated: 2026-07-14
 
 ## Metadata
 
-- Task ID: TASK-008
-- Task Name: Todo model, migration, and create API
-- Status: COMPLETED
+- Task ID: TASK-009
+- Task Name: Todo detail API
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
-  - Todo Category CRUD published in `83ac3eb`
-  - Default category seeding published in `d1c0dbf`
-  - Workflow hardening closed in `4c5c315`
+  - Todo create foundation published in `f2fe55e`
+  - TASK-008 terminal closure published in `2efce90`
 
 ## Background
 
-Todo categories and the active Inbox invariant are available. The next Phase 1A vertical slice is durable Todo storage plus `POST /api/v1/todos`, including authentication, category ownership, idempotency, sync write-through, and focused tests.
+Todo persistence and create behavior are available. The next smallest Phase 1A vertical slice is authenticated retrieval of one Todo, including ownership isolation and the distinct soft-delete semantics already fixed by the API contract.
 
 ## Goal
 
-An authenticated user can create a pending Todo exactly once, using an active owned category or the user's active Inbox by default, and receive the stable Todo DTO with a sync cursor.
+An authenticated user can retrieve one owned active Todo through `GET /api/v1/todos/{id}` using the stable Todo DTO, without leaking another user's Todo or treating a soft-deleted category as a deleted Todo.
 
 ## Scope
 
 ### In Scope
 
-- SQLAlchemy Todo model and Alembic migration.
-- Phase 1 Todo columns and recommended indexes needed for future endpoints.
-- `POST /api/v1/todos` only.
-- Todo create/read schemas needed for the create response.
-- User/category ownership and active-category validation.
-- Default active Inbox resolution when `category_id` is omitted.
-- Existing idempotency service integration.
-- `todo.created` sync change in the same transaction.
-- Two-user isolation and focused automated tests.
+- `GET /api/v1/todos/{id}` only.
+- Current-user ownership isolation.
+- Active Todo serialization through the existing Todo DTO helper.
+- Historical category summary behavior for active and soft-deleted categories.
+- Missing, cross-user, and current-user soft-deleted Todo errors.
+- Authentication, UUID path validation, boundary behavior, and focused automated tests.
+- Verification that the read endpoint creates no sync change or idempotency state.
 
 ### Out of Scope
 
-- `GET`, `PATCH`, complete, reopen, delete, list, Today, sync pull, or SSE Todo endpoints.
-- Reminder and recurring-template APIs or behavior.
-- Android offline replay and full login.
-- Frontend or Android work.
-- Changes to Todo Category API behavior or default-category seeding.
+- Todo update, complete, reopen, delete, list, Today, sync pull, or SSE endpoints.
+- Todo model or Alembic migration changes.
+- Idempotency-Key requirements for this read endpoint.
+- Reminder, recurring Todo, Android offline replay, full login, frontend, or Android work.
+- Timezone-aware `due_at` input validation deferred from TASK-008.
+- Live PostgreSQL service recovery or migration verification.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2-7 and 10.2
-- `docs/data-model-phase1.md` sections 3 and 4.3
+- `docs/api-phase1a.md` sections 5, 7.3, 9.4, and 10.3
 - `docs/phase1a-progress.md`
-- Existing models, migrations, API router, schemas, idempotency, sync, envelope, auth, time, and relevant tests under `backend/`
+- `backend/app/api/v1/todos.py`
+- `backend/app/schemas/todo.py`
+- `backend/app/models/todo.py`
+- `backend/app/models/todo_category.py`
+- Existing auth, envelope, error, category, and Todo create tests needed to follow repository patterns
 
 ### Allowed Modify Files
 
-- New Todo model, schema, API route, migration, and focused tests under `backend/`
-- Existing model/schema exports and API router registration required for Todo create
-- Small reusable backend helpers only when directly required by Todo create
+- `backend/app/api/v1/todos.py`
+- `backend/app/schemas/todo.py` only if a focused response-schema change is directly required
+- New or existing focused Todo detail tests under `backend/tests/`
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-008 state files
+- Active handoff, gate, Git record, issue-log, and TASK-009 state files
 
 ### Forbidden Modify Files
 
+- Todo models or Alembic migrations
+- Todo create behavior except a narrowly necessary shared serialization correction covered by tests
+- Any other Todo endpoint
+- Todo Category API behavior or default-category seeding
 - Frontend or Android files
-- Reminder, recurring Todo, sync pull, or SSE implementations
-- Existing Todo Category endpoint behavior
-- Completed TASK-005, TASK-006, and TASK-007 archives
 - Product requirements, architecture, API contract, and data-model documents unless Task Review returns a contract ambiguity to Decision
+- Completed TASK-005 through TASK-008 archives
 
 ## Implementation Requirements
 
-- Persist the Phase 1 Todo fields from `docs/data-model-phase1.md`; `recurring_template_id` remains nullable without a foreign key until the recurring-template table exists.
-- Create requests accept only `id`, `title`, `note`, `category_id`, `priority`, `planned_date`, and `due_at`; reject client-supplied ownership, status, completion, version, sync, and internal fields.
-- Trim `title` and reject an empty or whitespace-only title with `400 validation_error`.
-- Default `priority` to `medium`; allow only `high`, `medium`, or `low`.
-- Always create `status=pending`, `version=1`, with null completion/cancellation/deletion fields.
-- If `category_id` is omitted, resolve exactly one active `is_inbox=true` category owned by the user; missing or invalid Inbox state returns `400 invalid_state_transition` without creating data.
-- A supplied category must belong to the current user. Missing or cross-user category returns `404 not_found`; a current-user soft-deleted category returns `410 deleted_resource`.
-- A client-provided Todo UUID collision returns `400 validation_error` without leaking another user's data.
-- Require `Idempotency-Key`; replay an identical request and reject conflicting reuse using existing semantics.
-- Create Todo, `todo.created` sync change, and idempotency response atomically.
-- Sync change uses `entity_type=todo`, `entity_version=1`, and a payload snapshot consistent with the Todo DTO.
-- Response status is `201` and uses the write envelope with `sync.cursor`.
-- Never expose `user_id`, `deleted_at`, recurring/internal client fields, or internal sync fields in the normal Todo DTO.
+- Add `GET /api/v1/todos/{id}` under the existing Todo router and require bearer authentication.
+- Query by Todo ID and current user ownership so a missing Todo and a Todo owned by another user both return `404 not_found` without existence leakage.
+- If the matched current-user Todo has `deleted_at`, return `410 deleted_resource` using the standard error envelope.
+- Return an active matched Todo with the normal data envelope and stable Todo DTO; do not include `sync` metadata on this read response.
+- Reuse `todo_to_dict` rather than creating a divergent detail representation.
+- For an active category, return its current `id` and `name` with `is_deleted=false`.
+- For a soft-deleted category still referenced by the Todo, retain its historical `id` and current stored `name` with `is_deleted=true`.
+- If `category_id` or the related category row is absent, return `category=null` without crashing.
+- Do not expose `user_id`, `deleted_at`, recurring/internal client fields, or internal sync fields.
+- Do not require, consume, or persist an `Idempotency-Key`; do not create `sync_changes` for this read.
+- Keep response and error behavior consistent with existing envelope and auth conventions.
 
 ## Acceptance Criteria
 
-- [x] Migration creates the Todo table, constraints, and recommended indexes without breaking the current Alembic chain.
-- [x] Authenticated create returns `201`, a pending version-1 Todo DTO, and `sync.cursor`.
-- [x] Omitted category defaults to the current user's active Inbox.
-- [x] Supplied active owned category is accepted.
-- [x] Missing, cross-user, and soft-deleted category cases follow the specified errors and create no Todo.
-- [x] Missing/invalid Idempotency-Key, identical replay, and conflicting reuse are covered.
-- [x] Optional client UUID is preserved; server generates one when omitted; collision is handled safely.
-- [x] Invalid title, priority, UUID, and forbidden/internal request fields are rejected.
-- [x] Todo, sync change, and idempotency record are committed atomically.
-- [x] Two-user isolation is covered.
-- [x] Existing backend tests remain green.
+- [ ] Authenticated retrieval of an owned active Todo returns `200` and the expected Todo DTO.
+- [ ] An active category is summarized with `is_deleted=false`.
+- [ ] A soft-deleted category referenced by an active Todo is summarized with `is_deleted=true`; the Todo itself remains readable.
+- [ ] A Todo with no resolvable category returns `category=null` without failure.
+- [ ] Missing and cross-user Todo IDs both return `404 not_found` with no ownership leak.
+- [ ] A current-user soft-deleted Todo returns `410 deleted_resource` using the standard error envelope.
+- [ ] Missing or invalid authentication and an invalid path UUID follow existing API conventions.
+- [ ] The response excludes internal fields and does not contain write `sync` metadata.
+- [ ] The GET request creates no Todo, idempotency record, or sync change.
+- [ ] Existing backend tests remain green and no out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Focused Todo create API and migration/model tests.
-- Full `python -m pytest` from `backend/`.
-- `python -m alembic heads` and migration-chain inspection.
-- Live PostgreSQL upgrade/current and focused insert verification when the configured local database is safely available; otherwise record the missing verification explicitly.
-- `git diff --check` and exact modified-file review.
+- Add and run focused Todo detail API tests covering the acceptance criteria.
+- Run full `python -m pytest` from `backend/`.
+- Inspect route ordering so `/todos/{id}` does not preclude future static routes such as `/todos/today`.
+- Run `git diff --check`, inspect exact modified and untracked files, and confirm no migration/model/product-contract changes.
 
 ## Risks
 
-- Todo model fields needed by later endpoints may be omitted or typed inconsistently.
-- Client UUID collisions and category lookup errors can leak cross-user existence if handled carelessly.
-- Idempotency, sync, and Todo writes can diverge if transaction boundaries are split.
-- SQLite tests may not expose PostgreSQL migration/index differences.
+- Querying by ID before ownership can leak cross-user existence through error differences.
+- Filtering out soft-deleted Todos too early can incorrectly turn the required `410` into `404`.
+- Confusing a deleted category with a deleted Todo can incorrectly make historical Todos unreadable.
+- A dynamic `/{id}` route can conflict with future static Todo routes if route ordering is handled carelessly.
 
 ## Coding Output Requirements
 
-Report modified files, migration details, API behavior, acceptance results, test/migration commands, PostgreSQL verification status, diff check, unresolved issues, and task-outside findings.
+Report modified files, endpoint behavior, acceptance results, focused/full test results, route-order verification, diff checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS on 2026-07-14.
-
-Required next action: publish the Decision-approved TASK-008 Closure documents. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.

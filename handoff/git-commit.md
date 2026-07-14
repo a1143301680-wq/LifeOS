@@ -4,51 +4,33 @@ Last updated: 2026-07-14
 
 ## Commit Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-008
+Task ID: TASK-009
 
-Branch: main
+Branch: pending
 
-Commit Hash: f2fe55ecd7386a20b3514dbf62909090d456dc1e
+Commit Hash: pending
 
-Commit Message: feat(todo): add Todo create foundation
+Commit Message: pending Code Review recommendation
 
-Files Changed:
+Files Changed: pending
 
-- `backend/alembic/env.py`
-- `backend/alembic/versions/20260713_0004_add_todos.py`
-- `backend/app/api/v1/router.py`
-- `backend/app/api/v1/todos.py`
-- `backend/app/models/__init__.py`
-- `backend/app/models/todo.py`
-- `backend/app/schemas/todo.py`
-- `backend/tests/test_todos_create.py`
-- `handoff/current-task.md`
-- `handoff/git-snapshot.md`
-- `tasks/TASK-008-todo-create-foundation.md`
+Tests: pending
 
-Tests:
+Code Review Result: PENDING
 
-- `python -m pytest tests/test_todos_create.py`: PASS, 9 passed.
-- `python -m pytest`: PASS, 47 passed.
-- `python -m alembic heads`: PASS, `20260713_0004 (head)`.
-- `python -m alembic upgrade head --sql | Select-String -Pattern 'CREATE TABLE todos|ck_todos_status|ix_todos_user_status_planned_date|20260713_0004'`: PASS.
-- `python -m alembic current`: NOT COMPLETED; configured PostgreSQL connection timed out.
-
-Code Review Result: PASS
-
-Push Target: origin/main
+Push Target: pending
 
 ## Instructions
 
-Run only after Code Review passes.
+Run only after Code Review passes and approve only the exact reviewed scope.
 
 For a result commit, Git Commit must update both:
 
 - `handoff/current-task.md`
-- active `tasks/TASK-xxx.md`
+- `tasks/TASK-009-todo-detail-api.md`
 
-Both files must have `Status: COMPLETED` after a successful result commit.
+Both files must have `Status: COMPLETED` after a successful result commit. Record local/remote parity and remaining worktree changes; do not claim completion if either status update or push verification fails.
 
-For a terminal Closure Commit, commit only the documentation files approved by Decision Closure Check. A successful Closure Commit ends the task workflow and does not trigger another Closure Check.
+For a terminal Closure Commit, commit only the documentation files approved by Decision Closure Check. A successful Closure Commit ends the task workflow, creates no new uncommitted state, and does not trigger another Closure Check.

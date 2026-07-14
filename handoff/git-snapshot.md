@@ -1,32 +1,36 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-008
+Task ID: TASK-009
 
-Branch: main
+Branch: pending
 
-Base Commit: 4c5c31565f3cab79472dfde47c8ce8cba40885d1
+Base Commit: pending
 
-Working Tree: 8 approved TASK-008 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: pending
 
-Snapshot Commit: 20efdb916efdc4df7ec3752a69ee87b29e24c85a
+Snapshot Commit: pending
 
-Reason: approved TASK-008 readiness documents required a durable pre-Coding baseline
+Reason: pending Task Review PASS
 
 ## Instructions
 
 Run after Task Review passes and before Coding starts.
 
+Confirm that every pre-snapshot change belongs to the Task Review-approved TASK-009 publication scope. Unexpected files block the snapshot.
+
 After snapshot completion, update both:
 
 - `handoff/current-task.md`
-- active `tasks/TASK-xxx.md`
+- `tasks/TASK-009-todo-detail-api.md`
 
 Both files must have `Status: IN_PROGRESS`. If either update fails, Git Snapshot must not claim the transition completed.
+
+Post-snapshot status-file edits may remain local for Coding; do not create a second snapshot commit merely to capture the transition metadata.
