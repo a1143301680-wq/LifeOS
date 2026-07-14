@@ -120,6 +120,8 @@ Report modified files, migration details, API behavior, acceptance results, test
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-008 closure check before publishing the next task.
+Closure Check: PASS on 2026-07-14.
+
+Required next action: publish the Decision-approved TASK-008 Closure documents. After remote parity is verified, return to Decision; do not run another Closure Check.

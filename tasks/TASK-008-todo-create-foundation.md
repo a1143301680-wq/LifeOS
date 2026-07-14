@@ -180,7 +180,31 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-14 (Asia/Shanghai)
+- Result Commit: `f2fe55ecd7386a20b3514dbf62909090d456dc1e`
+- Completion Commit: `f332c02c2f641d13f154be7bdef4403b7bed7e05`
+- Remote Verification: local HEAD, `origin/main`, and remote `refs/heads/main` all matched `f332c02c2f641d13f154be7bdef4403b7bed7e05`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo create tests `9 passed`; full backend suite `47 passed`; Alembic head `20260713_0004`; offline PostgreSQL migration SQL verification passed.
+- Acceptance Criteria Result: all TASK-008 acceptance criteria confirmed.
+- Issue Disposition: no TASK-008 blocking issue. Live PostgreSQL migration/current verification is deferred until the local PostgreSQL service is available. Timezone-aware `due_at` validation is deferred to a Todo validation hardening follow-up.
+- Remaining Follow-ups:
+  - Run live PostgreSQL `alembic upgrade head` and `alembic current` when the service is available.
+  - Add timezone-aware `due_at` request validation.
+  - Continue with Todo detail/update/complete/reopen/delete.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `docs/phase1a-progress.md`
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-008-todo-create-foundation.md`
+- Commit message: `docs(task): close TASK-008`
+- This commit is terminal and must not trigger another Closure Check or create new state files.
 
 ## Follow-up Tasks
 

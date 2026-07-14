@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-07-11
+Last updated: 2026-07-14
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -39,7 +39,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
-| `POST /api/v1/todos` | next | TASK-008: Todo model/migration plus authenticated idempotent create |
+| `POST /api/v1/todos` | done | Published in `f2fe55e`; Code Review PASS; 47 backend tests passed; live PostgreSQL verification deferred |
 | `GET /api/v1/todos/{id}` | pending | Includes `410 deleted_resource` behavior |
 | `PATCH /api/v1/todos/{id}` | pending | Requires forbidden-field validation |
 | `POST /api/v1/todos/{id}/complete` | pending | Requires status transition and sync change |
@@ -57,12 +57,11 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add `todos` model/migration and `POST /api/v1/todos`.
-2. Add Todo detail/update/complete/reopen/delete.
-3. Add Todo list cursor pagination and filters.
-4. Add Today Todo aggregation.
-5. Add `GET /api/v1/sync/changes`.
-6. Add `GET /api/v1/sync/events`.
+1. Add Todo detail/update/complete/reopen/delete.
+2. Add Todo list cursor pagination and filters.
+3. Add Today Todo aggregation.
+4. Add `GET /api/v1/sync/changes`.
+5. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule
 

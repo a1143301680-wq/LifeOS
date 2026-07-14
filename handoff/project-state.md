@@ -44,6 +44,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-007 Decision Closure Check passed on 2026-07-13; terminal Closure Commit is the only remaining action before the next task may be published.
 - TASK-007 terminal Closure Commit `4c5c315` was published and the task workflow ended.
 - TASK-008 Todo create foundation completed in result commit `f2fe55e`; Code Review: PASS; backend tests: 47 passed; live PostgreSQL current verification remains blocked by the stopped local PostgreSQL service.
+- TASK-008 Decision Closure Check passed on 2026-07-14; terminal Closure Commit is the only remaining action.
 
 ## Recently Completed
 
@@ -92,7 +93,9 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-TASK-008 result has been published. Decision should run the TASK-008 closure check before publishing the next task.
+TASK-008 implementation and Decision Closure Check are complete. Publish the terminal Closure Commit before creating the next task.
+
+After terminal closure, the next Phase 1A business direction is Todo detail/update/complete/reopen/delete, subject to Decision task slicing.
 
 ## Notes For Windows
 
