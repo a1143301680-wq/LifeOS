@@ -159,3 +159,32 @@ async def create_todo(
         raise
 
     return JSONResponse(status_code=201, content=response_body)
+
+
+@router.get("/{todo_id}")
+def get_todo(
+    todo_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    todo = db.execute(
+        select(Todo).where(
+            Todo.id == todo_id,
+            Todo.user_id == current_user.id,
+        )
+    ).scalar_one_or_none()
+    if todo is None:
+        raise ApiError(404, "not_found", "todo not found")
+    if todo.deleted_at is not None:
+        raise ApiError(410, "deleted_resource", "todo is deleted")
+
+    category = None
+    if todo.category_id is not None:
+        category = db.execute(
+            select(TodoCategory).where(
+                TodoCategory.id == todo.category_id,
+                TodoCategory.user_id == current_user.id,
+            )
+        ).scalar_one_or_none()
+
+    return data_envelope(todo_to_dict(todo, category))
