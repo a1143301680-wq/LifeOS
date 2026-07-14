@@ -44,7 +44,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-007 terminal Closure Commit `4c5c315` was published and the task workflow ended.
 - TASK-008 Todo create foundation completed in result commit `f2fe55e`; Code Review: PASS; backend tests: 47 passed; live PostgreSQL current verification remains blocked by the stopped local PostgreSQL service.
 - TASK-008 terminal Closure Commit `2efce90` was published and the task workflow ended.
-- TASK-009 publishes the next business slice: authenticated Todo detail retrieval with ownership and soft-delete semantics.
+- TASK-009 Todo detail API completed in result commit `deb240b`; Code Review: PASS; backend tests: 54 passed.
 
 ## Recently Completed
 
@@ -93,7 +93,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is Todo detail retrieval, followed by separately reviewable Todo mutation and lifecycle slices. Live TASK-009 routing is maintained in `handoff/current-task.md`.
+The next Phase 1A business direction is a separately reviewable Todo mutation or lifecycle slice. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

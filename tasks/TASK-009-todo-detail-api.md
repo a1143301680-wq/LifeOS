@@ -4,7 +4,7 @@
 
 - Task ID: TASK-009
 - Task Name: Todo detail API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo create foundation `f2fe55e`; TASK-008 terminal closure `2efce90`
@@ -190,7 +190,14 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-14
+- Branch: main
+- Result Commit: deb240b1a3cbe46890853499a55daf60c2a49b81
+- Commit Message: `feat(todo): add Todo detail API`
+- Push Target: origin/main
+- Code Review Result: PASS
 
 ## Closure
 

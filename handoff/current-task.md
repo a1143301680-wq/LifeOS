@@ -6,7 +6,7 @@ Last updated: 2026-07-14
 
 - Task ID: TASK-009
 - Task Name: Todo detail API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -88,16 +88,16 @@ An authenticated user can retrieve one owned active Todo through `GET /api/v1/to
 
 ## Acceptance Criteria
 
-- [ ] Authenticated retrieval of an owned active Todo returns `200` and the expected Todo DTO.
-- [ ] An active category is summarized with `is_deleted=false`.
-- [ ] A soft-deleted category referenced by an active Todo is summarized with `is_deleted=true`; the Todo itself remains readable.
-- [ ] A Todo with no resolvable category returns `category=null` without failure.
-- [ ] Missing and cross-user Todo IDs both return `404 not_found` with no ownership leak.
-- [ ] A current-user soft-deleted Todo returns `410 deleted_resource` using the standard error envelope.
-- [ ] Missing or invalid authentication and an invalid path UUID follow existing API conventions.
-- [ ] The response excludes internal fields and does not contain write `sync` metadata.
-- [ ] The GET request creates no Todo, idempotency record, or sync change.
-- [ ] Existing backend tests remain green and no out-of-scope endpoint is added.
+- [x] Authenticated retrieval of an owned active Todo returns `200` and the expected Todo DTO.
+- [x] An active category is summarized with `is_deleted=false`.
+- [x] A soft-deleted category referenced by an active Todo is summarized with `is_deleted=true`; the Todo itself remains readable.
+- [x] A Todo with no resolvable category returns `category=null` without failure.
+- [x] Missing and cross-user Todo IDs both return `404 not_found` with no ownership leak.
+- [x] A current-user soft-deleted Todo returns `410 deleted_resource` using the standard error envelope.
+- [x] Missing or invalid authentication and an invalid path UUID follow existing API conventions.
+- [x] The response excludes internal fields and does not contain write `sync` metadata.
+- [x] The GET request creates no Todo, idempotency record, or sync change.
+- [x] Existing backend tests remain green and no out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -119,6 +119,6 @@ Report modified files, endpoint behavior, acceptance results, focused/full test 
 
 ## Current Stage
 
-Next role: Code Review
+Next role: Decision
 
-Required next action: review TASK-009 Todo detail API implementation.
+Required next action: run TASK-009 closure check before publishing the next task.

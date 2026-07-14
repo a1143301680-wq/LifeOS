@@ -40,7 +40,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
 | `POST /api/v1/todos` | done | Published in `f2fe55e`; Code Review PASS; 47 backend tests passed; live PostgreSQL verification deferred |
-| `GET /api/v1/todos/{id}` | next | TASK-009; ownership isolation, deleted-category summary, and `410 deleted_resource` |
+| `GET /api/v1/todos/{id}` | done | Published in `deb240b`; Code Review PASS; 54 backend tests passed |
 | `PATCH /api/v1/todos/{id}` | pending | Requires forbidden-field validation |
 | `POST /api/v1/todos/{id}/complete` | pending | Requires status transition and sync change |
 | `POST /api/v1/todos/{id}/reopen` | pending | Requires status transition and sync change |
@@ -57,12 +57,11 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add Todo detail (`TASK-009`).
-2. Add Todo update and lifecycle actions in subsequent closeable slices.
-3. Add Todo list cursor pagination and filters.
-4. Add Today Todo aggregation.
-5. Add `GET /api/v1/sync/changes`.
-6. Add `GET /api/v1/sync/events`.
+1. Add Todo update and lifecycle actions in subsequent closeable slices.
+2. Add Todo list cursor pagination and filters.
+3. Add Today Todo aggregation.
+4. Add `GET /api/v1/sync/changes`.
+5. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule
 

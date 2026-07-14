@@ -4,23 +4,33 @@ Last updated: 2026-07-14
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-009
 
-Branch: pending
+Branch: main
 
-Commit Hash: pending
+Commit Hash: deb240b1a3cbe46890853499a55daf60c2a49b81
 
-Commit Message: pending Code Review recommendation
+Commit Message: feat(todo): add Todo detail API
 
-Files Changed: pending
+Files Changed:
 
-Tests: pending
+- `backend/app/api/v1/todos.py`
+- `backend/tests/test_todos_detail.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-009-todo-detail-api.md`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: pending
+- `python -m pytest tests/test_todos_detail.py`: PASS, 7 passed.
+- `python -m pytest`: PASS, 54 passed.
+- Route order scan: PASS.
+
+Code Review Result: PASS
+
+Push Target: origin/main
 
 ## Instructions
 
