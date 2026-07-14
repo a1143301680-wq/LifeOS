@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Metadata
 
 - Task ID: TASK-008
 - Task Name: Todo model, migration, and create API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -87,17 +87,17 @@ An authenticated user can create a pending Todo exactly once, using an active ow
 
 ## Acceptance Criteria
 
-- [ ] Migration creates the Todo table, constraints, and recommended indexes without breaking the current Alembic chain.
-- [ ] Authenticated create returns `201`, a pending version-1 Todo DTO, and `sync.cursor`.
-- [ ] Omitted category defaults to the current user's active Inbox.
-- [ ] Supplied active owned category is accepted.
-- [ ] Missing, cross-user, and soft-deleted category cases follow the specified errors and create no Todo.
-- [ ] Missing/invalid Idempotency-Key, identical replay, and conflicting reuse are covered.
-- [ ] Optional client UUID is preserved; server generates one when omitted; collision is handled safely.
-- [ ] Invalid title, priority, UUID, and forbidden/internal request fields are rejected.
-- [ ] Todo, sync change, and idempotency record are committed atomically.
-- [ ] Two-user isolation is covered.
-- [ ] Existing backend tests remain green.
+- [x] Migration creates the Todo table, constraints, and recommended indexes without breaking the current Alembic chain.
+- [x] Authenticated create returns `201`, a pending version-1 Todo DTO, and `sync.cursor`.
+- [x] Omitted category defaults to the current user's active Inbox.
+- [x] Supplied active owned category is accepted.
+- [x] Missing, cross-user, and soft-deleted category cases follow the specified errors and create no Todo.
+- [x] Missing/invalid Idempotency-Key, identical replay, and conflicting reuse are covered.
+- [x] Optional client UUID is preserved; server generates one when omitted; collision is handled safely.
+- [x] Invalid title, priority, UUID, and forbidden/internal request fields are rejected.
+- [x] Todo, sync change, and idempotency record are committed atomically.
+- [x] Two-user isolation is covered.
+- [x] Existing backend tests remain green.
 
 ## Verification Plan
 
@@ -120,6 +120,6 @@ Report modified files, migration details, API behavior, acceptance results, test
 
 ## Current Stage
 
-Next role: Code Review
+Next role: Decision
 
-Required next action: review TASK-008 Todo create implementation.
+Required next action: run TASK-008 closure check before publishing the next task.

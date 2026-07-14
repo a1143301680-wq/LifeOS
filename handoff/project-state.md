@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Current Phase
 
@@ -43,6 +43,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-007 workflow health hardening completed in result commit `3ae0d50bf785c749d4d10d83ffe6bca2067ddf6c`; Code Review: PASS; workflow verification passed.
 - TASK-007 Decision Closure Check passed on 2026-07-13; terminal Closure Commit is the only remaining action before the next task may be published.
 - TASK-007 terminal Closure Commit `4c5c315` was published and the task workflow ended.
+- TASK-008 Todo create foundation completed in result commit `f2fe55e`; Code Review: PASS; backend tests: 47 passed; live PostgreSQL current verification remains blocked by the stopped local PostgreSQL service.
 
 ## Recently Completed
 
@@ -91,7 +92,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-TASK-008 is the active planned business slice: Todo model/migration plus `POST /api/v1/todos`. Live status and routing are in `handoff/current-task.md`.
+TASK-008 result has been published. Decision should run the TASK-008 closure check before publishing the next task.
 
 ## Notes For Windows
 

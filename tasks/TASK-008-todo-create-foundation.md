@@ -4,7 +4,7 @@
 
 - Task ID: TASK-008
 - Task Name: Todo model, migration, and create API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Category CRUD `83ac3eb`; default categories `d1c0dbf`; workflow closure `4c5c315`
@@ -169,7 +169,14 @@ None.
 
 ## Git Commit
 
-Pending.
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-14
+- Branch: main
+- Result Commit: f2fe55ecd7386a20b3514dbf62909090d456dc1e
+- Commit Message: `feat(todo): add Todo create foundation`
+- Push Target: origin/main
+- Code Review Result: PASS
 
 ## Closure
 
