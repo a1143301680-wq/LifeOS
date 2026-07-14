@@ -6,7 +6,7 @@ Last updated: 2026-07-13
 
 - Task ID: TASK-008
 - Task Name: Todo model, migration, and create API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -120,6 +120,6 @@ Report modified files, migration details, API behavior, acceptance results, test
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Code Review
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: review TASK-008 Todo create implementation.

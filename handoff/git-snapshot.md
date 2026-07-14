@@ -4,21 +4,21 @@ Last updated: 2026-07-13
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-008
 
-Branch: unknown
+Branch: main
 
-Base Commit: unknown
+Base Commit: 4c5c31565f3cab79472dfde47c8ce8cba40885d1
 
-Working Tree: unknown
+Working Tree: 8 approved TASK-008 pre-Coding publication-state documents committed separately; no business code
 
-Snapshot Commit Created: unknown
+Snapshot Commit Created: Yes
 
-Snapshot Commit: none
+Snapshot Commit: 20efdb916efdc4df7ec3752a69ee87b29e24c85a
 
-Reason: not run
+Reason: approved TASK-008 readiness documents required a durable pre-Coding baseline
 
 ## Instructions
 
