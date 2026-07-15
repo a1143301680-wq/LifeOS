@@ -4,33 +4,23 @@ Last updated: 2026-07-14
 
 ## Commit Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-009
+Task ID: TASK-010
 
-Branch: main
+Branch: pending
 
-Commit Hash: deb240b1a3cbe46890853499a55daf60c2a49b81
+Commit Hash: pending
 
-Commit Message: feat(todo): add Todo detail API
+Commit Message: pending Code Review recommendation
 
-Files Changed:
+Files Changed: pending
 
-- `backend/app/api/v1/todos.py`
-- `backend/tests/test_todos_detail.py`
-- `handoff/current-task.md`
-- `handoff/git-snapshot.md`
-- `tasks/TASK-009-todo-detail-api.md`
+Tests: pending
 
-Tests:
+Code Review Result: PENDING
 
-- `python -m pytest tests/test_todos_detail.py`: PASS, 7 passed.
-- `python -m pytest`: PASS, 54 passed.
-- Route order scan: PASS.
-
-Code Review Result: PASS
-
-Push Target: origin/main
+Push Target: pending
 
 ## Instructions
 
@@ -39,7 +29,7 @@ Run only after Code Review passes and approve only the exact reviewed scope.
 For a result commit, Git Commit must update both:
 
 - `handoff/current-task.md`
-- `tasks/TASK-009-todo-detail-api.md`
+- `tasks/TASK-010-todo-update-api.md`
 
 Both files must have `Status: COMPLETED` after a successful result commit. Record local/remote parity and remaining worktree changes; do not claim completion if either status update or push verification fails.
 

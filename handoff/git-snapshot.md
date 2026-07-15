@@ -4,32 +4,32 @@ Last updated: 2026-07-14
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-009
+Task ID: TASK-010
 
-Branch: main
+Branch: pending
 
-Base Commit: 2efce90a31dbb4191e06c2ee8c6eec20e389389a
+Base Commit: pending
 
-Working Tree: 8 approved TASK-009 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: pending
 
-Snapshot Commit: 78eb5e363ac529471b1ce411746cf809a78b6aa1
+Snapshot Commit: pending
 
-Reason: approved TASK-009 readiness documents required a durable pre-Coding baseline
+Reason: pending Task Review PASS
 
 ## Instructions
 
 Run after Task Review passes and before Coding starts.
 
-Confirm that every pre-snapshot change belongs to the Task Review-approved TASK-009 publication scope. Unexpected files block the snapshot.
+Confirm that every pre-snapshot change belongs to the Task Review-approved TASK-010 publication scope. Unexpected files block the snapshot.
 
 After snapshot completion, update both:
 
 - `handoff/current-task.md`
-- `tasks/TASK-009-todo-detail-api.md`
+- `tasks/TASK-010-todo-update-api.md`
 
 Both files must have `Status: IN_PROGRESS`. If either update fails, Git Snapshot must not claim the transition completed.
 
