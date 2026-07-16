@@ -1,26 +1,37 @@
 # LifeOS Git Commit Result
 
-Last updated: 2026-07-14
+Last updated: 2026-07-16
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-010
 
-Branch: pending
+Branch: main
 
-Commit Hash: pending
+Commit Hash: 09cd984163b948420ae4915f75422ed1b60dcaa2
 
-Commit Message: pending Code Review recommendation
+Commit Message: feat(todo): add Todo update API
 
-Files Changed: pending
+Files Changed:
 
-Tests: pending
+- `backend/app/api/v1/todos.py`
+- `backend/app/schemas/todo.py`
+- `backend/tests/test_todos_update.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-010-todo-update-api.md`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: pending
+- `python -m pytest tests/test_todos_update.py`: PASS, 8 passed.
+- `python -m pytest`: PASS, 62 passed.
+- Route and endpoint-scope scan: PASS.
+
+Code Review Result: PASS
+
+Push Target: origin/main
 
 ## Instructions
 

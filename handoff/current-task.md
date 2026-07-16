@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-14
+Last updated: 2026-07-16
 
 ## Metadata
 
 - Task ID: TASK-010
 - Task Name: Todo update API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -92,17 +92,17 @@ An authenticated user can partially update ordinary fields on an owned active To
 
 ## Acceptance Criteria
 
-- [ ] A partial update of one or several allowed fields returns `200`, the updated DTO, incremented version, and `sync.cursor`.
-- [ ] Omitted fields remain unchanged; nullable fields can be cleared explicitly with null.
-- [ ] Null/blank title, null/invalid priority, empty object, invalid values, and forbidden/internal fields return `400 validation_error` without mutation.
-- [ ] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
-- [ ] Active owned category selection succeeds; missing/cross-user category returns `404`, and current-user soft-deleted category returns `410`.
-- [ ] Ordinary fields can be edited without changing pending, completed, or canceled lifecycle state.
-- [ ] Todo, version, updated timestamp, `todo.updated` sync snapshot, and idempotency response are atomic and consistent.
-- [ ] Missing Idempotency-Key, identical replay, and conflicting key reuse follow existing semantics; replay has no duplicate side effects.
-- [ ] Authentication and invalid path/payload UUID behavior follow existing API conventions.
-- [ ] Internal fields remain absent from response and sync snapshot.
-- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [x] A partial update of one or several allowed fields returns `200`, the updated DTO, incremented version, and `sync.cursor`.
+- [x] Omitted fields remain unchanged; nullable fields can be cleared explicitly with null.
+- [x] Null/blank title, null/invalid priority, empty object, invalid values, and forbidden/internal fields return `400 validation_error` without mutation.
+- [x] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
+- [x] Active owned category selection succeeds; missing/cross-user category returns `404`, and current-user soft-deleted category returns `410`.
+- [x] Ordinary fields can be edited without changing pending, completed, or canceled lifecycle state.
+- [x] Todo, version, updated timestamp, `todo.updated` sync snapshot, and idempotency response are atomic and consistent.
+- [x] Missing Idempotency-Key, identical replay, and conflicting key reuse follow existing semantics; replay has no duplicate side effects.
+- [x] Authentication and invalid path/payload UUID behavior follow existing API conventions.
+- [x] Internal fields remain absent from response and sync snapshot.
+- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -125,6 +125,6 @@ Report modified files, update/null/error behavior, version and transaction behav
 
 ## Current Stage
 
-Next role: Code Review
+Next role: Decision
 
-Required next action: review TASK-010 Todo update API implementation.
+Required next action: run TASK-010 closure check before publishing the next task.
