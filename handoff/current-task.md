@@ -6,7 +6,7 @@ Last updated: 2026-07-14
 
 - Task ID: TASK-010
 - Task Name: Todo update API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -125,6 +125,6 @@ Report modified files, update/null/error behavior, version and transaction behav
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Code Review
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: review TASK-010 Todo update API implementation.
