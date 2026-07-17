@@ -4,23 +4,33 @@ Last updated: 2026-07-17
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-012
 
-Branch: pending
+Branch: main
 
-Commit Hash: pending
+Commit Hash: c2d167fdd063d362ef20e9ec0b1de17a08b62191
 
-Commit Message: pending Code Review recommendation
+Commit Message: `feat(todo): add Todo reopen API`
 
-Files Changed: pending
+Files Changed:
 
-Tests: pending
+- `backend/app/api/v1/todos.py`
+- `backend/tests/test_todos_reopen.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-012-todo-reopen-api.md`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: pending
+- `python -m pytest tests/test_todos_reopen.py`: PASS, 5 passed.
+- `python -m pytest`: PASS, 72 passed.
+- `python -m alembic heads`: PASS, `20260713_0004 (head)`.
+
+Code Review Result: PASS
+
+Push Target: origin/main
 
 ## Instructions
 

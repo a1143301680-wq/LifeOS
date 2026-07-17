@@ -4,7 +4,7 @@
 
 - Task ID: TASK-012
 - Task Name: Todo reopen API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo update `09cd984`; Todo complete `2c35f1d`; TASK-011 terminal closure `c2a2fac`
@@ -198,7 +198,15 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-17
+- Branch: main
+- Result Commit: c2d167fdd063d362ef20e9ec0b1de17a08b62191
+- Commit Message: `feat(todo): add Todo reopen API`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

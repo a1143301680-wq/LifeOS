@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-012
 - Task Name: Todo reopen API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -91,17 +91,17 @@ An authenticated user can reopen an owned active completed Todo exactly once and
 
 ## Acceptance Criteria
 
-- [ ] Reopening an owned completed Todo returns `200`, `status=pending`, null `completed_at`, incremented version, updated server timestamp, and `sync.cursor`.
-- [ ] Ordinary fields and `canceled_at` remain unchanged.
-- [ ] The `todo.reopened` sync row uses the updated entity version and a snapshot equal to the response DTO.
-- [ ] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
-- [ ] Pending and canceled active Todos return `400 invalid_state_transition` with no side effects.
-- [ ] Missing key, identical replay, conflicting reuse, and a new key after reopening follow defined behavior without duplicate effects.
-- [ ] Missing/invalid authentication and invalid path UUID follow existing conventions.
-- [ ] A soft-deleted or absent category does not block reopening and follows existing DTO serialization.
-- [ ] Todo mutation, version/timestamp, sync snapshot, and idempotency response are atomic and consistent under failure.
-- [ ] Internal fields remain absent from response and sync snapshot.
-- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [x] Reopening an owned completed Todo returns `200`, `status=pending`, null `completed_at`, incremented version, updated server timestamp, and `sync.cursor`.
+- [x] Ordinary fields and `canceled_at` remain unchanged.
+- [x] The `todo.reopened` sync row uses the updated entity version and a snapshot equal to the response DTO.
+- [x] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
+- [x] Pending and canceled active Todos return `400 invalid_state_transition` with no side effects.
+- [x] Missing key, identical replay, conflicting reuse, and a new key after reopening follow defined behavior without duplicate effects.
+- [x] Missing/invalid authentication and invalid path UUID follow existing conventions.
+- [x] A soft-deleted or absent category does not block reopening and follows existing DTO serialization.
+- [x] Todo mutation, version/timestamp, sync snapshot, and idempotency response are atomic and consistent under failure.
+- [x] Internal fields remain absent from response and sync snapshot.
+- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -123,6 +123,6 @@ Report modified files, transition/error/idempotency behavior, timestamp/version/
 
 ## Current Stage
 
-Next role: Code Review
+Next role: Decision
 
-Required next action: review TASK-012 Todo reopen API implementation.
+Required next action: run TASK-012 Decision Closure Check before publishing the next task.
