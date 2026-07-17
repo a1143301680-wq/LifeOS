@@ -211,4 +211,26 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-17 09:16 +08:00
+- Result Commit: `2c35f1dc2ab94e6908bfcfb0bd67287b4114fb66`
+- Completion Commit: `5320bf1467accf626a925cee941fa9e94938a2a7`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `5320bf1467accf626a925cee941fa9e94938a2a7`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo complete tests `5 passed`; full backend suite `67 passed`; Alembic head and endpoint-scope scans passed.
+- Acceptance Criteria Result: all TASK-011 acceptance criteria confirmed.
+- Issue Disposition: no TASK-011 issue-log entry, unresolved issue, or task-outside finding remained.
+- Remaining Follow-ups:
+  - Register future static Todo routes such as `/todos/today` before dynamic `/{todo_id}` routes.
+  - Continue with separately reviewable Todo reopen and delete slices.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-011-todo-complete-api.md`
+- Commit message: `docs(task): close TASK-011`
+- This commit is terminal and must not trigger another Closure Check or create new state files.
