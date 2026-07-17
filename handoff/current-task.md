@@ -4,135 +4,123 @@ Last updated: 2026-07-17
 
 ## Metadata
 
-- Task ID: TASK-012
-- Task Name: Todo reopen API
-- Status: COMPLETED
+- Task ID: TASK-013
+- Task Name: Todo delete API
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
   - Todo update API published in `09cd984`
-  - Todo complete API published in `2c35f1d`
-  - TASK-011 terminal closure published in `c2a2fac`
+  - Todo lifecycle actions published in `2c35f1d` and `c2d167f`
+  - TASK-012 terminal closure published in `17e54de`
 
 ## Background
 
-Todo completion is available. The next Phase 1A lifecycle slice reopens an owned completed Todo while preserving explicit state boundaries, server mutation metadata, idempotency, and sync write-through.
+Todo create, edit, complete, and reopen are available. The final Todo lifecycle mutation slice is soft deletion with a durable versioned tombstone for sync recovery, while preserving the Todo's lifecycle status.
 
 ## Goal
 
-An authenticated user can reopen an owned active completed Todo exactly once and receive the pending stable Todo DTO with a sync cursor, while invalid states and cross-user resources remain protected.
+An authenticated user can soft-delete an owned active Todo exactly once and receive a stable tombstone plus sync cursor, without hard deletion, status coercion, duplicate effects, or cross-user leakage.
 
 ## Scope
 
 ### In Scope
 
-- `POST /api/v1/todos/{id}/reopen` only.
-- `completed -> pending` lifecycle transition.
-- Clearing `completed_at`, setting server `updated_at`, and incrementing version.
-- Todo ownership and soft-delete checks.
+- `DELETE /api/v1/todos/{id}` only.
+- Soft deletion of active pending, completed, or canceled Todos.
+- Server-controlled `deleted_at`, `updated_at`, and version increment.
+- Todo ownership and already-deleted checks.
 - Existing idempotency service integration.
-- Atomic Todo mutation, `todo.reopened` sync change, and idempotency response.
-- Stable Todo DTO response and focused automated tests.
+- Atomic Todo mutation, `todo.deleted` tombstone sync change, and idempotency response.
+- Focused automated tests.
 
 ### Out of Scope
 
-- Delete, list, Today, sync pull, or SSE endpoints.
-- Ordinary-field update or complete behavior changes.
-- Canceled-state reopen or cancel API.
-- Reminder rescheduling, Reminder model/API, or recurring Todo work.
+- Hard deletion or status change to canceled.
+- List, Today, sync pull, or SSE endpoints.
+- Changes to create/detail/update/complete/reopen behavior.
+- Category deletion or Todo category mutation.
+- Reminder, recurring Todo, frontend, Android, offline replay, or full login work.
 - Todo model, schema, or Alembic migration changes unless Task Review proves one unavoidable.
-- Frontend, Android, offline replay, full login, or PostgreSQL service work.
+- Live PostgreSQL service recovery or migration verification.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 3, 5, 7.3, 9.4, and 10.6
-- `docs/data-model-phase1.md` Todo, version, sync, and idempotency rules
+- `docs/api-phase1a.md` sections 3, 5, 7.3, 10.7, and 12 tombstone rules
+- `docs/data-model-phase1.md` soft delete, Todo version, sync, and idempotency rules
 - `docs/phase1a-progress.md`
 - `backend/app/api/v1/todos.py`
-- Existing Todo complete tests and idempotency/sync helpers needed to follow repository patterns
+- Existing Todo lifecycle and category delete tests/helpers needed to follow repository patterns
 
 ### Allowed Modify Files
 
 - `backend/app/api/v1/todos.py`
-- New or existing focused Todo reopen tests under `backend/tests/`
-- Small reusable Todo lifecycle helpers only when directly required
+- New or existing focused Todo delete tests under `backend/tests/`
+- Small reusable Todo lifecycle/tombstone helpers only when directly required
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-012 state files
+- Active handoff, gate, Git record, issue-log, and TASK-013 state files
 
 ### Forbidden Modify Files
 
 - Todo models, schemas, or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
-- Todo create/detail/update/complete behavior except narrowly necessary shared helper corrections covered by tests
-- Delete, list, Today, sync pull, or SSE endpoints
-- Todo Category API behavior or default-category seeding
+- Existing Todo or category endpoint behavior except narrowly necessary shared helper corrections covered by tests
+- List, Today, sync pull, or SSE endpoints
 - Reminder or recurring Todo implementation
 - Frontend or Android files
 - Product requirements, architecture, API contract, and data-model documents unless Task Review returns a contract ambiguity to Decision
-- Completed TASK-005 through TASK-011 archives
+- Completed TASK-005 through TASK-012 archives
 
 ## Implementation Requirements
 
-- Add `POST /api/v1/todos/{id}/reopen` under the existing Todo router and require bearer authentication plus `Idempotency-Key`.
-- The action accepts no request body and no client-controlled lifecycle fields.
-- Query Todo by ID and current user ownership. Missing or cross-user Todo returns `404 not_found`; a current-user soft-deleted Todo returns `410 deleted_resource`.
-- Permit only `status=completed`. An active Todo already `pending` or `canceled` returns `400 invalid_state_transition` without mutation, sync change, or stored successful action result.
-- On success, use server time to set `status=pending` and `updated_at`, clear `completed_at`, and leave ordinary fields plus `canceled_at` unchanged.
-- Increment `version` exactly once.
-- Resolve the existing category only for response serialization; a soft-deleted or absent category must not block reopening.
-- Create `todo.reopened` with `entity_type=todo`, the updated `entity_version`, and a payload snapshot equal to the response Todo DTO.
-- Persist Todo changes, sync change, and idempotency response atomically. Any failure must roll back all three.
-- Return `200` using the write envelope with reopened Todo DTO and `sync.cursor`.
+- Add `DELETE /api/v1/todos/{id}` under the existing Todo router and require bearer authentication plus `Idempotency-Key`.
+- The action accepts no request body or client-controlled deletion/lifecycle fields; reject a non-empty body with `400 validation_error`.
+- Query Todo by ID and current user ownership. Missing or cross-user Todo returns `404 not_found`; a current-user already soft-deleted Todo returns `410 deleted_resource`.
+- Permit deletion for any active `pending`, `completed`, or `canceled` Todo.
+- On success, use one server timestamp for `deleted_at` and `updated_at`, increment `version` exactly once, and leave `status`, `completed_at`, `canceled_at`, and ordinary fields unchanged.
+- Do not hard-delete the Todo or alter its category relationship.
+- Return `200` with data tombstone `{id, deleted: true, deleted_at, version}` plus `sync.cursor`.
+- Create `todo.deleted` with `entity_type=todo`, updated `entity_version`, and payload tombstone containing `deleted=true` and the same serialized `deleted_at` as the response.
+- Persist Todo mutation, sync change, and idempotency response atomically. Any failure must roll back all three.
 - Identical Idempotency-Key replay returns the original response without another timestamp, version increment, or sync row.
 - Reusing the same key for a conflicting fingerprint follows existing `idempotency_key_conflict` behavior.
-- A new key submitted after the Todo is already pending is not a replay and must return `400 invalid_state_transition`.
-- Never expose internal ownership, deletion, cancellation, recurring/client, or sync fields in the Todo DTO.
+- A new key submitted after deletion is not a replay and returns `410 deleted_resource` without duplicate effects.
+- Do not expose `user_id`, status, category, ordinary Todo data, or other internal fields in the deletion tombstone response.
 
 ## Acceptance Criteria
 
-- [x] Reopening an owned completed Todo returns `200`, `status=pending`, null `completed_at`, incremented version, updated server timestamp, and `sync.cursor`.
-- [x] Ordinary fields and `canceled_at` remain unchanged.
-- [x] The `todo.reopened` sync row uses the updated entity version and a snapshot equal to the response DTO.
-- [x] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
-- [x] Pending and canceled active Todos return `400 invalid_state_transition` with no side effects.
-- [x] Missing key, identical replay, conflicting reuse, and a new key after reopening follow defined behavior without duplicate effects.
-- [x] Missing/invalid authentication and invalid path UUID follow existing conventions.
-- [x] A soft-deleted or absent category does not block reopening and follows existing DTO serialization.
-- [x] Todo mutation, version/timestamp, sync snapshot, and idempotency response are atomic and consistent under failure.
-- [x] Internal fields remain absent from response and sync snapshot.
-- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [ ] Deleting an owned active Todo returns `200`, the defined tombstone, incremented version, and `sync.cursor`.
+- [ ] Pending, completed, and canceled Todos can be deleted while their status/completion/cancellation data remains unchanged in storage.
+- [ ] `deleted_at` and `updated_at` use the same server timestamp; no hard delete occurs.
+- [ ] `todo.deleted` uses the updated entity version and tombstone timestamp equal to the response.
+- [ ] Missing or cross-user Todo returns `404 not_found`; current-user already-deleted Todo returns `410 deleted_resource`.
+- [ ] Missing key, identical replay, conflicting reuse, and a new key after deletion follow defined behavior without duplicate effects.
+- [ ] Missing/invalid authentication, invalid UUID, and non-empty body follow existing validation/error conventions.
+- [ ] Todo mutation, version/timestamps, sync tombstone, and idempotency response are atomic and consistent under failure.
+- [ ] Response and sync tombstone expose only approved deletion fields.
+- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Add and run focused Todo reopen tests covering success, invalid states, replay/conflict, ownership, category history, and rollback/no-side-effect behavior.
+- Add and run focused Todo delete tests covering all statuses, errors, tombstone equality, replay/conflict, ownership, and rollback/no-side-effect behavior.
 - Run full `python -m pytest` from `backend/`.
-- Inspect route and endpoint scope to confirm delete/list/Today/sync/SSE were not added.
+- Inspect route and endpoint scope to confirm list/Today/sync/SSE were not added.
 - Run `git diff --check`, inspect exact modified and untracked files, and confirm no model/migration/product-contract changes.
 
 ## Risks
 
-- Same-key replay can be confused with a new-key second reopen attempt.
-- Status, cleared completion timestamp, version, and sync snapshot can diverge.
+- Soft delete can accidentally coerce status or erase completion history.
+- Same-key replay can be confused with a new-key delete of an existing tombstone.
+- Version and response/sync tombstone timestamps can diverge.
 - Ownership lookup order can leak cross-user existence.
-- Deleted category history can incorrectly block reopening.
 
 ## Coding Output Requirements
 
-Report modified files, transition/error/idempotency behavior, timestamp/version/transaction evidence, acceptance results, focused/full test results, endpoint-scope verification, diff checks, unresolved issues, and task-outside findings.
+Report modified files, tombstone/status/error/idempotency behavior, timestamp/version/transaction evidence, acceptance results, focused/full test results, endpoint-scope verification, diff checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-17 09:55 +08:00
-
-Result Commit: `c2d167fdd063d362ef20e9ec0b1de17a08b62191`
-
-Completion Commit: `f438a64cb84d7292f6f62bdc399048146311d45a`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `f438a64cb84d7292f6f62bdc399048146311d45a` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-012 Closure documents with message `docs(task): close TASK-012`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.

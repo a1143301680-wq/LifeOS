@@ -44,7 +44,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `PATCH /api/v1/todos/{id}` | done | Published in `09cd984`; Code Review PASS; 62 backend tests passed |
 | `POST /api/v1/todos/{id}/complete` | done | Published in `2c35f1d`; Code Review PASS; 67 backend tests passed |
 | `POST /api/v1/todos/{id}/reopen` | done | Published in `c2d167f`; Code Review PASS; 72 backend tests passed |
-| `DELETE /api/v1/todos/{id}` | pending | Requires soft delete tombstone |
+| `DELETE /api/v1/todos/{id}` | next | TASK-013; versioned soft-delete tombstone, idempotency, and sync |
 | `GET /api/v1/sync/changes` | pending | Durable pull recovery endpoint |
 | `GET /api/v1/sync/events` | pending | SSE wake-up only |
 
@@ -57,7 +57,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add Todo delete as a separate slice.
+1. Add Todo delete (`TASK-013`).
 2. Add Todo list cursor pagination and filters.
 3. Add Today Todo aggregation.
 4. Add `GET /api/v1/sync/changes`.
