@@ -53,6 +53,15 @@ def todo_to_dict(todo: Todo, category: TodoCategory | None) -> dict:
     ).model_dump(mode="json")
 
 
+def todo_delete_tombstone(todo: Todo) -> dict:
+    return {
+        "id": str(todo.id),
+        "deleted": True,
+        "deleted_at": todo.deleted_at.isoformat() if todo.deleted_at is not None else None,
+        "version": todo.version,
+    }
+
+
 def get_owned_active_category(db: Session, user_id: UUID, category_id: UUID) -> TodoCategory:
     category = db.execute(
         select(TodoCategory).where(
@@ -319,6 +328,67 @@ async def reopen_todo(
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be reopened") from exc
+    except Exception:
+        db.rollback()
+        raise
+
+    return JSONResponse(status_code=200, content=response_body)
+
+
+@router.delete("/{todo_id}")
+async def delete_todo(
+    todo_id: UUID,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
+    require_idempotency_key(idempotency_key)
+    if await request.body() != b"":
+        raise ApiError(400, "validation_error", "request body is not allowed")
+
+    key, request_hash, replay = await get_idempotency_context(
+        db, request=request, user_id=current_user.id, raw_key=idempotency_key
+    )
+    if replay is not None:
+        return replay
+
+    try:
+        todo = get_current_user_todo(db, current_user.id, todo_id)
+        if todo.deleted_at is not None:
+            raise ApiError(410, "deleted_resource", "todo is deleted")
+
+        deleted_at = now_server()
+        todo.deleted_at = deleted_at
+        todo.updated_at = deleted_at
+        todo.version += 1
+        db.flush()
+
+        tombstone = todo_delete_tombstone(todo)
+        sync_change = create_sync_change(
+            db,
+            user_id=current_user.id,
+            change_type="todo.deleted",
+            entity_type="todo",
+            entity_id=todo.id,
+            entity_version=todo.version,
+            payload=tombstone,
+        )
+        response_body = data_envelope(tombstone, sync={"cursor": sync_change.cursor})
+        store_idempotency_response(
+            db,
+            user_id=current_user.id,
+            key=key,
+            method=request.method,
+            path=request.url.path,
+            request_hash=request_hash,
+            response_status=200,
+            response_body=response_body,
+        )
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise ApiError(400, "validation_error", "todo could not be deleted") from exc
     except Exception:
         db.rollback()
         raise

@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-013
 - Task Name: Todo delete API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -121,6 +121,6 @@ Report modified files, tombstone/status/error/idempotency behavior, timestamp/ve
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: publish the Code Review-approved TASK-013 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
