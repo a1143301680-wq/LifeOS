@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-013
 - Task Name: Todo delete API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -90,16 +90,16 @@ An authenticated user can soft-delete an owned active Todo exactly once and rece
 
 ## Acceptance Criteria
 
-- [ ] Deleting an owned active Todo returns `200`, the defined tombstone, incremented version, and `sync.cursor`.
-- [ ] Pending, completed, and canceled Todos can be deleted while their status/completion/cancellation data remains unchanged in storage.
-- [ ] `deleted_at` and `updated_at` use the same server timestamp; no hard delete occurs.
-- [ ] `todo.deleted` uses the updated entity version and tombstone timestamp equal to the response.
-- [ ] Missing or cross-user Todo returns `404 not_found`; current-user already-deleted Todo returns `410 deleted_resource`.
-- [ ] Missing key, identical replay, conflicting reuse, and a new key after deletion follow defined behavior without duplicate effects.
-- [ ] Missing/invalid authentication, invalid UUID, and non-empty body follow existing validation/error conventions.
-- [ ] Todo mutation, version/timestamps, sync tombstone, and idempotency response are atomic and consistent under failure.
-- [ ] Response and sync tombstone expose only approved deletion fields.
-- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [x] Deleting an owned active Todo returns `200`, the defined tombstone, incremented version, and `sync.cursor`.
+- [x] Pending, completed, and canceled Todos can be deleted while their status/completion/cancellation data remains unchanged in storage.
+- [x] `deleted_at` and `updated_at` use the same server timestamp; no hard delete occurs.
+- [x] `todo.deleted` uses the updated entity version and tombstone timestamp equal to the response.
+- [x] Missing or cross-user Todo returns `404 not_found`; current-user already-deleted Todo returns `410 deleted_resource`.
+- [x] Missing key, identical replay, conflicting reuse, and a new key after deletion follow defined behavior without duplicate effects.
+- [x] Missing/invalid authentication, invalid UUID, and non-empty body follow existing validation/error conventions.
+- [x] Todo mutation, version/timestamps, sync tombstone, and idempotency response are atomic and consistent under failure.
+- [x] Response and sync tombstone expose only approved deletion fields.
+- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -121,6 +121,6 @@ Report modified files, tombstone/status/error/idempotency behavior, timestamp/ve
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the Code Review-approved TASK-013 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
+Required next action: run TASK-013 Decision Closure Check before publishing the next task.

@@ -52,7 +52,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-011 terminal Closure Commit `c2a2fac` was published and the task workflow ended.
 - TASK-012 Todo reopen API completed in result commit `c2d167f`; Code Review: PASS; backend tests: 72 passed.
 - TASK-012 terminal Closure Commit `17e54de` was published and the task workflow ended.
-- TASK-013 publishes the next business slice: versioned idempotent Todo soft deletion with a durable sync tombstone.
+- TASK-013 Todo delete API completed in result commit `3a97402`; Code Review: PASS; backend tests: 78 passed.
 
 ## Recently Completed
 
@@ -101,7 +101,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is Todo soft deletion, followed by Todo list pagination and filtering. Live TASK-013 routing is maintained in `handoff/current-task.md`.
+The next Phase 1A business direction is Todo list pagination and filtering. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

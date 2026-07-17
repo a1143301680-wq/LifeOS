@@ -4,7 +4,7 @@
 
 - Task ID: TASK-013
 - Task Name: Todo delete API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo update `09cd984`; lifecycle actions `2c35f1d`, `c2d167f`; TASK-012 closure `17e54de`
@@ -205,7 +205,15 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-17
+- Branch: main
+- Result Commit: 3a974026bc98e0642c3a63a36a4d8bcbb3a6347d
+- Commit Message: `feat(todo): add soft delete API`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

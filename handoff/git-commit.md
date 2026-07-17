@@ -4,23 +4,32 @@ Last updated: 2026-07-17
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-013
 
-Branch: pending
+Branch: main
 
-Commit Hash: pending
+Commit Hash: 3a974026bc98e0642c3a63a36a4d8bcbb3a6347d
 
-Commit Message: pending Code Review recommendation
+Commit Message: `feat(todo): add soft delete API`
 
-Files Changed: pending
+Files Changed:
 
-Tests: pending
+- `backend/app/api/v1/todos.py`
+- `backend/tests/test_todos_delete.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-013-todo-delete-api.md`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: pending
+- `python -m pytest tests/test_todos_delete.py`: PASS, 6 passed.
+- `python -m pytest`: PASS, 78 passed.
+
+Code Review Result: PASS
+
+Push Target: origin/main
 
 ## Instructions
 
