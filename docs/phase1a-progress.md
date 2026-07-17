@@ -43,7 +43,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `GET /api/v1/todos/{id}` | done | Published in `deb240b`; Code Review PASS; 54 backend tests passed |
 | `PATCH /api/v1/todos/{id}` | done | Published in `09cd984`; Code Review PASS; 62 backend tests passed |
 | `POST /api/v1/todos/{id}/complete` | done | Published in `2c35f1d`; Code Review PASS; 67 backend tests passed |
-| `POST /api/v1/todos/{id}/reopen` | pending | Requires status transition and sync change |
+| `POST /api/v1/todos/{id}/reopen` | next | TASK-012; completed-to-pending transition, idempotency, versioning, and sync |
 | `DELETE /api/v1/todos/{id}` | pending | Requires soft delete tombstone |
 | `GET /api/v1/sync/changes` | pending | Durable pull recovery endpoint |
 | `GET /api/v1/sync/events` | pending | SSE wake-up only |
@@ -57,11 +57,12 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add Todo reopen and delete in subsequent closeable slices.
-2. Add Todo list cursor pagination and filters.
-3. Add Today Todo aggregation.
-4. Add `GET /api/v1/sync/changes`.
-5. Add `GET /api/v1/sync/events`.
+1. Add Todo reopen (`TASK-012`).
+2. Add Todo delete as a separate slice.
+3. Add Todo list cursor pagination and filters.
+4. Add Today Todo aggregation.
+5. Add `GET /api/v1/sync/changes`.
+6. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule
 
