@@ -4,28 +4,28 @@ Last updated: 2026-07-17
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-013
+Task ID: TASK-014
 
-Branch: main
+Branch: pending
 
-Base Commit: 17e54dea4644725fd8ac96682ec74f7856719937
+Base Commit: pending
 
-Working Tree: 8 approved TASK-013 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: pending
 
-Snapshot Commit: 446c897c3383cb2952e1a4eba4a5a5f902aa3626
+Snapshot Commit: pending
 
-Reason: approved TASK-013 readiness documents required a durable pre-Coding baseline
+Reason: pending Task Review PASS
 
 ## Instructions
 
 Run after Task Review passes and before Coding starts.
 
-Confirm every pre-snapshot change belongs to the Task Review-approved TASK-013 publication scope. Unexpected files block the snapshot.
+Confirm every pre-snapshot change belongs to the Task Review-approved TASK-014 publication scope. Unexpected files block the snapshot.
 
-After completion, update both `handoff/current-task.md` and `tasks/TASK-013-todo-delete-api.md` to `Status: IN_PROGRESS`. If either update fails, Git Snapshot must not claim completion.
+After completion, update both `handoff/current-task.md` and `tasks/TASK-014-todo-list-pagination.md` to `Status: IN_PROGRESS`. If either update fails, Git Snapshot must not claim completion.
 
 Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit merely to capture transition metadata.

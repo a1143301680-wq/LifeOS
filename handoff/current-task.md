@@ -4,133 +4,129 @@ Last updated: 2026-07-17
 
 ## Metadata
 
-- Task ID: TASK-013
-- Task Name: Todo delete API
-- Status: COMPLETED
+- Task ID: TASK-014
+- Task Name: Todo list cursor pagination and filters
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
-  - Todo update API published in `09cd984`
-  - Todo lifecycle actions published in `2c35f1d` and `c2d167f`
-  - TASK-012 terminal closure published in `17e54de`
+  - Todo CRUD and lifecycle APIs published through `3a97402`
+  - TASK-013 terminal closure published in `b80ca37`
 
 ## Background
 
-Todo create, edit, complete, and reopen are available. The final Todo lifecycle mutation slice is soft deletion with a durable versioned tombstone for sync recovery, while preserving the Todo's lifecycle status.
+Todo persistence and all single-item CRUD/lifecycle mutations are available. The next Phase 1A slice is the main Todo collection read with deterministic filtering, ordering, and opaque keyset pagination for PC and Android clients.
 
 ## Goal
 
-An authenticated user can soft-delete an owned active Todo exactly once and receive a stable tombstone plus sync cursor, without hard deletion, status coercion, duplicate effects, or cross-user leakage.
+An authenticated user can list only owned, non-deleted Todos using the contracted filters and stable keyset cursor, with deterministic ordering and no duplicate or skipped rows on an unchanged dataset.
 
 ## Scope
 
 ### In Scope
 
-- `DELETE /api/v1/todos/{id}` only.
-- Soft deletion of active pending, completed, or canceled Todos.
-- Server-controlled `deleted_at`, `updated_at`, and version increment.
-- Todo ownership and already-deleted checks.
-- Existing idempotency service integration.
-- Atomic Todo mutation, `todo.deleted` tombstone sync change, and idempotency response.
-- Focused automated tests.
+- `GET /api/v1/todos` only.
+- Status, category, planned-date, due-range, limit, and cursor query parameters.
+- Contracted null-aware ordering and priority rank.
+- Versioned base64url JSON keyset cursor tied to normalized filters and fixed sort.
+- Stable Todo DTOs including active, deleted, or absent category summaries.
+- Two-user isolation, validation, pagination boundaries, and focused tests.
 
 ### Out of Scope
 
-- Hard deletion or status change to canceled.
-- List, Today, sync pull, or SSE endpoints.
-- Changes to create/detail/update/complete/reopen behavior.
-- Category deletion or Todo category mutation.
-- Reminder, recurring Todo, frontend, Android, offline replay, or full login work.
-- Todo model, schema, or Alembic migration changes unless Task Review proves one unavoidable.
-- Live PostgreSQL service recovery or migration verification.
+- `GET /api/v1/todos/today`.
+- Todo writes, sync pull, SSE, or fanout.
+- Full-text search, alternate sorts, offset pagination, totals/counts, or cursor signing/encryption.
+- Snapshot isolation across concurrent mutations; guarantees apply to an unchanged dataset.
+- Todo model or Alembic migration changes unless Task Review proves one unavoidable.
+- Frontend, Android, Reminder, recurring Todo, offline replay, or full login work.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 3, 5, 7.3, 10.7, and 12 tombstone rules
-- `docs/data-model-phase1.md` soft delete, Todo version, sync, and idempotency rules
+- `docs/api-phase1a.md` sections 2, 5-7, 9.4, and 10.1
+- `docs/data-model-phase1.md` Todo fields/indexes and ownership rules
 - `docs/phase1a-progress.md`
 - `backend/app/api/v1/todos.py`
-- Existing Todo lifecycle and category delete tests/helpers needed to follow repository patterns
+- Existing Todo DTO, auth/error/envelope patterns, models, and tests
 
 ### Allowed Modify Files
 
 - `backend/app/api/v1/todos.py`
-- New or existing focused Todo delete tests under `backend/tests/`
-- Small reusable Todo lifecycle/tombstone helpers only when directly required
+- `backend/app/schemas/todo.py` only if directly needed for list query/cursor validation
+- A focused Todo list cursor/query helper under `backend/app/` when it materially reduces complexity
+- New or existing focused Todo list tests under `backend/tests/`
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-013 state files
+- Active handoff, gate, Git record, issue-log, and TASK-014 state files
 
 ### Forbidden Modify Files
 
-- Todo models, schemas, or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
-- Existing Todo or category endpoint behavior except narrowly necessary shared helper corrections covered by tests
-- List, Today, sync pull, or SSE endpoints
-- Reminder or recurring Todo implementation
-- Frontend or Android files
+- Todo models or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
+- Existing Todo/category write or detail behavior
+- Today, sync pull, SSE, or fanout endpoints
 - Product requirements, architecture, API contract, and data-model documents unless Task Review returns a contract ambiguity to Decision
-- Completed TASK-005 through TASK-012 archives
+- Frontend or Android files
+- Completed TASK-005 through TASK-013 archives
 
 ## Implementation Requirements
 
-- Add `DELETE /api/v1/todos/{id}` under the existing Todo router and require bearer authentication plus `Idempotency-Key`.
-- The action accepts no request body or client-controlled deletion/lifecycle fields; reject a non-empty body with `400 validation_error`.
-- Query Todo by ID and current user ownership. Missing or cross-user Todo returns `404 not_found`; a current-user already soft-deleted Todo returns `410 deleted_resource`.
-- Permit deletion for any active `pending`, `completed`, or `canceled` Todo.
-- On success, use one server timestamp for `deleted_at` and `updated_at`, increment `version` exactly once, and leave `status`, `completed_at`, `canceled_at`, and ordinary fields unchanged.
-- Do not hard-delete the Todo or alter its category relationship.
-- Return `200` with data tombstone `{id, deleted: true, deleted_at, version}` plus `sync.cursor`.
-- Create `todo.deleted` with `entity_type=todo`, updated `entity_version`, and payload tombstone containing `deleted=true` and the same serialized `deleted_at` as the response.
-- Persist Todo mutation, sync change, and idempotency response atomically. Any failure must roll back all three.
-- Identical Idempotency-Key replay returns the original response without another timestamp, version increment, or sync row.
-- Reusing the same key for a conflicting fingerprint follows existing `idempotency_key_conflict` behavior.
-- A new key submitted after deletion is not a replay and returns `410 deleted_resource` without duplicate effects.
-- Do not expose `user_id`, status, category, ordinary Todo data, or other internal fields in the deletion tombstone response.
+- Add authenticated `GET /api/v1/todos` using the normal list envelope with `items`, always-present `next_cursor` (string or null), and `server_time`.
+- Always filter by current user and `deleted_at IS NULL`.
+- Support `status=pending|completed|all`, default `pending`. `all` includes pending, completed, and canceled active Todos.
+- Support optional `category_id` UUID by direct Todo field filtering. Do not separately reveal whether the category exists or belongs to another user; unmatched filters return an empty list.
+- Support optional exact `planned_date` and inclusive `due_from`/`due_to`. A due filter excludes null `due_at` rows. Reject `due_from > due_to`.
+- Timestamp query values must be valid ISO 8601 timestamps with timezone, consistent with the API time contract.
+- Support integer `limit`, default 50, minimum 1, maximum 100.
+- Apply fixed ordering: `planned_date ASC NULLS LAST`, `due_at ASC NULLS LAST`, priority rank high=1/medium=2/low=3, `updated_at DESC`, then `id ASC`.
+- Express null ordering and keyset comparisons explicitly so SQLite tests and PostgreSQL behavior agree.
+- Use limit-plus-one fetching. Return at most `limit` items and derive `next_cursor` from the last returned item only when another row exists.
+- Encode a deterministic base64url JSON v1 cursor without required padding. It must contain the final ordering anchor and normalized filter identity for status, category, planned date, due bounds, and fixed sort version.
+- `limit` is not part of filter identity and may change between pages. Any other filter mismatch returns `400 validation_error`.
+- Reject malformed base64/JSON, unsupported version, missing/extra or invalid anchor fields, invalid UUID/date/timestamp/priority rank, and filter mismatch with `400 validation_error`.
+- Cursor values for nullable ordering fields must represent null explicitly and resume strictly after the anchor.
+- Serialize every item through the existing stable Todo DTO. Batch-load categories referenced by the page rather than issuing one category query per Todo.
+- Active categories use `is_deleted=false`; soft-deleted categories use `is_deleted=true`; absent relations return `category=null`.
+- The endpoint is read-only: no Idempotency-Key requirement, state mutation, sync change, or idempotency record.
+- Registering the list route must not add or shadow `/todos/today`; future static routes still need registration before dynamic `/{todo_id}` routes.
 
 ## Acceptance Criteria
 
-- [x] Deleting an owned active Todo returns `200`, the defined tombstone, incremented version, and `sync.cursor`.
-- [x] Pending, completed, and canceled Todos can be deleted while their status/completion/cancellation data remains unchanged in storage.
-- [x] `deleted_at` and `updated_at` use the same server timestamp; no hard delete occurs.
-- [x] `todo.deleted` uses the updated entity version and tombstone timestamp equal to the response.
-- [x] Missing or cross-user Todo returns `404 not_found`; current-user already-deleted Todo returns `410 deleted_resource`.
-- [x] Missing key, identical replay, conflicting reuse, and a new key after deletion follow defined behavior without duplicate effects.
-- [x] Missing/invalid authentication, invalid UUID, and non-empty body follow existing validation/error conventions.
-- [x] Todo mutation, version/timestamps, sync tombstone, and idempotency response are atomic and consistent under failure.
-- [x] Response and sync tombstone expose only approved deletion fields.
-- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [ ] Default list returns only current-user active pending Todos with the stable DTO and `next_cursor` present.
+- [ ] Status pending/completed/all semantics include the correct rows; deleted and cross-user Todos never appear.
+- [ ] Category, planned-date, and inclusive due-range filters work alone and in combination without leaking category ownership/existence.
+- [ ] Invalid status, UUID, date/timestamp, naive timestamp, due range, limit, and cursor return `400 validation_error`.
+- [ ] Ordering exactly follows contracted null placement, priority rank, descending update time, and UUID tie-breaker.
+- [ ] Multi-page traversal on an unchanged dataset has no duplicate or skipped rows, including equal and null sort values.
+- [ ] `next_cursor` is null on the final page and is generated from the last returned row when more data exists.
+- [ ] Cursor filter mismatch fails, while changing only limit remains valid.
+- [ ] Cursor malformed/version/schema/type cases are covered and cursor output is deterministic base64url JSON v1.
+- [ ] Category summaries correctly cover active, soft-deleted, and missing categories without N+1 lookups.
+- [ ] The endpoint creates no Todo, sync change, or idempotency record and exposes no internal fields.
+- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Add and run focused Todo delete tests covering all statuses, errors, tombstone equality, replay/conflict, ownership, and rollback/no-side-effect behavior.
+- Add focused Todo list tests for auth/isolation, every filter, validation, exact ordering, cursor schema, multi-page boundaries, category summaries, and no-write behavior.
 - Run full `python -m pytest` from `backend/`.
-- Inspect route and endpoint scope to confirm list/Today/sync/SSE were not added.
+- Inspect generated/query logic for explicit null ordering and PostgreSQL-compatible SQLAlchemy expressions.
+- Inspect route scope and query count for category batch loading.
 - Run `git diff --check`, inspect exact modified and untracked files, and confirm no model/migration/product-contract changes.
 
 ## Risks
 
-- Soft delete can accidentally coerce status or erase completion history.
-- Same-key replay can be confused with a new-key delete of an existing tombstone.
-- Version and response/sync tombstone timestamps can diverge.
-- Ownership lookup order can leak cross-user existence.
+- Mixed ASC/DESC and nullable keyset comparisons can create duplicates or skips.
+- Cursor/filter mismatch can silently return incorrect pages if identity is incomplete.
+- SQLite and PostgreSQL may differ when null ordering is implicit.
+- Per-item category lookup can create an N+1 query path.
+- Dynamic route ordering can shadow a future `/todos/today` route.
 
 ## Coding Output Requirements
 
-Report modified files, tombstone/status/error/idempotency behavior, timestamp/version/transaction evidence, acceptance results, focused/full test results, endpoint-scope verification, diff checks, unresolved issues, and task-outside findings.
+Report modified files, filter/ordering/cursor design, cursor schema, category loading behavior, acceptance results, focused/full test results, SQL/route/query verification, diff checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-17 18:20 +08:00
-
-Result Commit: `3a974026bc98e0642c3a63a36a4d8bcbb3a6347d`
-
-Completion Commit: `b64804918f4b2401f86681dbe958a6c6348dd259`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `b64804918f4b2401f86681dbe958a6c6348dd259` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-013 Closure documents with message `docs(task): close TASK-013`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-014 from the approved publication-state files. Coding must not start before Git Snapshot completion.

@@ -37,7 +37,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `POST /api/v1/todo-categories` | done | Implemented, tested, and protected by DB-level active-name uniqueness |
 | `PATCH /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
-| `GET /api/v1/todos` | pending | Cursor pagination and filters not started |
+| `GET /api/v1/todos` | next | TASK-014; current-user filters, deterministic ordering, and keyset cursor |
 | `GET /api/v1/todos/today` | pending | Aggregation not started |
 | `POST /api/v1/todos` | done | Published in `f2fe55e`; Code Review PASS; 47 backend tests passed; live PostgreSQL verification deferred |
 | `GET /api/v1/todos/{id}` | done | Published in `deb240b`; Code Review PASS; 54 backend tests passed |
@@ -57,7 +57,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add Todo list cursor pagination and filters.
+1. Add Todo list cursor pagination and filters (`TASK-014`).
 2. Add Today Todo aggregation.
 3. Add `GET /api/v1/sync/changes`.
 4. Add `GET /api/v1/sync/events`.
