@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-16
+Last updated: 2026-07-17
 
 ## Current Phase
 
@@ -47,7 +47,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-009 Todo detail API completed in result commit `deb240b`; Code Review: PASS; backend tests: 54 passed.
 - TASK-009 terminal Closure Commit `f8614b3` was published and the task workflow ended.
 - TASK-010 Todo update API completed in result commit `09cd984`; Code Review: PASS; backend tests: 62 passed.
-- TASK-010 Decision Closure Check passed on 2026-07-16; terminal Closure Commit is the only remaining action before the next task may be published.
+- TASK-010 terminal Closure Commit `a2237de` was published and the task workflow ended.
+- TASK-011 publishes the next business slice: idempotent pending-to-completed Todo lifecycle transition with versioned sync write-through.
 
 ## Recently Completed
 
@@ -96,7 +97,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-After TASK-010 terminal closure, the next Phase 1A business direction is a separately reviewable Todo complete slice. Live routing is maintained in `handoff/current-task.md`.
+The next Phase 1A business direction is Todo completion, followed by separately reviewable reopen and delete slices. Live TASK-011 routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

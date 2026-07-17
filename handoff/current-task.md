@@ -1,140 +1,129 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-16
+Last updated: 2026-07-17
 
 ## Metadata
 
-- Task ID: TASK-010
-- Task Name: Todo update API
-- Status: COMPLETED
+- Task ID: TASK-011
+- Task Name: Todo complete API
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
   - Todo create foundation published in `f2fe55e`
-  - Todo detail API published in `deb240b`
-  - TASK-009 terminal closure published in `f8614b3`
+  - Todo update API published in `09cd984`
+  - TASK-010 terminal closure published in `a2237de`
 
 ## Background
 
-Todo create and detail retrieval are available. The next Phase 1A vertical slice is updating ordinary Todo fields while preserving ownership, status-action boundaries, idempotency, mutation versioning, and sync write-through.
+Todo create, detail, and ordinary-field update are available. The next Phase 1A vertical slice is the first explicit Todo lifecycle action: completing an owned pending Todo with server-controlled state, timestamp, version, idempotency, and sync output.
 
 ## Goal
 
-An authenticated user can partially update ordinary fields on an owned active Todo exactly once and receive the updated stable Todo DTO with a sync cursor, without changing lifecycle status or leaking another user's data.
+An authenticated user can complete an owned active pending Todo exactly once and receive the completed stable Todo DTO with a sync cursor, while invalid states and cross-user resources remain protected.
 
 ## Scope
 
 ### In Scope
 
-- `PATCH /api/v1/todos/{id}` only.
-- Partial updates for `title`, `note`, `category_id`, `priority`, `planned_date`, and `due_at`.
-- Ownership and soft-delete checks for Todo and selected category.
+- `POST /api/v1/todos/{id}/complete` only.
+- `pending -> completed` lifecycle transition.
+- Server-controlled `completed_at`, `updated_at`, and version increment.
+- Todo ownership and soft-delete checks.
 - Existing idempotency service integration.
-- Atomic Todo mutation, version increment, `todo.updated` sync change, and idempotency response.
+- Atomic Todo mutation, `todo.completed` sync change, and idempotency response.
 - Stable Todo DTO response and focused automated tests.
 
 ### Out of Scope
 
-- Complete, reopen, delete, list, Today, sync pull, or SSE endpoints.
-- Any direct status, completion, deletion, ownership, version, or timestamp mutation supplied by clients.
-- Todo model or Alembic migration changes.
-- Timezone-aware `due_at` input validation deferred from TASK-008.
-- Reminder, recurring Todo, Android offline replay, full login, frontend, or Android work.
+- Reopen, delete, list, Today, sync pull, or SSE endpoints.
+- Ordinary-field update behavior.
+- Canceled-state creation or cancel API.
+- Reminder cancellation or Reminder model/API work; reminders are outside Phase 1A and no Reminder table currently exists.
+- Todo model, schema, or Alembic migration changes unless Task Review proves one unavoidable.
+- Frontend, Android, recurring Todo, offline replay, or full login work.
 - Live PostgreSQL service recovery or migration verification.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 3, 5, 7.3, 9.4, and 10.4
-- `docs/data-model-phase1.md` sections 2 and 4.3
+- `docs/api-phase1a.md` sections 3, 5, 7.3, 9.4, and 10.5
+- `docs/data-model-phase1.md` Todo, version, sync, and idempotency rules
 - `docs/phase1a-progress.md`
 - `backend/app/api/v1/todos.py`
-- `backend/app/schemas/todo.py`
-- Existing Todo create/detail and Todo Category update tests and helpers needed to follow repository patterns
+- Existing Todo create/update tests and idempotency/sync helpers needed to follow repository patterns
 
 ### Allowed Modify Files
 
 - `backend/app/api/v1/todos.py`
-- `backend/app/schemas/todo.py`
-- New or existing focused Todo update tests under `backend/tests/`
-- Small reusable Todo lookup/update helpers only when directly required
+- New or existing focused Todo complete tests under `backend/tests/`
+- Small reusable Todo lifecycle helpers only when directly required
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-010 state files
+- Active handoff, gate, Git record, issue-log, and TASK-011 state files
 
 ### Forbidden Modify Files
 
-- Todo models or Alembic migrations
-- Todo create/detail behavior except narrowly necessary shared helper corrections covered by tests
-- Complete, reopen, delete, list, Today, sync pull, or SSE endpoints
+- Todo models, schemas, or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
+- Todo create/detail/update behavior except narrowly necessary shared helper corrections covered by tests
+- Reopen, delete, list, Today, sync pull, or SSE endpoints
 - Todo Category API behavior or default-category seeding
+- Reminder or recurring Todo implementation
 - Frontend or Android files
 - Product requirements, architecture, API contract, and data-model documents unless Task Review returns a contract ambiguity to Decision
-- Completed TASK-005 through TASK-009 archives
+- Completed TASK-005 through TASK-010 archives
 
 ## Implementation Requirements
 
-- Add `PATCH /api/v1/todos/{id}` under the existing Todo router and require bearer authentication plus `Idempotency-Key`.
-- Accept only fields explicitly present in the request from: `title`, `note`, `category_id`, `priority`, `planned_date`, and `due_at`.
-- Reject an empty update object with `400 validation_error` so no no-op mutation, sync change, or idempotency result is committed.
-- Trim `title`; reject null, empty, or whitespace-only title. Allow only `high`, `medium`, or `low` priority and reject null priority.
-- Permit null `note`, `category_id`, `planned_date`, and `due_at` to clear those optional fields. Omitted fields remain unchanged.
-- A non-null `category_id` must identify an active category owned by the current user. Missing or cross-user category returns `404 not_found`; current-user soft-deleted category returns `410 deleted_resource`.
+- Add `POST /api/v1/todos/{id}/complete` under the existing Todo router and require bearer authentication plus `Idempotency-Key`.
+- The action accepts no request body and no client-controlled lifecycle fields.
 - Query Todo by ID and current user ownership. Missing or cross-user Todo returns `404 not_found`; a current-user soft-deleted Todo returns `410 deleted_resource`.
-- Reject `status`, `completed_at`, `deleted_at`, `user_id`, `version`, `created_at`, `updated_at`, and every other undeclared field with `400 validation_error`.
-- Do not alter `status`, `completed_at`, or other lifecycle fields; completed and canceled active Todos may still have ordinary fields edited.
-- For each accepted non-empty update, apply requested fields, increment `version` exactly once, and set `updated_at` using server time.
-- Create `todo.updated` with `entity_type=todo`, the updated `entity_version`, and a payload snapshot equal to the response Todo DTO.
-- Persist Todo changes, sync change, and idempotency response atomically. Failures must roll back all three.
-- Return `200` using the write envelope with updated Todo DTO and `sync.cursor`.
-- Preserve existing identical replay and conflicting-key behavior. A replay must not increment version or create another sync change.
-- Never expose internal ownership, deletion, recurring/client, or sync fields in the Todo DTO.
+- Permit only `status=pending`. An active Todo already `completed` or `canceled` returns `400 invalid_state_transition` without mutation, sync change, or stored successful action result.
+- On success, use one server timestamp to set `status=completed`, `completed_at`, and `updated_at`; leave ordinary fields and `canceled_at` unchanged.
+- Increment `version` exactly once.
+- Resolve the existing category only for response serialization; a soft-deleted or absent category must not block completion.
+- Create `todo.completed` with `entity_type=todo`, the updated `entity_version`, and a payload snapshot equal to the response Todo DTO.
+- Persist Todo changes, sync change, and idempotency response atomically. Any failure must roll back all three.
+- Return `200` using the write envelope with completed Todo DTO and `sync.cursor`.
+- Identical Idempotency-Key replay returns the original response without another state change, timestamp, version increment, or sync row.
+- Reusing the same key for a conflicting method/path/body fingerprint follows the existing `idempotency_key_conflict` behavior.
+- A new key submitted after the Todo is already completed is not a replay and must return `400 invalid_state_transition`.
+- Never expose internal ownership, deletion, cancellation, recurring/client, or sync fields in the Todo DTO.
 
 ## Acceptance Criteria
 
-- [x] A partial update of one or several allowed fields returns `200`, the updated DTO, incremented version, and `sync.cursor`.
-- [x] Omitted fields remain unchanged; nullable fields can be cleared explicitly with null.
-- [x] Null/blank title, null/invalid priority, empty object, invalid values, and forbidden/internal fields return `400 validation_error` without mutation.
-- [x] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
-- [x] Active owned category selection succeeds; missing/cross-user category returns `404`, and current-user soft-deleted category returns `410`.
-- [x] Ordinary fields can be edited without changing pending, completed, or canceled lifecycle state.
-- [x] Todo, version, updated timestamp, `todo.updated` sync snapshot, and idempotency response are atomic and consistent.
-- [x] Missing Idempotency-Key, identical replay, and conflicting key reuse follow existing semantics; replay has no duplicate side effects.
-- [x] Authentication and invalid path/payload UUID behavior follow existing API conventions.
-- [x] Internal fields remain absent from response and sync snapshot.
-- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [ ] Completing an owned pending Todo returns `200`, `status=completed`, server `completed_at`, incremented version, and `sync.cursor`.
+- [ ] `updated_at` and `completed_at` use the same server transition timestamp; ordinary fields remain unchanged.
+- [ ] The `todo.completed` sync row uses the updated entity version and a snapshot equal to the response DTO.
+- [ ] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
+- [ ] Already completed and canceled active Todos return `400 invalid_state_transition` with no side effects.
+- [ ] Missing Idempotency-Key, identical replay, conflicting key reuse, and a new key after completion follow the defined behavior without duplicate effects.
+- [ ] Missing/invalid authentication and invalid path UUID follow existing conventions.
+- [ ] A soft-deleted or absent category does not block completion and is serialized through existing DTO rules.
+- [ ] Todo mutation, version/timestamps, sync snapshot, and idempotency response are atomic and consistent under failure.
+- [ ] Internal fields remain absent from response and sync snapshot.
+- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Add and run focused Todo update tests covering all acceptance paths and rollback/no-side-effect assertions.
+- Add and run focused Todo complete tests covering all acceptance paths, replay, invalid states, ownership, category history, and rollback/no-side-effect assertions.
 - Run full `python -m pytest` from `backend/`.
-- Inspect route registration for future static `/todos/today` compatibility and ensure no lifecycle endpoint was added.
+- Inspect route and endpoint scope to confirm reopen/delete/list/Today/sync/SSE were not added.
 - Run `git diff --check`, inspect exact modified and untracked files, and confirm no model/migration/product-contract changes.
 
 ## Risks
 
-- Partial-update schemas can confuse omitted values with explicit null clearing.
-- Todo or category lookup order can leak cross-user existence.
-- Replay can accidentally apply a second mutation or create a duplicate sync change.
-- Version, DTO snapshot, and persisted state can diverge if transaction ordering is wrong.
-- Dynamic Todo route placement can conflict with future static routes.
+- Idempotency replay can be confused with a second completion attempt using a new key.
+- State, completion timestamp, version, and sync snapshot can diverge if mutation ordering is wrong.
+- Ownership lookup order can leak cross-user existence.
+- Soft-deleted category history can incorrectly block an otherwise valid Todo action.
 
 ## Coding Output Requirements
 
-Report modified files, update/null/error behavior, version and transaction behavior, acceptance results, focused/full test results, route-order verification, diff checks, unresolved issues, and task-outside findings.
+Report modified files, transition/error/idempotency behavior, version/timestamp/transaction evidence, acceptance results, focused/full test results, endpoint-scope verification, diff checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-16 08:51 +08:00
-
-Result Commit: `09cd984163b948420ae4915f75422ed1b60dcaa2`
-
-Completion Commit: `97f818411ca0365d92f2593da45233518324198f`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `97f818411ca0365d92f2593da45233518324198f` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-010 Closure documents with message `docs(task): close TASK-010`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
