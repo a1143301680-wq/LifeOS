@@ -257,6 +257,75 @@ async def complete_todo(
     return JSONResponse(status_code=200, content=response_body)
 
 
+@router.post("/{todo_id}/reopen")
+async def reopen_todo(
+    todo_id: UUID,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
+    require_idempotency_key(idempotency_key)
+    if await request.body() != b"":
+        raise ApiError(400, "validation_error", "request body is not allowed")
+
+    key, request_hash, replay = await get_idempotency_context(
+        db, request=request, user_id=current_user.id, raw_key=idempotency_key
+    )
+    if replay is not None:
+        return replay
+
+    try:
+        todo = get_current_user_todo(db, current_user.id, todo_id)
+        if todo.deleted_at is not None:
+            raise ApiError(410, "deleted_resource", "todo is deleted")
+        if todo.status != "completed":
+            raise ApiError(
+                400,
+                "invalid_state_transition",
+                "todo must be completed to reopen",
+            )
+
+        reopened_at = now_server()
+        todo.status = "pending"
+        todo.completed_at = None
+        todo.updated_at = reopened_at
+        todo.version += 1
+        db.flush()
+
+        category = get_todo_category_for_response(db, current_user.id, todo.category_id)
+        todo_data = todo_to_dict(todo, category)
+        sync_change = create_sync_change(
+            db,
+            user_id=current_user.id,
+            change_type="todo.reopened",
+            entity_type="todo",
+            entity_id=todo.id,
+            entity_version=todo.version,
+            payload={"snapshot": todo_data},
+        )
+        response_body = data_envelope(todo_data, sync={"cursor": sync_change.cursor})
+        store_idempotency_response(
+            db,
+            user_id=current_user.id,
+            key=key,
+            method=request.method,
+            path=request.url.path,
+            request_hash=request_hash,
+            response_status=200,
+            response_body=response_body,
+        )
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise ApiError(400, "validation_error", "todo could not be reopened") from exc
+    except Exception:
+        db.rollback()
+        raise
+
+    return JSONResponse(status_code=200, content=response_body)
+
+
 @router.get("/{todo_id}")
 def get_todo(
     todo_id: UUID,

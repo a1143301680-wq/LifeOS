@@ -4,21 +4,21 @@ Last updated: 2026-07-17
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-012
 
-Branch: pending
+Branch: main
 
-Base Commit: pending
+Base Commit: c2a2facdd0a4da5426f41bd797747b67628319dc
 
-Working Tree: pending
+Working Tree: 8 approved TASK-012 pre-Coding publication-state documents committed separately; no business code
 
-Snapshot Commit Created: pending
+Snapshot Commit Created: Yes
 
-Snapshot Commit: pending
+Snapshot Commit: 13a7de1051ad90e0ff774efcd0c1ddd4107f11cf
 
-Reason: pending Task Review PASS
+Reason: approved TASK-012 readiness documents required a durable pre-Coding baseline
 
 ## Instructions
 

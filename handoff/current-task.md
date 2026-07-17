@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-012
 - Task Name: Todo reopen API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -123,6 +123,6 @@ Report modified files, transition/error/idempotency behavior, timestamp/version/
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Code Review
 
-Required next action: establish the pre-Coding Git Snapshot. Coding must not start until Git Snapshot completes.
+Required next action: review TASK-012 Todo reopen API implementation.
