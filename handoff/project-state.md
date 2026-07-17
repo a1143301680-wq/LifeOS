@@ -51,6 +51,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-011 Todo complete API completed in result commit `2c35f1d`; Code Review: PASS; backend tests: 67 passed.
 - TASK-011 terminal Closure Commit `c2a2fac` was published and the task workflow ended.
 - TASK-012 Todo reopen API completed in result commit `c2d167f`; Code Review: PASS; backend tests: 72 passed.
+- TASK-012 Decision Closure Check passed on 2026-07-17; terminal Closure Commit is the only remaining action before the next task may be published.
 
 ## Recently Completed
 
@@ -99,7 +100,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is a separately reviewable Todo delete slice. Live task routing is maintained in `handoff/current-task.md`.
+After TASK-012 terminal closure, the next Phase 1A business direction is a separately reviewable Todo delete slice. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

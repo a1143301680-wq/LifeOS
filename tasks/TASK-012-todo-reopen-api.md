@@ -210,4 +210,26 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-17 09:55 +08:00
+- Result Commit: `c2d167fdd063d362ef20e9ec0b1de17a08b62191`
+- Completion Commit: `f438a64cb84d7292f6f62bdc399048146311d45a`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `f438a64cb84d7292f6f62bdc399048146311d45a`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo reopen tests `5 passed`; full backend suite `72 passed`; Alembic head and endpoint-scope scans passed.
+- Acceptance Criteria Result: all TASK-012 acceptance criteria confirmed.
+- Issue Disposition: no TASK-012 issue-log entry, unresolved issue, or task-outside finding remained.
+- Remaining Follow-ups:
+  - Register future static Todo routes such as `/todos/today` before dynamic `/{todo_id}` routes.
+  - Continue with a separately reviewable Todo delete slice.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-012-todo-reopen-api.md`
+- Commit message: `docs(task): close TASK-012`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

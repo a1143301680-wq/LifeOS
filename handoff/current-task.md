@@ -123,6 +123,16 @@ Report modified files, transition/error/idempotency behavior, timestamp/version/
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-012 Decision Closure Check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-17 09:55 +08:00
+
+Result Commit: `c2d167fdd063d362ef20e9ec0b1de17a08b62191`
+
+Completion Commit: `f438a64cb84d7292f6f62bdc399048146311d45a`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `f438a64cb84d7292f6f62bdc399048146311d45a` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-012 Closure documents with message `docs(task): close TASK-012`. After remote parity is verified, return to Decision; do not run another Closure Check.
