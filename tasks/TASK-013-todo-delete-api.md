@@ -217,4 +217,26 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-17 18:20 +08:00
+- Result Commit: `3a974026bc98e0642c3a63a36a4d8bcbb3a6347d`
+- Completion Commit: `b64804918f4b2401f86681dbe958a6c6348dd259`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `b64804918f4b2401f86681dbe958a6c6348dd259`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo delete tests `6 passed`; full backend suite `78 passed`; route and endpoint-scope scans passed.
+- Acceptance Criteria Result: all TASK-013 acceptance criteria confirmed.
+- Issue Disposition: no TASK-013 issue-log entry, unresolved issue, or task-outside finding remained.
+- Remaining Follow-ups:
+  - Register future static Todo routes such as `/todos/today` before dynamic `/{todo_id}` routes.
+  - Continue with Todo list cursor pagination and filtering.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-013-todo-delete-api.md`
+- Commit message: `docs(task): close TASK-013`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

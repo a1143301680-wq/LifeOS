@@ -121,6 +121,16 @@ Report modified files, tombstone/status/error/idempotency behavior, timestamp/ve
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-013 Decision Closure Check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-17 18:20 +08:00
+
+Result Commit: `3a974026bc98e0642c3a63a36a4d8bcbb3a6347d`
+
+Completion Commit: `b64804918f4b2401f86681dbe958a6c6348dd259`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `b64804918f4b2401f86681dbe958a6c6348dd259` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-013 Closure documents with message `docs(task): close TASK-013`. After remote parity is verified, return to Decision; do not run another Closure Check.
