@@ -4,7 +4,7 @@
 
 - Task ID: TASK-011
 - Task Name: Todo complete API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo create `f2fe55e`; Todo update `09cd984`; TASK-010 terminal closure `a2237de`
@@ -200,7 +200,14 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-17
+- Branch: main
+- Result Commit: 2c35f1dc2ab94e6908bfcfb0bd67287b4114fb66
+- Commit Message: `feat(todo): add Todo complete API`
+- Push Target: origin/main
+- Code Review Result: PASS
 
 ## Closure
 

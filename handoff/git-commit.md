@@ -4,23 +4,34 @@ Last updated: 2026-07-17
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-011
 
-Branch: pending
+Branch: main
 
-Commit Hash: pending
+Commit Hash: 2c35f1dc2ab94e6908bfcfb0bd67287b4114fb66
 
-Commit Message: pending Code Review recommendation
+Commit Message: feat(todo): add Todo complete API
 
-Files Changed: pending
+Files Changed:
 
-Tests: pending
+- `backend/app/api/v1/todos.py`
+- `backend/tests/test_todos_complete.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-011-todo-complete-api.md`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: pending
+- `python -m pytest tests/test_todos_complete.py`: PASS, 5 passed.
+- `python -m pytest`: PASS, 67 passed.
+- `python -m alembic heads`: PASS, `20260713_0004 (head)`.
+- Route and endpoint-scope scan: PASS.
+
+Code Review Result: PASS
+
+Push Target: origin/main
 
 ## Instructions
 

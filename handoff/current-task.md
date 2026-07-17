@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-011
 - Task Name: Todo complete API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -92,17 +92,17 @@ An authenticated user can complete an owned active pending Todo exactly once and
 
 ## Acceptance Criteria
 
-- [ ] Completing an owned pending Todo returns `200`, `status=completed`, server `completed_at`, incremented version, and `sync.cursor`.
-- [ ] `updated_at` and `completed_at` use the same server transition timestamp; ordinary fields remain unchanged.
-- [ ] The `todo.completed` sync row uses the updated entity version and a snapshot equal to the response DTO.
-- [ ] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
-- [ ] Already completed and canceled active Todos return `400 invalid_state_transition` with no side effects.
-- [ ] Missing Idempotency-Key, identical replay, conflicting key reuse, and a new key after completion follow the defined behavior without duplicate effects.
-- [ ] Missing/invalid authentication and invalid path UUID follow existing conventions.
-- [ ] A soft-deleted or absent category does not block completion and is serialized through existing DTO rules.
-- [ ] Todo mutation, version/timestamps, sync snapshot, and idempotency response are atomic and consistent under failure.
-- [ ] Internal fields remain absent from response and sync snapshot.
-- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [x] Completing an owned pending Todo returns `200`, `status=completed`, server `completed_at`, incremented version, and `sync.cursor`.
+- [x] `updated_at` and `completed_at` use the same server transition timestamp; ordinary fields remain unchanged.
+- [x] The `todo.completed` sync row uses the updated entity version and a snapshot equal to the response DTO.
+- [x] Missing or cross-user Todo returns `404 not_found`; current-user soft-deleted Todo returns `410 deleted_resource`.
+- [x] Already completed and canceled active Todos return `400 invalid_state_transition` with no side effects.
+- [x] Missing Idempotency-Key, identical replay, conflicting key reuse, and a new key after completion follow the defined behavior without duplicate effects.
+- [x] Missing/invalid authentication and invalid path UUID follow existing conventions.
+- [x] A soft-deleted or absent category does not block completion and is serialized through existing DTO rules.
+- [x] Todo mutation, version/timestamps, sync snapshot, and idempotency response are atomic and consistent under failure.
+- [x] Internal fields remain absent from response and sync snapshot.
+- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -124,6 +124,6 @@ Report modified files, transition/error/idempotency behavior, version/timestamp/
 
 ## Current Stage
 
-Next role: Code Review
+Next role: Decision
 
-Required next action: review TASK-011 Todo complete API implementation.
+Required next action: run TASK-011 closure check before publishing the next task.
