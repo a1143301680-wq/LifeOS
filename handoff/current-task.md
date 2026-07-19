@@ -6,7 +6,7 @@ Last updated: 2026-07-17
 
 - Task ID: TASK-014
 - Task Name: Todo list cursor pagination and filters
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -92,18 +92,18 @@ An authenticated user can list only owned, non-deleted Todos using the contracte
 
 ## Acceptance Criteria
 
-- [ ] Default list returns only current-user active pending Todos with the stable DTO and `next_cursor` present.
-- [ ] Status pending/completed/all semantics include the correct rows; deleted and cross-user Todos never appear.
-- [ ] Category, planned-date, and inclusive due-range filters work alone and in combination without leaking category ownership/existence.
-- [ ] Invalid status, UUID, date/timestamp, naive timestamp, due range, limit, and cursor return `400 validation_error`.
-- [ ] Ordering exactly follows contracted null placement, priority rank, descending update time, and UUID tie-breaker.
-- [ ] Multi-page traversal on an unchanged dataset has no duplicate or skipped rows, including equal and null sort values.
-- [ ] `next_cursor` is null on the final page and is generated from the last returned row when more data exists.
-- [ ] Cursor filter mismatch fails, while changing only limit remains valid.
-- [ ] Cursor malformed/version/schema/type cases are covered and cursor output is deterministic base64url JSON v1.
-- [ ] Category summaries correctly cover active, soft-deleted, and missing categories without N+1 lookups.
-- [ ] The endpoint creates no Todo, sync change, or idempotency record and exposes no internal fields.
-- [ ] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [x] Default list returns only current-user active pending Todos with the stable DTO and `next_cursor` present.
+- [x] Status pending/completed/all semantics include the correct rows; deleted and cross-user Todos never appear.
+- [x] Category, planned-date, and inclusive due-range filters work alone and in combination without leaking category ownership/existence.
+- [x] Invalid status, UUID, date/timestamp, naive timestamp, due range, limit, and cursor return `400 validation_error`.
+- [x] Ordering exactly follows contracted null placement, priority rank, descending update time, and UUID tie-breaker.
+- [x] Multi-page traversal on an unchanged dataset has no duplicate or skipped rows, including equal and null sort values.
+- [x] `next_cursor` is null on the final page and is generated from the last returned row when more data exists.
+- [x] Cursor filter mismatch fails, while changing only limit remains valid.
+- [x] Cursor malformed/version/schema/type cases are covered and cursor output is deterministic base64url JSON v1.
+- [x] Category summaries correctly cover active, soft-deleted, and missing categories without N+1 lookups.
+- [x] The endpoint creates no Todo, sync change, or idempotency record and exposes no internal fields.
+- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -127,6 +127,6 @@ Report modified files, filter/ordering/cursor design, cursor schema, category lo
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the Code Review-approved TASK-014 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
+Required next action: run TASK-014 Decision Closure Check before publishing the next task.

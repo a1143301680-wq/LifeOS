@@ -54,7 +54,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-012 terminal Closure Commit `17e54de` was published and the task workflow ended.
 - TASK-013 Todo delete API completed in result commit `3a97402`; Code Review: PASS; backend tests: 78 passed.
 - TASK-013 terminal Closure Commit `b80ca37` was published and the task workflow ended.
-- TASK-014 publishes the next business slice: current-user Todo list filtering with deterministic keyset pagination.
+- TASK-014 Todo list cursor pagination and filters completed in result commit `dd0d6fa`; Code Review: PASS; backend tests: 83 passed.
 
 ## Recently Completed
 
@@ -103,7 +103,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is Todo list cursor pagination and filtering, followed by Today aggregation. Live TASK-014 routing is maintained in `handoff/current-task.md`.
+The next Phase 1A business direction is Today Todo aggregation. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

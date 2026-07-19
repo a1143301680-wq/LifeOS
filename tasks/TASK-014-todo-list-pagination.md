@@ -4,7 +4,7 @@
 
 - Task ID: TASK-014
 - Task Name: Todo list cursor pagination and filters
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo APIs through `3a97402`; TASK-013 terminal closure `b80ca37`
@@ -218,7 +218,15 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-19
+- Branch: main
+- Result Commit: dd0d6fa9724b38c004c1737203d2d6280596ee2b
+- Commit Message: `feat(todo): add cursor-paginated list API`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 
