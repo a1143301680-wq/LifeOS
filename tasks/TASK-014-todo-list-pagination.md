@@ -230,4 +230,26 @@ None.
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-19 09:58 +08:00
+- Result Commit: `dd0d6fa9724b38c004c1737203d2d6280596ee2b`
+- Completion Commit: `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: focused Todo list tests `5 passed`; full backend suite `83 passed`; Alembic head, route, cursor/null-order, and whitespace checks passed.
+- Acceptance Criteria Result: all TASK-014 acceptance criteria confirmed.
+- Issue Disposition: no TASK-014 issue-log entry, unresolved blocking issue, or task-outside finding remained. Cursor-anchor timezone validation is retained as a non-blocking hardening follow-up.
+- Remaining Follow-ups:
+  - Add explicit timezone-awareness validation for decoded cursor anchor timestamps in a future hardening slice.
+  - Continue with Today Todo aggregation.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-014-todo-list-pagination.md`
+- Commit message: `docs(task): close TASK-014`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

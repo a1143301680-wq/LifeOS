@@ -127,6 +127,16 @@ Report modified files, filter/ordering/cursor design, cursor schema, category lo
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-014 Decision Closure Check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-19 09:58 +08:00
+
+Result Commit: `dd0d6fa9724b38c004c1737203d2d6280596ee2b`
+
+Completion Commit: `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-014 Closure documents with message `docs(task): close TASK-014`. After remote parity is verified, return to Decision; do not run another Closure Check.
