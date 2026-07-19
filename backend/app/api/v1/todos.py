@@ -1,6 +1,7 @@
+from datetime import date, datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
 from app.core.database import get_db
-from app.core.envelope import data_envelope
+from app.core.envelope import data_envelope, list_envelope
 from app.core.errors import ApiError
 from app.core.time import now_server
 from app.models.todo import Todo
@@ -21,6 +22,14 @@ from app.services.idempotency import (
     store_idempotency_response,
 )
 from app.services.sync import create_sync_change
+from app.services.todo_list import (
+    decode_todo_list_cursor,
+    encode_todo_list_cursor,
+    normalize_todo_list_filters,
+    todo_after_anchor_filter,
+    todo_list_anchor,
+    todo_list_order_by,
+)
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
@@ -118,6 +127,75 @@ def get_todo_category_for_response(
             TodoCategory.user_id == user_id,
         )
     ).scalar_one_or_none()
+
+
+def get_todo_categories_for_response(
+    db: Session, user_id: UUID, todos: list[Todo]
+) -> dict[UUID, TodoCategory]:
+    category_ids = {todo.category_id for todo in todos if todo.category_id is not None}
+    if not category_ids:
+        return {}
+    categories = db.execute(
+        select(TodoCategory).where(
+            TodoCategory.user_id == user_id,
+            TodoCategory.id.in_(category_ids),
+        )
+    ).scalars()
+    return {category.id: category for category in categories}
+
+
+@router.get("")
+def list_todos(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    status: str = "pending",
+    category_id: UUID | None = None,
+    planned_date: date | None = None,
+    due_from: datetime | None = None,
+    due_to: datetime | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+    cursor: str | None = None,
+):
+    filters = normalize_todo_list_filters(
+        status=status,
+        category_id=category_id,
+        planned_date=planned_date,
+        due_from=due_from,
+        due_to=due_to,
+    )
+    anchor = decode_todo_list_cursor(cursor, filters=filters)
+
+    stmt = select(Todo).where(
+        Todo.user_id == current_user.id,
+        Todo.deleted_at.is_(None),
+    )
+    if status == "all":
+        stmt = stmt.where(Todo.status.in_(["pending", "completed", "canceled"]))
+    else:
+        stmt = stmt.where(Todo.status == status)
+    if category_id is not None:
+        stmt = stmt.where(Todo.category_id == category_id)
+    if planned_date is not None:
+        stmt = stmt.where(Todo.planned_date == planned_date)
+    if due_from is not None or due_to is not None:
+        stmt = stmt.where(Todo.due_at.is_not(None))
+    if due_from is not None:
+        stmt = stmt.where(Todo.due_at >= due_from)
+    if due_to is not None:
+        stmt = stmt.where(Todo.due_at <= due_to)
+    if anchor is not None:
+        stmt = stmt.where(todo_after_anchor_filter(anchor))
+
+    todos = db.execute(stmt.order_by(*todo_list_order_by()).limit(limit + 1)).scalars().all()
+    page = todos[:limit]
+    categories = get_todo_categories_for_response(db, current_user.id, page)
+    items = [todo_to_dict(todo, categories.get(todo.category_id)) for todo in page]
+    next_cursor = (
+        encode_todo_list_cursor(filters=filters, anchor=todo_list_anchor(page[-1]))
+        if len(todos) > limit
+        else None
+    )
+    return list_envelope(items, extra={"next_cursor": next_cursor})
 
 
 @router.post("")
