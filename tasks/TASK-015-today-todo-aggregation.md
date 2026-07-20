@@ -220,4 +220,27 @@ None.
 
 ## Closure
 
-Closure Check: PENDING
+Closure Check: PASS
+
+- Checked At: 2026-07-20 09:19 +08:00
+- Result Commit: `2a698f37028e1f8ebb0c8ededcfb5305c4c9a085`
+- Completion Commit: `876ba753a3ce91cee9b6a9f9fd90ea9da556764c`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `876ba753a3ce91cee9b6a9f9fd90ea9da556764c`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: Decision reran focused Today tests (`5 passed`), the full backend suite (`88 passed`), and Alembic heads (`20260713_0004 (head)`) on the published completion state.
+- Acceptance Criteria Result: all TASK-015 acceptance criteria confirmed.
+- Issue Disposition: no TASK-015 issue-log entry or unresolved blocking issue exists. Invalid stored user-timezone validation remains a non-blocking future hardening item if timezone editing is introduced.
+- Phase/Progress Result: `GET /api/v1/todos/today` is recorded as done; the next Phase 1A business direction is `GET /api/v1/sync/changes`.
+- Remaining Follow-ups:
+  - Validate stored timezone identifiers if user timezones become editable outside controlled seed/admin paths.
+  - Continue with `GET /api/v1/sync/changes` after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-015-today-todo-aggregation.md`
+- Commit message: `docs(task): close TASK-015`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

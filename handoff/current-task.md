@@ -117,6 +117,16 @@ Report modified files, date-boundary conversion, section classification/de-dupli
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-015 Decision Closure Check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-20 09:19 +08:00
+
+Result Commit: `2a698f37028e1f8ebb0c8ededcfb5305c4c9a085`
+
+Completion Commit: `876ba753a3ce91cee9b6a9f9fd90ea9da556764c`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `876ba753a3ce91cee9b6a9f9fd90ea9da556764c` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-015 Closure documents with message `docs(task): close TASK-015`. After remote parity is verified, return to Decision; do not run another Closure Check.

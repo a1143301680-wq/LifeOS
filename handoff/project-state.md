@@ -57,6 +57,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-014 Todo list cursor pagination and filters completed in result commit `dd0d6fa`; Code Review: PASS; backend tests: 83 passed.
 - TASK-014 terminal Closure Commit `0a5760a` was published and the task workflow ended.
 - TASK-015 Today Todo aggregation API completed in result commit `2a698f3`; Code Review: PASS; backend tests: 88 passed.
+- TASK-015 Decision Closure Check passed on 2026-07-20; terminal Closure Commit is the only remaining action before the next task may be published.
 
 ## Recently Completed
 
