@@ -30,6 +30,7 @@ from app.services.todo_list import (
     todo_list_anchor,
     todo_list_order_by,
 )
+from app.services.todo_today import classify_today_todos, completed_count_for_day
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
@@ -472,6 +473,59 @@ async def delete_todo(
         raise
 
     return JSONResponse(status_code=200, content=response_body)
+
+
+@router.get("/today")
+def get_today_todos(
+    selected_date: date = Query(alias="date"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    todos = db.execute(
+        select(Todo).where(
+            Todo.user_id == current_user.id,
+            Todo.deleted_at.is_(None),
+        )
+    ).scalars().all()
+    pending_todos = [todo for todo in todos if todo.status == "pending"]
+    active_inbox = db.execute(
+        select(TodoCategory).where(
+            TodoCategory.user_id == current_user.id,
+            TodoCategory.deleted_at.is_(None),
+            TodoCategory.is_inbox.is_(True),
+        )
+    ).scalars().first()
+    sections = classify_today_todos(
+        todos=pending_todos,
+        selected_date=selected_date,
+        user=current_user,
+        active_inbox=active_inbox,
+    )
+    section_todos = [
+        todo
+        for section_name in ("overdue", "due", "planned", "inbox_recent")
+        for todo in sections[section_name]
+    ]
+    categories = get_todo_categories_for_response(db, current_user.id, section_todos)
+    section_data = {
+        section_name: [
+            todo_to_dict(todo, categories.get(todo.category_id))
+            for todo in section_items
+        ]
+        for section_name, section_items in sections.items()
+    }
+    pending_count = sum(len(items) for items in section_data.values())
+    response_body = {
+        "date": selected_date.isoformat(),
+        "timezone": current_user.timezone,
+        "sections": section_data,
+        "summary": {
+            "pending_count": pending_count,
+            "completed_count": completed_count_for_day(todos, selected_date, current_user),
+            "overdue_count": len(section_data["overdue"]),
+        },
+    }
+    return data_envelope(response_body)
 
 
 @router.get("/{todo_id}")

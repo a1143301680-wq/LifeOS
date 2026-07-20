@@ -4,7 +4,7 @@
 
 - Task ID: TASK-015
 - Task Name: Today Todo aggregation API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo APIs through `dd0d6fa`; TASK-014 terminal closure `0a5760a`
@@ -56,14 +56,14 @@ Implement only `GET /api/v1/todos/today` as the next Phase 1A vertical slice. Th
 
 ## Acceptance Criteria
 
-- [ ] Envelope, authentication, required date validation, and static route precedence are correct.
-- [ ] Timezone/DST boundaries correctly classify due and completed timestamps.
-- [ ] Four sections follow membership rules, strict single assignment, and stable ordering without duplicate IDs.
-- [ ] Inbox recent uses the active owned Inbox, selects the newest five eligible rows, and then applies presentation ordering.
-- [ ] Summary counts match the locked semantics for pending/completed/overdue and exclude canceled/deleted/cross-user rows.
-- [ ] Todo DTO/category serialization is stable and category loading is batched.
-- [ ] No write side effect, Reminder section, pagination, migration, or out-of-scope endpoint is added.
-- [ ] Focused/full tests, Alembic head, route/query review, and whitespace checks pass.
+- [x] Envelope, authentication, required date validation, and static route precedence are correct.
+- [x] Timezone/DST boundaries correctly classify due and completed timestamps.
+- [x] Four sections follow membership rules, strict single assignment, and stable ordering without duplicate IDs.
+- [x] Inbox recent uses the active owned Inbox, selects the newest five eligible rows, and then applies presentation ordering.
+- [x] Summary counts match the locked semantics for pending/completed/overdue and exclude canceled/deleted/cross-user rows.
+- [x] Todo DTO/category serialization is stable and category loading is batched.
+- [x] No write side effect, Reminder section, pagination, migration, or out-of-scope endpoint is added.
+- [x] Focused/full tests, Alembic head, route/query review, and whitespace checks pass.
 
 ## Verification Plan
 
@@ -88,21 +88,123 @@ Implement only `GET /api/v1/todos/today` as the next Phase 1A vertical slice. Th
 
 ## Git Snapshot
 
-- Status: PENDING
-- Branch: pending
+- Status: COMPLETE
+- Branch: main
 - Base Commit: `0a5760adaee3907532e8ec028938d3658c494997`
-- Snapshot Commit: pending
+- Snapshot Commit: `82eecbfb82c0d96543ca8a0dc50b5a81706b9344`
+- Reason: approved TASK-015 readiness documents required a durable pre-Coding baseline
 
 ## Coding Result
 
-Pending.
+### Modified Files
+
+- `backend/app/api/v1/todos.py`
+- `backend/app/services/todo_today.py`
+- `backend/tests/test_todos_today.py`
+- `handoff/current-task.md`
+- `tasks/TASK-015-today-todo-aggregation.md`
+
+Pre-existing TASK-015 state file preserved:
+
+- `handoff/git-snapshot.md`
+
+### Implementation Summary
+
+- Added authenticated `GET /api/v1/todos/today` before dynamic `GET /api/v1/todos/{todo_id}`.
+- Added `backend/app/services/todo_today.py` for user-timezone day bounds, section classification, section ordering, Inbox recent selection, and completed-count calculation.
+- Uses `current_user.timezone` with `ZoneInfo` and constructs `[local midnight, next local midnight)` from calendar dates.
+- Filters current-user, non-deleted Todos and classifies pending candidates once in strict order: `overdue`, `due`, `planned`, `inbox_recent`.
+- `inbox_recent` uses the owned active Inbox, null `planned_date`, null `due_at`, newest five by `created_at DESC`, then presentation ordering.
+- Applies section ordering by priority rank, due null-last ASC, planned-date null-last ASC, `created_at ASC`, and `id ASC`.
+- Returns `data.date`, `data.timezone`, all four section arrays, `summary`, and `server_time`; no pagination or Reminder section.
+- Batch-loads categories for returned section items and preserves existing active/deleted/missing category DTO behavior.
+- Keeps the endpoint read-only: no Idempotency-Key requirement, mutation, sync change, idempotency record, or event fanout.
+
+### Acceptance Criteria Results
+
+- Envelope, authentication, required date validation, and static route precedence: covered.
+- Asia/Shanghai and America/New_York DST local-day boundaries for due/completed timestamps: covered.
+- Four-section membership, strict single assignment, de-duplication, and ordering: covered.
+- Inbox recent active-Inbox ownership, top-five selection, and presentation ordering: covered.
+- Summary counts for pending/completed/overdue with canceled/deleted/cross-user exclusions: covered.
+- Stable Todo DTO/category behavior and batch category loading: covered.
+- No write side effects, Reminder section, pagination, migration, or out-of-scope endpoint: covered.
+
+### Verification Commands And Results
+
+- `python -m pytest tests/test_todos_today.py`: PASS, 5 passed.
+- `python -m pytest`: PASS, 88 passed.
+- `python -m alembic heads`: PASS, single head `20260713_0004 (head)`.
+- `rg -n '@router\.(get|post|patch|delete)|prefix="/todos"|today|sync|events|changes' backend/app/api/v1/todos.py`: PASS, `/today` is registered before `/{todo_id}` and no sync/SSE endpoint was added.
+- `rg -n 'local_day_bounds|ZoneInfo|classify_today_todos|select_inbox_recent|completed_count_for_day|section_sort_key|status !=' backend/app/services/todo_today.py`: PASS, timezone boundary, section, Inbox, summary, and ordering helpers are present.
+- `Select-String -Path D:\LifeOS\backend\tests\test_todos_today.py,D:\LifeOS\backend\app\services\todo_today.py -Pattern '[ \t]+$'`: PASS, no trailing whitespace in new untracked files.
+
+### Git Diff Check
+
+- `git status --short --untracked-files=all`: PASS, only TASK-015 implementation/state files plus pre-existing `handoff/git-snapshot.md` state diff are present.
+- `git diff --stat`: PASS, reviewed focused route and state diffs; untracked helper/test files reviewed separately.
+- `git diff --check`: PASS, no whitespace errors; Git reported expected LF-to-CRLF working-copy warnings.
+- `git diff --cached`: PASS, empty.
+
+### Unresolved Issues
+
+None.
+
+### Task-Outside Findings
+
+None.
 
 ## Code Review
 
-- Result: PENDING
-- Target Status: REVIEWING
-- Reviewed by: pending
-- Reviewed at: pending
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-07-20 08:53 +08:00
+- Branch: main
+- HEAD: `82eecbfb82c0d96543ca8a0dc50b5a81706b9344`
+- Snapshot Commit: `82eecbfb82c0d96543ca8a0dc50b5a81706b9344`
+
+### Reviewed Scope
+
+- `backend/app/api/v1/todos.py`
+- `backend/app/services/todo_today.py`
+- `backend/tests/test_todos_today.py`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-015-today-todo-aggregation.md`
+
+### Review Findings
+
+- Blocking Issues: None.
+- Non-blocking Suggestions: If user timezones become editable outside controlled seed/admin paths, add validation for invalid `users.timezone` values to avoid a 500 from `ZoneInfo`.
+- Follow-up Tasks: After Git Commit publishes TASK-015, update Phase 1A progress so `GET /api/v1/todos/today` is marked done and the next task advances to `GET /api/v1/sync/changes`.
+
+### Review Evidence
+
+- Current task and TASK archive both identify `TASK-015` and remain `Status: REVIEWING`.
+- Task Review gate is `Result: PASS`.
+- Git Snapshot is `Status: COMPLETE` with snapshot commit `82eecbfb82c0d96543ca8a0dc50b5a81706b9344`.
+- Code Review gate was `PENDING` before review and is now `PASS`.
+- Implementation matches the approved `GET /api/v1/todos/today` scope.
+- `/today` is registered before dynamic `/{todo_id}` routing.
+- Today aggregation uses `current_user.timezone`, calendar-date local day bounds, current-user active Todo filtering, pending-only section candidates, strict section assignment, and deterministic ordering.
+- Inbox recent uses the owned active Inbox, null planned/due fields, newest-five selection, and presentation ordering.
+- Summary counts match the locked TASK-015 semantics for pending, completed, and overdue.
+- Category summaries are batch-loaded and preserve active, soft-deleted, and missing category behavior.
+- No Todo/category write, detail, lifecycle, collection-list, sync pull, SSE, fanout, Reminder, recurrence, frontend, Android, model, or migration change was added.
+
+### Verification
+
+- `python -m pytest tests/test_todos_today.py` from `D:\LifeOS\backend`: PASS, 5 passed.
+- `python -m pytest` from `D:\LifeOS\backend`: PASS, 88 passed.
+- `python -m alembic heads` from `D:\LifeOS\backend`: PASS, `20260713_0004 (head)`.
+- `git diff --check`: PASS, no whitespace errors; Git reported expected LF-to-CRLF working-copy warnings.
+- `git diff --cached --check`: PASS, no staged changes.
+- New untracked helper/test trailing-whitespace scan: PASS.
+
+### Recommended Commit Message
+
+`feat(todo): add today aggregation API`
 
 ## Git Commit
 

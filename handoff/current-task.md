@@ -6,7 +6,7 @@ Last updated: 2026-07-20
 
 - Task ID: TASK-015
 - Task Name: Today Todo aggregation API
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -117,6 +117,6 @@ Report modified files, date-boundary conversion, section classification/de-dupli
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-015 from the approved publication-state files. Coding must not start before Git Snapshot completion.
+Required next action: publish the Code Review-approved TASK-015 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
