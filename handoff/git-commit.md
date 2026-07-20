@@ -1,42 +1,29 @@
 # LifeOS Git Commit Result
 
-Last updated: 2026-07-17
+Last updated: 2026-07-20
 
 ## Commit Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-014
+Task ID: TASK-015
 
-Branch: main
+Branch: pending
 
-Commit Hash: dd0d6fa9724b38c004c1737203d2d6280596ee2b
+Commit Hash: pending
 
-Commit Message: `feat(todo): add cursor-paginated list API`
+Commit Message: pending Code Review recommendation
 
-Files Changed:
+Files Changed: pending Code Review approved scope
 
-- `backend/app/api/v1/todos.py`
-- `backend/app/services/todo_list.py`
-- `backend/tests/test_todos_list.py`
-- `handoff/current-task.md`
-- `handoff/git-snapshot.md`
-- `tasks/TASK-014-todo-list-pagination.md`
+Tests: pending
 
-Tests:
-
-- `python -m pytest tests/test_todos_list.py`: PASS, 5 passed.
-- `python -m pytest`: PASS, 83 passed.
-- `python -m alembic heads`: PASS, `20260713_0004 (head)`.
-
-Code Review Result: PASS
+Code Review Result: PENDING
 
 Push Target: origin/main
 
 ## Instructions
 
-Run only after Code Review passes and approve only the exact reviewed scope.
+Run only after Code Review PASS and stage only its exact reviewed scope. For a result commit, synchronize both task-status files to `COMPLETED`, commit, push, and verify local/remote parity before claiming success.
 
-For a result commit, update both `handoff/current-task.md` and `tasks/TASK-014-todo-list-pagination.md` to `Status: COMPLETED`. Record local/remote parity and remaining worktree changes; do not claim completion if either status update or push verification fails.
-
-For a terminal Closure Commit, commit only documents approved by Decision Closure Check. Success ends the task workflow, creates no new uncommitted state, and does not trigger another Closure Check.
+For a later terminal Closure Commit, commit only Decision Closure-approved documents. A successful terminal commit ends TASK-015 and must not trigger another Closure Check or leave new state changes.

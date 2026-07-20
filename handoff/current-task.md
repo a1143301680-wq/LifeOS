@@ -1,142 +1,122 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-17
+Last updated: 2026-07-20
 
 ## Metadata
 
-- Task ID: TASK-014
-- Task Name: Todo list cursor pagination and filters
-- Status: COMPLETED
+- Task ID: TASK-015
+- Task Name: Today Todo aggregation API
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
-  - Todo CRUD and lifecycle APIs published through `3a97402`
-  - TASK-013 terminal closure published in `b80ca37`
+  - Todo CRUD, lifecycle, and collection list APIs published through `dd0d6fa`
+  - TASK-014 terminal closure published in `0a5760a`
 
 ## Background
 
-Todo persistence and all single-item CRUD/lifecycle mutations are available. The next Phase 1A slice is the main Todo collection read with deterministic filtering, ordering, and opaque keyset pagination for PC and Android clients.
+The Phase 1A Todo persistence and read/write APIs are complete. PC and Android now need the contracted Today homepage aggregation so a selected local calendar date can be rendered without duplicating classification logic on each client.
 
 ## Goal
 
-An authenticated user can list only owned, non-deleted Todos using the contracted filters and stable keyset cursor, with deterministic ordering and no duplicate or skipped rows on an unchanged dataset.
+An authenticated user can request one date in their configured timezone and receive owned, non-deleted Todos in four deterministic, mutually exclusive sections with a concise summary and no write side effects.
 
 ## Scope
 
 ### In Scope
 
-- `GET /api/v1/todos` only.
-- Status, category, planned-date, due-range, limit, and cursor query parameters.
-- Contracted null-aware ordering and priority rank.
-- Versioned base64url JSON keyset cursor tied to normalized filters and fixed sort.
-- Stable Todo DTOs including active, deleted, or absent category summaries.
-- Two-user isolation, validation, pagination boundaries, and focused tests.
+- `GET /api/v1/todos/today?date=YYYY-MM-DD` only.
+- User-timezone date boundaries for due and completion timestamps.
+- `overdue`, `due`, `planned`, and `inbox_recent` sections.
+- Single-assignment priority and deterministic section ordering.
+- Today summary counts, stable Todo DTOs, category batch loading, isolation, validation, and focused tests.
 
 ### Out of Scope
 
-- `GET /api/v1/todos/today`.
-- Todo writes, sync pull, SSE, or fanout.
-- Full-text search, alternate sorts, offset pagination, totals/counts, or cursor signing/encryption.
-- Snapshot isolation across concurrent mutations; guarantees apply to an unchanged dataset.
-- Todo model or Alembic migration changes unless Task Review proves one unavoidable.
-- Frontend, Android, Reminder, recurring Todo, offline replay, or full login work.
+- Reminder sections or Reminder-derived items.
+- Pagination, cursors, configurable limits, search, or alternate grouping/sorting.
+- Todo/category writes, sync pull, SSE, or fanout.
+- Frontend, Android, widgets, recurring Todo generation, or offline replay.
+- Todo/user/category model or Alembic migration changes unless Task Review proves one unavoidable.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 5-7, 9.4, and 10.1
-- `docs/data-model-phase1.md` Todo fields/indexes and ownership rules
+- `docs/api-phase1a.md` sections 2, 5-7, 9.4, 10, and 11
+- `docs/data-model-phase1.md` Todo/category/user fields and ownership rules
 - `docs/phase1a-progress.md`
 - `backend/app/api/v1/todos.py`
-- Existing Todo DTO, auth/error/envelope patterns, models, and tests
+- `backend/app/services/todo_list.py`
+- Existing Todo DTO, authentication, error, envelope, timezone, model, and test patterns
 
 ### Allowed Modify Files
 
 - `backend/app/api/v1/todos.py`
-- `backend/app/schemas/todo.py` only if directly needed for list query/cursor validation
-- A focused Todo list cursor/query helper under `backend/app/` when it materially reduces complexity
-- New or existing focused Todo list tests under `backend/tests/`
+- `backend/app/schemas/todo.py` only if directly required for the Today response
+- A focused Today aggregation helper under `backend/app/services/`
+- New or existing focused Today Todo tests under `backend/tests/`
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-014 state files
+- Active handoff, gate, Git record, issue-log, and TASK-015 state files
 
 ### Forbidden Modify Files
 
-- Todo models or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
-- Existing Todo/category write or detail behavior
-- Today, sync pull, SSE, or fanout endpoints
-- Product requirements, architecture, API contract, and data-model documents unless Task Review returns a contract ambiguity to Decision
-- Frontend or Android files
-- Completed TASK-005 through TASK-013 archives
+- Models or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
+- Existing Todo/category write, detail, lifecycle, or collection-list behavior
+- Sync pull, SSE, fanout, Reminder, recurrence, frontend, or Android behavior
+- Product requirements, architecture, API contract, or data-model documents unless Task Review returns a genuine contract ambiguity to Decision
+- Completed TASK-005 through TASK-014 archives
 
 ## Implementation Requirements
 
-- Add authenticated `GET /api/v1/todos` using the normal list envelope with `items`, always-present `next_cursor` (string or null), and `server_time`.
-- Always filter by current user and `deleted_at IS NULL`.
-- Support `status=pending|completed|all`, default `pending`. `all` includes pending, completed, and canceled active Todos.
-- Support optional `category_id` UUID by direct Todo field filtering. Do not separately reveal whether the category exists or belongs to another user; unmatched filters return an empty list.
-- Support optional exact `planned_date` and inclusive `due_from`/`due_to`. A due filter excludes null `due_at` rows. Reject `due_from > due_to`.
-- Timestamp query values must be valid ISO 8601 timestamps with timezone, consistent with the API time contract.
-- Support integer `limit`, default 50, minimum 1, maximum 100.
-- Apply fixed ordering: `planned_date ASC NULLS LAST`, `due_at ASC NULLS LAST`, priority rank high=1/medium=2/low=3, `updated_at DESC`, then `id ASC`.
-- Express null ordering and keyset comparisons explicitly so SQLite tests and PostgreSQL behavior agree.
-- Use limit-plus-one fetching. Return at most `limit` items and derive `next_cursor` from the last returned item only when another row exists.
-- Encode a deterministic base64url JSON v1 cursor without required padding. It must contain the final ordering anchor and normalized filter identity for status, category, planned date, due bounds, and fixed sort version.
-- `limit` is not part of filter identity and may change between pages. Any other filter mismatch returns `400 validation_error`.
-- Reject malformed base64/JSON, unsupported version, missing/extra or invalid anchor fields, invalid UUID/date/timestamp/priority rank, and filter mismatch with `400 validation_error`.
-- Cursor values for nullable ordering fields must represent null explicitly and resume strictly after the anchor.
-- Serialize every item through the existing stable Todo DTO. Batch-load categories referenced by the page rather than issuing one category query per Todo.
-- Active categories use `is_deleted=false`; soft-deleted categories use `is_deleted=true`; absent relations return `category=null`.
-- The endpoint is read-only: no Idempotency-Key requirement, state mutation, sync change, or idempotency record.
-- Registering the list route must not add or shadow `/todos/today`; future static routes still need registration before dynamic `/{todo_id}` routes.
+- Add authenticated `GET /api/v1/todos/today` with required `date=YYYY-MM-DD`; malformed or missing dates use the existing validation-error envelope.
+- Register `/today` before dynamic `GET /{todo_id}` so the static route cannot be captured as a UUID.
+- Use `current_user.timezone`, not server-local time, to construct the selected local day as `[local midnight, next local midnight)`, then compare timestamp columns against timezone-aware boundaries. Build the next local midnight from the next calendar date so DST days remain correct.
+- Always filter Todo rows by current user and `deleted_at IS NULL`.
+- Section candidates are pending Todos only. Assign each Todo once in this strict order: `overdue`, `due`, `planned`, then `inbox_recent`.
+- `overdue`: `due_at` before selected-day start. `due`: `due_at` inside the selected local day. `planned`: `planned_date` equals the selected date after excluding earlier assignments.
+- `inbox_recent`: remaining pending Todos in the current user's active Inbox category with both `planned_date` and `due_at` null. Select at most the five newest by `created_at DESC`, then apply the standard section order to the selected set.
+- Apply the API contract's standard section ordering: priority high, medium, low; `due_at ASC` null last; `planned_date ASC` null last; `created_at ASC`; final `id ASC` tie-breaker.
+- Return the existing stable Todo DTO for each item. Batch-load referenced categories; preserve the existing active, soft-deleted, and missing category summary behavior without per-item queries.
+- Return `data.date`, `data.timezone`, all four always-present arrays, `summary`, and `server_time`; do not return pagination fields or a Reminder section.
+- Lock summary semantics for this slice: `pending_count` is the number of unique Todos returned across the four sections; `completed_count` is the number of current-user, non-deleted Todos whose `completed_at` falls inside the selected local day; `overdue_count` is the number of Todos in `overdue`. Canceled Todos are excluded from all three counts.
+- Keep the endpoint read-only: no Idempotency-Key requirement, mutation, sync change, idempotency record, or event fanout.
 
 ## Acceptance Criteria
 
-- [x] Default list returns only current-user active pending Todos with the stable DTO and `next_cursor` present.
-- [x] Status pending/completed/all semantics include the correct rows; deleted and cross-user Todos never appear.
-- [x] Category, planned-date, and inclusive due-range filters work alone and in combination without leaking category ownership/existence.
-- [x] Invalid status, UUID, date/timestamp, naive timestamp, due range, limit, and cursor return `400 validation_error`.
-- [x] Ordering exactly follows contracted null placement, priority rank, descending update time, and UUID tie-breaker.
-- [x] Multi-page traversal on an unchanged dataset has no duplicate or skipped rows, including equal and null sort values.
-- [x] `next_cursor` is null on the final page and is generated from the last returned row when more data exists.
-- [x] Cursor filter mismatch fails, while changing only limit remains valid.
-- [x] Cursor malformed/version/schema/type cases are covered and cursor output is deterministic base64url JSON v1.
-- [x] Category summaries correctly cover active, soft-deleted, and missing categories without N+1 lookups.
-- [x] The endpoint creates no Todo, sync change, or idempotency record and exposes no internal fields.
-- [x] Focused and full backend tests pass; no migration or out-of-scope endpoint is added.
+- [ ] Valid authentication and date return the aggregation envelope with the requested date, user timezone, four arrays, summary, and server time.
+- [ ] Missing/invalid authentication and malformed/missing date use existing error behavior; `/todos/today` reaches the static handler rather than UUID validation.
+- [ ] Local-day boundaries correctly classify due and completed timestamps before, at, inside, and at the end-exclusive boundary, including a non-UTC timezone and a DST transition date.
+- [ ] Overdue, due, planned, and inbox-recent membership follows the contracted rules and strict single-assignment priority with no duplicate Todo IDs.
+- [ ] Inbox recent uses only the owned active Inbox, requires null planning/due fields, selects no more than the five newest eligible Todos, and excludes other users/categories.
+- [ ] Every section has deterministic contracted ordering with an ID tie-breaker.
+- [ ] Pending, completed, overdue, canceled, deleted, and cross-user rows produce the locked summary counts.
+- [ ] Stable Todo DTO/category behavior is preserved and categories are batch-loaded without an N+1 query path.
+- [ ] The endpoint creates no Todo, sync change, idempotency record, or other write side effect.
+- [ ] Focused and full backend tests pass; Alembic remains at one head; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Add focused Todo list tests for auth/isolation, every filter, validation, exact ordering, cursor schema, multi-page boundaries, category summaries, and no-write behavior.
-- Run full `python -m pytest` from `backend/`.
-- Inspect generated/query logic for explicit null ordering and PostgreSQL-compatible SQLAlchemy expressions.
-- Inspect route scope and query count for category batch loading.
-- Run `git diff --check`, inspect exact modified and untracked files, and confirm no model/migration/product-contract changes.
+- Add focused Today tests for auth/date validation, route ordering, timezone boundaries, all section rules, de-duplication, ordering, Inbox cap, summaries, DTO/category behavior, two-user isolation, and no writes.
+- Run `python -m pytest tests/test_todos_today.py` and full `python -m pytest` from `backend/`.
+- Run `python -m alembic heads` and inspect route registration order.
+- Inspect query behavior for explicit timezone boundaries, deterministic ordering, and batch category loading.
+- Run `git diff --check`, independently whitespace-check new untracked files, inspect the exact changed-file set, and confirm no model/migration/product-contract change.
 
 ## Risks
 
-- Mixed ASC/DESC and nullable keyset comparisons can create duplicates or skips.
-- Cursor/filter mismatch can silently return incorrect pages if identity is incomplete.
-- SQLite and PostgreSQL may differ when null ordering is implicit.
-- Per-item category lookup can create an N+1 query path.
-- Dynamic route ordering can shadow a future `/todos/today` route.
+- Converting a local calendar date to absolute timestamp bounds can be wrong around UTC offsets or DST changes.
+- Overlapping due/planned/Inbox conditions can duplicate rows unless assignment priority is explicit.
+- Selecting the newest five Inbox candidates and then applying presentation ordering can be implemented in the wrong order.
+- Dynamic UUID routing can shadow `/today` if route registration moves below `/{todo_id}`.
+- Separate item/category lookups can introduce N+1 queries.
 
 ## Coding Output Requirements
 
-Report modified files, filter/ordering/cursor design, cursor schema, category loading behavior, acceptance results, focused/full test results, SQL/route/query verification, diff checks, unresolved issues, and task-outside findings.
+Report modified files, date-boundary conversion, section classification/de-duplication, Inbox selection and presentation ordering, summary queries, category loading, route order, acceptance results, focused/full test results, Alembic/query/diff checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-19 09:58 +08:00
-
-Result Commit: `dd0d6fa9724b38c004c1737203d2d6280596ee2b`
-
-Completion Commit: `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `ee6f17d38292a6c4f21979c6ef35fb51d50f46b1` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-014 Closure documents with message `docs(task): close TASK-014`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-015 from the approved publication-state files. Coding must not start before Git Snapshot completion.

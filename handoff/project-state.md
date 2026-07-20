@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-17
+Last updated: 2026-07-20
 
 ## Current Phase
 
@@ -55,7 +55,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-013 Todo delete API completed in result commit `3a97402`; Code Review: PASS; backend tests: 78 passed.
 - TASK-013 terminal Closure Commit `b80ca37` was published and the task workflow ended.
 - TASK-014 Todo list cursor pagination and filters completed in result commit `dd0d6fa`; Code Review: PASS; backend tests: 83 passed.
-- TASK-014 Decision Closure Check passed on 2026-07-19; terminal Closure Commit is the only remaining action before the next task may be published.
+- TASK-014 terminal Closure Commit `0a5760a` was published and the task workflow ended.
+- TASK-015 Today Todo aggregation was published on 2026-07-20 and is awaiting Task Review.
 
 ## Recently Completed
 
@@ -104,7 +105,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-After TASK-014 terminal closure, the next Phase 1A business direction is Today Todo aggregation. Live routing is maintained in `handoff/current-task.md`.
+Complete TASK-015 Today Todo aggregation, then continue to the sync changes pull endpoint. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

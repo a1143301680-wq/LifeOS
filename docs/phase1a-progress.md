@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-07-17
+Last updated: 2026-07-20
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -38,7 +38,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `PATCH /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `GET /api/v1/todos` | done | Published in `dd0d6fa`; Code Review PASS; 83 backend tests passed |
-| `GET /api/v1/todos/today` | next | Aggregation not started |
+| `GET /api/v1/todos/today` | next | TASK-015 published; awaiting Task Review |
 | `POST /api/v1/todos` | done | Published in `f2fe55e`; Code Review PASS; 47 backend tests passed; live PostgreSQL verification deferred |
 | `GET /api/v1/todos/{id}` | done | Published in `deb240b`; Code Review PASS; 54 backend tests passed |
 | `PATCH /api/v1/todos/{id}` | done | Published in `09cd984`; Code Review PASS; 62 backend tests passed |
@@ -57,7 +57,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add Today Todo aggregation.
+1. Complete TASK-015 Today Todo aggregation.
 2. Add `GET /api/v1/sync/changes`.
 3. Add `GET /api/v1/sync/events`.
 

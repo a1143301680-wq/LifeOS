@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-07-17
+Last updated: 2026-07-20
 
 ## Gate Status
 
@@ -10,36 +10,16 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-07-17 18:33 +08:00
+Reviewed at: 2026-07-20 08:40 +08:00
 
-Reviewed task: TASK-014 Todo list cursor pagination and filters
+Reviewed task: TASK-015 Today Todo aggregation API
 
-## Scope Check
+## Required Review
 
-- [x] Task goal is explicit.
-- [x] In Scope and Out of Scope are explicit.
-- [x] No obvious scope conflict exists.
-- [x] Task size fits one closeable loop.
-
-## Input Check
-
-- [x] Relevant files can be located.
-- [x] Required product and technical information is available.
-- [x] Prerequisites are complete.
-- [x] External dependency state is clear.
-
-## Acceptance Check
-
-- [x] Acceptance criteria are verifiable.
-- [x] Verification methods are explicit.
-- [x] Existing behavior to preserve is stated.
-
-## Git Check
-
-- [x] Current worktree state is clear.
-- [x] Uncommitted and staged changes are identified.
-- [x] No unrelated changes will be overwritten.
-- [x] Git Snapshot can establish a baseline.
+- [x] Goal, scope, exclusions, dependencies, and allowed files are complete.
+- [x] Timezone boundaries, section assignment, Inbox selection, ordering, and summary semantics are implementation-ready.
+- [x] Acceptance and verification plans cover route precedence, isolation, de-duplication, DST, batching, and no-write behavior.
+- [x] Branch, HEAD, worktree, staged state, changed files, whitespace checks, and Git Snapshot readiness are recorded.
 
 ## Issues
 
@@ -48,8 +28,8 @@ No blocking issues.
 ## Review Evidence
 
 - Branch: `main`
-- HEAD: `b80ca37e9e7f6ee8b441e7f8bc9cc8440ced1bee` (`docs(task): close TASK-013`); matches `origin/main`.
-- Worktree Summary: seven modified tracked TASK-014 publication-state files and one untracked TASK-014 archive; no business implementation, model, migration, product-contract, frontend, Android, generated, secret, or unrelated changes.
+- HEAD: `0a5760adaee3907532e8ec028938d3658c494997` (`docs(task): close TASK-014`); matches `origin/main`.
+- Worktree Summary: seven modified tracked TASK-015 publication-state files and one untracked TASK-015 archive; no business implementation, model, migration, product-contract, frontend, Android, generated, secret, or unrelated changes.
 - Changed Files:
   - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
@@ -58,43 +38,24 @@ No blocking issues.
   - `handoff/git-snapshot.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-014-todo-list-pagination.md`
+  - `tasks/TASK-015-today-todo-aggregation.md`
 - Staged Changes: none; `git diff --cached --name-status` is empty and `git diff --cached --check` exits 0.
-- `git diff --check`: PASS (exit code 0; untracked TASK-014 archive also passes an independent whitespace check; non-blocking LF/CRLF conversion warnings only).
-- Git Snapshot readiness: READY; the eight TASK-014 publication-state files belong to the current Decision output and can be captured as the pre-Coding baseline. Coding has not started.
+- `git diff --check`: PASS (exit code 0; non-blocking LF/CRLF conversion warnings only).
+- Independent new-file whitespace check: PASS; `git diff --no-index --check NUL tasks/TASK-015-today-todo-aggregation.md` exits 0.
+- Git Snapshot readiness: READY; the eight TASK-015 publication-state files belong to the current Decision output and can be captured as the pre-Coding baseline. Coding has not started.
 
 ## Task Review Notes
 
-- Filtering, deterministic ordering, and keyset cursor behavior form one closeable collection-read slice because page correctness depends on all three contracts.
-- `status=all` explicitly includes `pending`, `completed`, and `canceled` active Todos.
-- Due bounds require timezone-aware ISO timestamps, reject `due_from > due_to`, and exclude null `due_at` rows when a due filter is used.
-- Mixed ASC/DESC and null-last ordering is sufficiently specified for implementation by requiring explicit null ordering, priority rank, strict keyset resume after the anchor, and SQLite/PostgreSQL-compatible SQLAlchemy expressions.
-- Cursor identity is sufficient: v1 base64url JSON, final ordering anchor, normalized status/category/planned-date/due-bound filters, and fixed sort version. `limit` is intentionally excluded and may change between pages; other filter mismatch returns `400 validation_error`.
-- Category behavior is explicit: direct non-revealing category filter, batch-loaded summaries, active/deleted/missing categories covered in DTO acceptance.
-- The task excludes Today, sync pull, SSE, fanout, writes, product-contract changes, model/migration changes unless proven unavoidable, and completed task archives.
+- Today aggregation is a single closeable slice: one read-only endpoint owns timezone conversion, four-section classification, de-duplication, ordering, summary counts, DTO serialization, and tests.
+- Four sections and single-assignment priority are explicit: `overdue`, `due`, `planned`, then `inbox_recent`; pending active Todos are assigned once in that order.
+- User timezone and DST behavior are implementation-ready: use `current_user.timezone`, construct `[local midnight, next local midnight)` from calendar dates, and verify non-UTC plus DST transition boundaries.
+- `inbox_recent` is unambiguous: filter remaining pending active-Inbox Todos with null `planned_date` and null `due_at`, select at most five newest by `created_at DESC`, then present that selected set with the standard section ordering.
+- Summary semantics are locked: `pending_count` is unique returned section items, `completed_count` is current-user non-deleted Todos completed inside the selected local day, and `overdue_count` is the overdue section length; canceled rows are excluded.
+- Route precedence is explicit: register `/todos/today` before dynamic `/{todo_id}` so it reaches the static handler instead of UUID validation.
+- Scope excludes pagination, writes, sync, SSE, fanout, Reminder, recurrence, frontend, Android, model/migration changes unless proven unavoidable, product-contract edits, and completed TASK-005 through TASK-014 archives.
 
 ## Instructions
 
-Task Review must update this file before Git Snapshot or Coding starts.
+Task Review must update this file before Git Snapshot or Coding starts. PASS and REJECT must include durable Review Evidence: Branch, HEAD, Worktree Summary, Changed Files, Staged Changes, `git diff --check`, independent new-file whitespace check, Git Snapshot readiness, Reviewed task, and Reviewed at.
 
-PASS and REJECT must both include durable Review Evidence: Branch, HEAD, Worktree Summary, Changed Files, Staged Changes, `git diff --check` result, Git Snapshot readiness, Reviewed task, and Reviewed at.
-
-On PASS, update both `handoff/current-task.md` and `tasks/TASK-014-todo-list-pagination.md` to `Status: READY`.
-
-On REJECT, keep or set both task-status files to `Status: PLANNED`.
-
-If either task-status file cannot be updated, the transition is not complete.
-
-Valid outputs:
-
-```text
-Result: PASS
-Target Status: READY
-```
-
-or
-
-```text
-Result: REJECT
-Target Status: PLANNED
-```
+On PASS, update both `handoff/current-task.md` and `tasks/TASK-015-today-todo-aggregation.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. If either task-status file cannot be updated, the transition is incomplete.
