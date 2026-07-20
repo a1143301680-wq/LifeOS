@@ -4,7 +4,7 @@
 
 - Task ID: TASK-015
 - Task Name: Today Todo aggregation API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: Todo APIs through `dd0d6fa`; TASK-014 terminal closure `0a5760a`
@@ -208,9 +208,15 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
-- Result Commit: pending
-- Push Result: pending
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-20
+- Branch: main
+- Result Commit: 2a698f37028e1f8ebb0c8ededcfb5305c4c9a085
+- Commit Message: `feat(todo): add today aggregation API`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

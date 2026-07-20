@@ -38,14 +38,14 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `PATCH /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `DELETE /api/v1/todo-categories/{id}` | done | Implemented, tested, reviewed, and published in `83ac3eb` |
 | `GET /api/v1/todos` | done | Published in `dd0d6fa`; Code Review PASS; 83 backend tests passed |
-| `GET /api/v1/todos/today` | next | TASK-015 published; awaiting Task Review |
+| `GET /api/v1/todos/today` | done | Published in `2a698f3`; Code Review PASS; 88 backend tests passed |
 | `POST /api/v1/todos` | done | Published in `f2fe55e`; Code Review PASS; 47 backend tests passed; live PostgreSQL verification deferred |
 | `GET /api/v1/todos/{id}` | done | Published in `deb240b`; Code Review PASS; 54 backend tests passed |
 | `PATCH /api/v1/todos/{id}` | done | Published in `09cd984`; Code Review PASS; 62 backend tests passed |
 | `POST /api/v1/todos/{id}/complete` | done | Published in `2c35f1d`; Code Review PASS; 67 backend tests passed |
 | `POST /api/v1/todos/{id}/reopen` | done | Published in `c2d167f`; Code Review PASS; 72 backend tests passed |
 | `DELETE /api/v1/todos/{id}` | done | Published in `3a97402`; Code Review PASS; 78 backend tests passed |
-| `GET /api/v1/sync/changes` | pending | Durable pull recovery endpoint |
+| `GET /api/v1/sync/changes` | next | Durable pull recovery endpoint |
 | `GET /api/v1/sync/events` | pending | SSE wake-up only |
 
 ## Open Issues That Affect Sequencing
@@ -57,9 +57,8 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Complete TASK-015 Today Todo aggregation.
-2. Add `GET /api/v1/sync/changes`.
-3. Add `GET /api/v1/sync/events`.
+1. Add `GET /api/v1/sync/changes`.
+2. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule
 

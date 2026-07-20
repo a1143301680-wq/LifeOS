@@ -6,7 +6,7 @@ Last updated: 2026-07-20
 
 - Task ID: TASK-015
 - Task Name: Today Todo aggregation API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -84,16 +84,16 @@ An authenticated user can request one date in their configured timezone and rece
 
 ## Acceptance Criteria
 
-- [ ] Valid authentication and date return the aggregation envelope with the requested date, user timezone, four arrays, summary, and server time.
-- [ ] Missing/invalid authentication and malformed/missing date use existing error behavior; `/todos/today` reaches the static handler rather than UUID validation.
-- [ ] Local-day boundaries correctly classify due and completed timestamps before, at, inside, and at the end-exclusive boundary, including a non-UTC timezone and a DST transition date.
-- [ ] Overdue, due, planned, and inbox-recent membership follows the contracted rules and strict single-assignment priority with no duplicate Todo IDs.
-- [ ] Inbox recent uses only the owned active Inbox, requires null planning/due fields, selects no more than the five newest eligible Todos, and excludes other users/categories.
-- [ ] Every section has deterministic contracted ordering with an ID tie-breaker.
-- [ ] Pending, completed, overdue, canceled, deleted, and cross-user rows produce the locked summary counts.
-- [ ] Stable Todo DTO/category behavior is preserved and categories are batch-loaded without an N+1 query path.
-- [ ] The endpoint creates no Todo, sync change, idempotency record, or other write side effect.
-- [ ] Focused and full backend tests pass; Alembic remains at one head; no migration or out-of-scope endpoint is added.
+- [x] Valid authentication and date return the aggregation envelope with the requested date, user timezone, four arrays, summary, and server time.
+- [x] Missing/invalid authentication and malformed/missing date use existing error behavior; `/todos/today` reaches the static handler rather than UUID validation.
+- [x] Local-day boundaries correctly classify due and completed timestamps before, at, inside, and at the end-exclusive boundary, including a non-UTC timezone and a DST transition date.
+- [x] Overdue, due, planned, and inbox-recent membership follows the contracted rules and strict single-assignment priority with no duplicate Todo IDs.
+- [x] Inbox recent uses only the owned active Inbox, requires null planning/due fields, selects no more than the five newest eligible Todos, and excludes other users/categories.
+- [x] Every section has deterministic contracted ordering with an ID tie-breaker.
+- [x] Pending, completed, overdue, canceled, deleted, and cross-user rows produce the locked summary counts.
+- [x] Stable Todo DTO/category behavior is preserved and categories are batch-loaded without an N+1 query path.
+- [x] The endpoint creates no Todo, sync change, idempotency record, or other write side effect.
+- [x] Focused and full backend tests pass; Alembic remains at one head; no migration or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -117,6 +117,6 @@ Report modified files, date-boundary conversion, section classification/de-dupli
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the Code Review-approved TASK-015 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
+Required next action: run TASK-015 Decision Closure Check before publishing the next task.

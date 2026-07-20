@@ -56,7 +56,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-013 terminal Closure Commit `b80ca37` was published and the task workflow ended.
 - TASK-014 Todo list cursor pagination and filters completed in result commit `dd0d6fa`; Code Review: PASS; backend tests: 83 passed.
 - TASK-014 terminal Closure Commit `0a5760a` was published and the task workflow ended.
-- TASK-015 Today Todo aggregation was published on 2026-07-20 and is awaiting Task Review.
+- TASK-015 Today Todo aggregation API completed in result commit `2a698f3`; Code Review: PASS; backend tests: 88 passed.
 
 ## Recently Completed
 
@@ -105,7 +105,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Complete TASK-015 Today Todo aggregation, then continue to the sync changes pull endpoint. Live routing is maintained in `handoff/current-task.md`.
+The next Phase 1A business direction is `GET /api/v1/sync/changes`. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
