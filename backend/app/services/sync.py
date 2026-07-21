@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
+from app.core.errors import ApiError
 from app.models.sync import SyncChange
 
 
@@ -46,3 +47,47 @@ def create_sync_change(
     )
     db.add(change)
     return change
+
+
+def sync_change_to_dict(change: SyncChange) -> dict:
+    item = {
+        "cursor": change.cursor,
+        "change_type": change.change_type,
+        "entity_type": change.entity_type,
+        "entity_id": str(change.entity_id) if change.entity_id is not None else None,
+        "entity_version": change.entity_version,
+    }
+    if change.payload:
+        item.update(change.payload)
+    return item
+
+
+def pull_sync_changes(
+    db: Session,
+    *,
+    user_id: UUID,
+    cursor: int,
+    limit: int,
+) -> tuple[list[dict], int, bool]:
+    high_water = get_latest_cursor(db)
+    if cursor > high_water:
+        raise ApiError(400, "validation_error", "cursor is beyond the latest sync cursor")
+
+    rows = (
+        db.execute(
+            select(SyncChange)
+            .where(
+                SyncChange.user_id == user_id,
+                SyncChange.cursor > cursor,
+                SyncChange.cursor <= high_water,
+            )
+            .order_by(SyncChange.cursor.asc())
+            .limit(limit + 1)
+        )
+        .scalars()
+        .all()
+    )
+    page = rows[:limit]
+    has_more = len(rows) > limit
+    next_cursor = page[-1].cursor if has_more else high_water
+    return [sync_change_to_dict(change) for change in page], next_cursor, has_more
