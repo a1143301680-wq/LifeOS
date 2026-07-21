@@ -1,27 +1,27 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-20
+Last updated: 2026-07-21
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-015
+Task ID: TASK-016
 
-Branch: main
+Branch: pending
 
-Base Commit: `0a5760adaee3907532e8ec028938d3658c494997`
+Base Commit: `f562773316251f43d5eb9ba704f361eb6f25dc24`
 
-Working Tree: 8 approved TASK-015 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: No
 
-Snapshot Commit: `82eecbfb82c0d96543ca8a0dc50b5a81706b9344`
+Snapshot Commit: pending
 
-Reason: approved TASK-015 readiness documents required a durable pre-Coding baseline
+Reason: awaiting Task Review PASS
 
 ## Instructions
 
-Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-015 publication scope; unexpected files block the snapshot.
+Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-016 publication scope; unexpected files block the snapshot.
 
-After completion, update both `handoff/current-task.md` and `tasks/TASK-015-today-todo-aggregation.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.
+After completion, update both `handoff/current-task.md` and `tasks/TASK-016-sync-changes-pull.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.

@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-07-20
+Last updated: 2026-07-21
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -45,7 +45,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `POST /api/v1/todos/{id}/complete` | done | Published in `2c35f1d`; Code Review PASS; 67 backend tests passed |
 | `POST /api/v1/todos/{id}/reopen` | done | Published in `c2d167f`; Code Review PASS; 72 backend tests passed |
 | `DELETE /api/v1/todos/{id}` | done | Published in `3a97402`; Code Review PASS; 78 backend tests passed |
-| `GET /api/v1/sync/changes` | next | Durable pull recovery endpoint |
+| `GET /api/v1/sync/changes` | next | TASK-016 published; awaiting Task Review |
 | `GET /api/v1/sync/events` | pending | SSE wake-up only |
 
 ## Open Issues That Affect Sequencing
@@ -57,7 +57,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add `GET /api/v1/sync/changes`.
+1. Complete TASK-016 `GET /api/v1/sync/changes`.
 2. Add `GET /api/v1/sync/events`.
 
 ## Decision Rule

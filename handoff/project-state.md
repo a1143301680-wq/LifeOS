@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-20
+Last updated: 2026-07-21
 
 ## Current Phase
 
@@ -57,7 +57,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-014 Todo list cursor pagination and filters completed in result commit `dd0d6fa`; Code Review: PASS; backend tests: 83 passed.
 - TASK-014 terminal Closure Commit `0a5760a` was published and the task workflow ended.
 - TASK-015 Today Todo aggregation API completed in result commit `2a698f3`; Code Review: PASS; backend tests: 88 passed.
-- TASK-015 Decision Closure Check passed on 2026-07-20; terminal Closure Commit is the only remaining action before the next task may be published.
+- TASK-015 terminal Closure Commit `f562773` was published and the task workflow ended.
+- TASK-016 Sync changes pull API was published on 2026-07-21 and is awaiting Task Review.
 
 ## Recently Completed
 
@@ -106,7 +107,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is `GET /api/v1/sync/changes`. Live routing is maintained in `handoff/current-task.md`.
+Complete TASK-016 `GET /api/v1/sync/changes`, then continue to the SSE wake-up endpoint. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
