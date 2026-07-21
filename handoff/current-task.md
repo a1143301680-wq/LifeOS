@@ -116,6 +116,16 @@ Report modified files, high-water capture and cursor advancement, query/paging l
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-016 Decision Closure Check before publishing the next task.
+Closure Check: PASS
+
+Checked at: 2026-07-21 11:06 +08:00
+
+Result Commit: `f6f90912c7ebead4a27d4a6571cc473317f7895f`
+
+Completion Commit: `1d4ffe4db392a61a01e42a173a840573960d8c5c`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `1d4ffe4db392a61a01e42a173a840573960d8c5c` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-016 Closure documents with message `docs(task): close TASK-016`. After remote parity is verified, return to Decision; do not run another Closure Check.

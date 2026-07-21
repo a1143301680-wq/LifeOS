@@ -216,4 +216,27 @@ Task-Outside Findings:
 
 ## Closure
 
-Closure Check: PENDING
+Closure Check: PASS
+
+- Checked At: 2026-07-21 11:06 +08:00
+- Result Commit: `f6f90912c7ebead4a27d4a6571cc473317f7895f`
+- Completion Commit: `1d4ffe4db392a61a01e42a173a840573960d8c5c`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `1d4ffe4db392a61a01e42a173a840573960d8c5c`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: Decision reran focused sync pull tests (`6 passed`), the full backend suite (`94 passed`), and Alembic heads (`20260713_0004 (head)`) on the published completion state.
+- Acceptance Criteria Result: all TASK-016 acceptance criteria confirmed.
+- Issue Disposition: no TASK-016 issue-log entry or unresolved blocking issue exists. Payload-key collision hardening remains a non-blocking future test if additional writer payload shapes are introduced.
+- Phase/Progress Result: `GET /api/v1/sync/changes` is recorded as done; the next Phase 1A business direction is `GET /api/v1/sync/events`.
+- Remaining Follow-ups:
+  - Add payload metadata-collision hardening if future sync writers introduce new payload keys.
+  - Continue with `GET /api/v1/sync/events` after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-016-sync-changes-pull.md`
+- Commit message: `docs(task): close TASK-016`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

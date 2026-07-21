@@ -59,6 +59,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-015 Today Todo aggregation API completed in result commit `2a698f3`; Code Review: PASS; backend tests: 88 passed.
 - TASK-015 terminal Closure Commit `f562773` was published and the task workflow ended.
 - TASK-016 Sync changes pull API completed in result commit `f6f9091`; Code Review: PASS; backend tests: 94 passed.
+- TASK-016 Decision Closure Check passed on 2026-07-21; terminal Closure Commit is the only remaining action before the next task may be published.
 
 ## Recently Completed
 
