@@ -6,7 +6,7 @@ Last updated: 2026-07-21
 
 - Task ID: TASK-016
 - Task Name: Sync changes pull API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -84,15 +84,15 @@ An authenticated client can pull only its user's durable changes in global curso
 
 ## Acceptance Criteria
 
-- [ ] Default authenticated request returns the contracted top-level envelope and changes after cursor 0 in ascending cursor order.
-- [ ] Only current-user changes are returned; another user's rows create valid gaps and never leak payload or metadata.
-- [ ] Empty database and no-current-user-result cases return empty items, `has_more=false`, and the captured global high-water cursor.
-- [ ] Limit-plus-one paging returns every current-user change exactly once across pages; intermediate pages use the last returned cursor and terminal pages advance to the global high water.
-- [ ] Default, minimum, maximum, and changed-per-page limits work; negative cursor, zero/oversized limit, malformed values, and future cursor return `400 validation_error`.
-- [ ] Snapshot and Todo/category tombstone payloads are emitted at item top level exactly as stored, with nullable entity metadata handled and internal fields excluded.
-- [ ] Rows created after the request's captured high water are not mixed into that page and remain discoverable on a later request.
-- [ ] Authentication failures use existing behavior and the endpoint performs no writes or cursor allocation.
-- [ ] Focused and full backend tests pass; Alembic remains at one head; no migration, SSE route, or out-of-scope behavior is added.
+- [x] Default authenticated request returns the contracted top-level envelope and changes after cursor 0 in ascending cursor order.
+- [x] Only current-user changes are returned; another user's rows create valid gaps and never leak payload or metadata.
+- [x] Empty database and no-current-user-result cases return empty items, `has_more=false`, and the captured global high-water cursor.
+- [x] Limit-plus-one paging returns every current-user change exactly once across pages; intermediate pages use the last returned cursor and terminal pages advance to the global high water.
+- [x] Default, minimum, maximum, and changed-per-page limits work; negative cursor, zero/oversized limit, malformed values, and future cursor return `400 validation_error`.
+- [x] Snapshot and Todo/category tombstone payloads are emitted at item top level exactly as stored, with nullable entity metadata handled and internal fields excluded.
+- [x] Rows created after the request's captured high water are not mixed into that page and remain discoverable on a later request.
+- [x] Authentication failures use existing behavior and the endpoint performs no writes or cursor allocation.
+- [x] Focused and full backend tests pass; Alembic remains at one head; no migration, SSE route, or out-of-scope behavior is added.
 
 ## Verification Plan
 
@@ -116,6 +116,6 @@ Report modified files, high-water capture and cursor advancement, query/paging l
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the Code Review-approved TASK-016 result. Git Commit must verify the reviewed file set against `handoff/code-review-gate.md` before committing.
+Required next action: run TASK-016 Decision Closure Check before publishing the next task.

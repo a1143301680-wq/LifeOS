@@ -4,7 +4,7 @@
 
 - Task ID: TASK-016
 - Task Name: Sync changes pull API
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: durable sync writes and cursor allocator; TASK-015 terminal closure `f562773`
@@ -204,9 +204,15 @@ Task-Outside Findings:
 
 ## Git Commit
 
-- Result: PENDING
-- Result Commit: pending
-- Push Result: pending
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-21
+- Branch: main
+- Result Commit: f6f90912c7ebead4a27d4a6571cc473317f7895f
+- Commit Message: `feat(sync): add changes pull API`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 
