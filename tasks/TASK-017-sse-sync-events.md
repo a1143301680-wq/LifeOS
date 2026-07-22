@@ -199,4 +199,27 @@ Task-Outside Findings:
 
 ## Closure
 
-Closure Check: PENDING
+Closure Check: PASS
+
+- Checked At: 2026-07-22 10:11 +08:00
+- Result Commit: `b4a2c1ef368df7c1bf64386060c949e8e4300944`
+- Completion Commit: `c96e2bfb85f624d4c691b328d72b0718f4a8f673`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `c96e2bfb85f624d4c691b328d72b0718f4a8f673`.
+- Working Tree Before Closure Docs: clean.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: Decision reran focused SSE/fanout tests (`7 passed`), the full backend suite (`101 passed`), and Alembic heads (`20260713_0004 (head)`) on the published completion state.
+- Acceptance Criteria Result: all TASK-017 acceptance criteria confirmed.
+- Issue Disposition: no TASK-017 issue-log entry or unresolved blocking issue exists. Multi-worker/cross-instance fanout remains an explicit production hardening boundary, not a Phase 1A blocker.
+- Phase/Progress Result: `GET /api/v1/sync/events` and the process-local fanout foundation are recorded as done; all Phase 1A endpoints are now marked done.
+- Remaining Follow-ups:
+  - Document or replace process-local SSE fanout before introducing a multi-worker or multi-instance runtime.
+  - Run the Phase 1A completion audit after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-017-sse-sync-events.md`
+- Commit message: `docs(task): close TASK-017`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

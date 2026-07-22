@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 ## Current Phase
 
@@ -61,6 +61,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-016 Sync changes pull API completed in result commit `f6f9091`; Code Review: PASS; backend tests: 94 passed.
 - TASK-016 terminal Closure Commit `818bade` was published and the task workflow ended.
 - TASK-017 SSE sync wake-up and in-memory fanout completed in result commit `b4a2c1e`; Code Review: PASS; backend tests: 101 passed.
+- TASK-017 Decision Closure Check passed on 2026-07-22; terminal Closure Commit is the only remaining action before the Phase 1A completion audit.
 
 ## Recently Completed
 

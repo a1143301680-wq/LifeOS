@@ -1,6 +1,6 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 ## Metadata
 
@@ -118,6 +118,16 @@ Report modified files, SSE framing/headers, broker lifecycle and coalescing, eve
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-017 Decision Closure Check before publishing the Phase 1A completion audit task.
+Closure Check: PASS
+
+Checked at: 2026-07-22 10:11 +08:00
+
+Result Commit: `b4a2c1ef368df7c1bf64386060c949e8e4300944`
+
+Completion Commit: `c96e2bfb85f624d4c691b328d72b0718f4a8f673`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `c96e2bfb85f624d4c691b328d72b0718f4a8f673` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-017 Closure documents with message `docs(task): close TASK-017`. After remote parity is verified, return to Decision for the Phase 1A completion audit; do not run another Closure Check.
