@@ -6,7 +6,7 @@ Last updated: 2026-07-21
 
 - Task ID: TASK-017
 - Task Name: SSE sync wake-up and in-memory fanout
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -85,16 +85,16 @@ An authenticated client can maintain an SSE subscription scoped to its identity 
 
 ## Acceptance Criteria
 
-- [ ] Missing/invalid authentication is rejected before streaming; valid auth returns an SSE response with correct content type and buffering/cache headers.
-- [ ] Optional valid `device_id` is accepted without affecting identity or event payload; invalid length uses existing validation behavior.
-- [ ] Each successful category and Todo mutation publishes exactly one post-commit wake-up containing its committed sync cursor.
-- [ ] Validation failure, transaction rollback, idempotency replay, and GET endpoints publish no new event.
-- [ ] Events contain only `type`, `latest_cursor`, and `server_time`, use valid SSE framing, and never contain snapshots/tombstones/entity or identity data.
-- [ ] Same-user multiple subscribers receive wake-ups; cross-user subscribers do not.
-- [ ] Slow-consumer coalescing preserves the greatest pending cursor without blocking the write path.
-- [ ] Cancellation/disconnect removes the subscription and repeated connect/disconnect cycles leave no registry leak.
-- [ ] Clients can use the event cursor with the existing pull endpoint; lost/coalesced notifications do not alter durable sync rows.
-- [ ] Focused and full backend tests pass; Alembic remains at one head; no model, migration, external dependency, or out-of-scope endpoint is added.
+- [x] Missing/invalid authentication is rejected before streaming; valid auth returns an SSE response with correct content type and buffering/cache headers.
+- [x] Optional valid `device_id` is accepted without affecting identity or event payload; invalid length uses existing validation behavior.
+- [x] Each successful category and Todo mutation publishes exactly one post-commit wake-up containing its committed sync cursor.
+- [x] Validation failure, transaction rollback, idempotency replay, and GET endpoints publish no new event.
+- [x] Events contain only `type`, `latest_cursor`, and `server_time`, use valid SSE framing, and never contain snapshots/tombstones/entity or identity data.
+- [x] Same-user multiple subscribers receive wake-ups; cross-user subscribers do not.
+- [x] Slow-consumer coalescing preserves the greatest pending cursor without blocking the write path.
+- [x] Cancellation/disconnect removes the subscription and repeated connect/disconnect cycles leave no registry leak.
+- [x] Clients can use the event cursor with the existing pull endpoint; lost/coalesced notifications do not alter durable sync rows.
+- [x] Focused and full backend tests pass; Alembic remains at one head; no model, migration, external dependency, or out-of-scope endpoint is added.
 
 ## Verification Plan
 
@@ -118,6 +118,6 @@ Report modified files, SSE framing/headers, broker lifecycle and coalescing, eve
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-017 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.
+Required next action: run TASK-017 Decision Closure Check before publishing the Phase 1A completion audit task.

@@ -4,7 +4,7 @@
 
 - Task ID: TASK-017
 - Task Name: SSE sync wake-up and in-memory fanout
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies: durable sync pull published in `f6f9091`; TASK-016 terminal closure `818bade`
@@ -187,9 +187,15 @@ Task-Outside Findings:
 
 ## Git Commit
 
-- Result: PENDING
-- Result Commit: pending
-- Push Result: pending
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-22
+- Branch: main
+- Result Commit: b4a2c1ef368df7c1bf64386060c949e8e4300944
+- Commit Message: `feat(sync): add SSE wake-up fanout`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

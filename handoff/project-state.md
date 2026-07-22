@@ -60,7 +60,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-015 terminal Closure Commit `f562773` was published and the task workflow ended.
 - TASK-016 Sync changes pull API completed in result commit `f6f9091`; Code Review: PASS; backend tests: 94 passed.
 - TASK-016 terminal Closure Commit `818bade` was published and the task workflow ended.
-- TASK-017 SSE sync wake-up and in-memory fanout was published on 2026-07-21 and is awaiting Task Review.
+- TASK-017 SSE sync wake-up and in-memory fanout completed in result commit `b4a2c1e`; Code Review: PASS; backend tests: 101 passed.
 
 ## Recently Completed
 
@@ -109,7 +109,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Complete TASK-017 `GET /api/v1/sync/events` with process-local post-commit fanout, then run a Phase 1A completion audit. Live task routing is maintained in `handoff/current-task.md`.
+The next recommended direction is a Phase 1A completion audit after TASK-017 terminal closure. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
