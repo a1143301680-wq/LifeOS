@@ -4,130 +4,117 @@ Last updated: 2026-07-22
 
 ## Metadata
 
-- Task ID: TASK-017
-- Task Name: SSE sync wake-up and in-memory fanout
-- Status: COMPLETED
+- Task ID: TASK-018
+- Task Name: PC Web identity and Todo list vertical slice
+- Status: READY
 - Priority: P1
-- Parent Task: Phase 1A backend
+- Parent Task: Phase 1A PC Web
 - Dependencies:
-  - Durable sync writes and `GET /api/v1/sync/changes` published through `f6f9091`
-  - TASK-016 terminal closure published in `818bade`
+  - Phase 1A backend and sync endpoints published through `b4a2c1e`
+  - TASK-017 terminal closure published in `32894e4`
+  - Phase 1A audit confirms PC Web and Android remain incomplete
 
 ## Background
 
-Durable pull recovery is complete, but connected PC and Android clients are not yet notified that new changes are available. Phase 1A requires a lightweight SSE wake-up channel backed by process-local fanout; clients always pull durable snapshots or tombstones after receiving a signal.
+The Phase 1A backend is complete, but the repository has no PC Web or Android client. This first client slice must produce a usable browser experience rather than a standalone scaffold: enter a bootstrap token, validate the selected identity, and view that identity's pending Todos.
 
 ## Goal
 
-An authenticated client can maintain an SSE subscription scoped to its identity and receive a lightweight `sync.available` event after a successful Todo or category write commits, without receiving entity data or affecting durable recovery correctness.
+A user can open the PC Web app, securely enter or reuse a Phase 1A identity token, confirm the resolved identity through `GET /api/v1/me`, and view only that identity's pending Todo list with useful loading, empty, error, retry, and identity-switch states.
 
 ## Scope
 
 ### In Scope
 
-- `GET /api/v1/sync/events` with bearer authentication and optional `device_id`.
-- Process-local, per-user SSE subscription registry and non-blocking wake-up fanout.
-- Publication after each existing Todo/category REST write commits successfully.
-- Exact event payload, SSE framing/headers, subscriber cleanup, isolation, slow-consumer coalescing, and focused tests.
+- React + Vite + TypeScript PC Web project under `web/`.
+- Token entry, `/me` identity validation, local token persistence, and clear/re-enter identity flow.
+- Authenticated `GET /api/v1/todos` pending-list integration.
+- Quiet, responsive work-focused UI with loading, empty, error, unauthorized, retry, and identity display states.
+- Focused component/API/storage tests, production build verification, and local development instructions.
 
 ### Out of Scope
 
-- Redis, PostgreSQL LISTEN/NOTIFY, message queues, cross-process or cross-instance fanout, replayable SSE history, or guaranteed event delivery.
-- Entity snapshots/tombstones in SSE, durable cursor replacement, or changes to `GET /api/v1/sync/changes`.
-- New write endpoints, changes to existing write/idempotency/sync payload semantics, or background retry queues.
-- Frontend, Android, reconnect UI, Reminder, recurrence, and offline operation replay.
-- Models, dependencies, settings, or Alembic migrations unless Task Review proves one unavoidable prerequisite.
+- Today view, category management, Todo create/edit/complete/delete, filters, pagination controls, or Todo detail screens.
+- SSE connection/refresh, offline cache, service worker/PWA, routing framework, or Android work.
+- Backend API, authentication, CORS, database, or deployment changes.
+- Storing tokens in repository files, URLs, logs, analytics, or visible error details.
+- Marketing/landing content, dashboards outside the Todo list, or broad design-system work.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 3.1, 12-14
-- `docs/architecture.md` synchronization model
-- `docs/data-model-phase1.md` sections 4.7 and 7
-- `docs/mvp.md` Phase 1A backend scope and acceptance
-- `docs/phase1a-progress.md`
-- `backend/app/api/v1/sync.py`, router, auth, time, envelope, and error patterns
-- Existing Todo/category write endpoints and their transaction/idempotency tests
+- `docs/mvp.md` Phase 1A PC Web scope
+- `docs/api-phase1a.md` sections 2, 4, 7.1, 8.1, 9.4, 10.1, and closed PC token decision
+- `docs/architecture.md` identity/access and PC Web responsibilities
+- `docs/phase1a-completion-audit.md`
+- Existing backend envelopes and Todo DTO/list tests only as contract references
 
 ### Allowed Modify Files
 
-- `backend/app/api/v1/sync.py`
-- A focused process-local SSE broker/helper under `backend/app/services/`
-- `backend/app/api/v1/todos.py` only for post-commit wake-up publication
-- `backend/app/api/v1/todo_categories.py` only for post-commit wake-up publication
-- `backend/app/main.py` only if lifecycle cleanup is directly required
-- New or existing focused SSE/fanout tests under `backend/tests/`
+- New `web/` React/Vite/TypeScript project files, source, styles, tests, package manifest, and lockfile
+- Root `.gitignore` only for frontend generated/local artifacts
+- `README.md` or `web/README.md` only for concise PC Web setup/run instructions
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-017 state files
+- Active handoff, gate, Git record, issue-log, and TASK-018 state files
 
 ### Forbidden Modify Files
 
-- Models, migrations, persistent sync payloads, cursor allocation, or pull API semantics
-- Existing write validation, mutation, idempotency replay/conflict, transaction, or response behavior beyond post-commit wake-up publication
-- External broker/dependency or multi-worker delivery infrastructure
-- Product requirements, architecture, API contract, or data-model documents unless Task Review returns a genuine contract ambiguity to Decision
-- Frontend, Android, Reminder, recurrence, offline replay, and completed TASK-005 through TASK-016 archives
+- Any `backend/` implementation, tests, dependencies, settings, or migrations
+- Product requirements, architecture, MVP, API contract, or data-model documents
+- Today/category/mutation/SSE/offline/Android behavior
+- Raw identity tokens, `.env` secrets, build output, dependency directories, logs, caches, or editor-local files
+- Completed TASK-005 through TASK-017 archives
 
 ## Implementation Requirements
 
-- Add authenticated `GET /api/v1/sync/events` to the existing `/sync` router and return `text/event-stream` with no-cache and anti-buffering headers appropriate for SSE.
-- Accept optional `device_id` as connection metadata with a bounded length consistent with current device identifiers. It must not select identity, be persisted, or appear in events.
-- Implement a process-local broker keyed only by authenticated user ID. Each active subscription has an independent bounded queue and is removed reliably when its stream is cancelled or disconnected.
-- Emit data events using valid SSE framing and compact JSON containing exactly `type="sync.available"`, integer `latest_cursor`, and `server_time`. Entity snapshots, tombstones, entity IDs, user IDs, and device IDs are forbidden.
-- Keepalive comments may be emitted during idle periods but must contain no domain payload and must not be treated as `sync.available` events.
-- Publish only after a Todo/category write transaction commits successfully, using the cursor of that write's committed `sync_changes` row. Cover category create/update/delete and Todo create/update/complete/reopen/delete.
-- Idempotency replay, validation failure, rollback, and read endpoints must not publish a new wake-up event. Fanout must not change existing HTTP response bodies or sync cursors.
-- Publishing must be non-blocking for write requests. A slow subscriber may coalesce pending notifications, but its next domain event must carry the greatest published cursor it has not yet consumed.
-- One user's publication must reach all active subscriptions for that user and none for another user. Disconnecting one subscriber must not affect others.
-- A missed or coalesced SSE event is acceptable because clients recover through `GET /api/v1/sync/changes`; SSE is never the durable source of truth.
-- Keep the Phase 1A runtime explicitly process-local. Do not claim cross-worker delivery; focused tests must not require external network services.
+- Create a maintainable React + Vite + TypeScript app in `web/` with npm scripts for development, test, and production build. Use Vitest and Testing Library for focused behavior tests.
+- Use a relative `/api/v1` base by default and a Vite development proxy to the local backend, with a non-secret environment override when useful. Do not require a backend CORS change for local development.
+- Store the raw token only in `localStorage` key `lifeos.identityToken`. `lifeos.selectedIdentityAlias` may store the alias returned by `/me` for display only and must never authorize requests.
+- Provide a focused identity setup screen with a password-style token input. Never put the token in URLs, UI error details, logs, test snapshots, or committed configuration.
+- Validate submitted/stored tokens with authenticated `GET /api/v1/me`. Authorization always comes from the bearer token; the client must never send `user_id`.
+- On valid identity, show the resolved display name/alias and provide a clear switch/re-enter action that removes both local identity keys and returns to setup.
+- Fetch `GET /api/v1/todos` with the bearer token and render the default pending list using stable Todo DTO fields: title, priority, planned date, due time, and category summary when present.
+- Handle initial identity validation and Todo fetch separately with stable loading states. Provide professional empty, recoverable error, and retry states without exposing backend internals.
+- On `401 unauthorized`, clear invalid local identity data and return to token entry with a concise message. Other failures preserve the token and allow retry.
+- Keep the first screen as the usable application, not a landing page. Use restrained, work-focused composition, responsive layout, accessible labels/focus states, and Lucide icons for familiar actions.
+- Do not add mutations, Today/category views, SSE, pagination UI, or speculative application architecture in this slice.
 
 ## Acceptance Criteria
 
-- [x] Missing/invalid authentication is rejected before streaming; valid auth returns an SSE response with correct content type and buffering/cache headers.
-- [x] Optional valid `device_id` is accepted without affecting identity or event payload; invalid length uses existing validation behavior.
-- [x] Each successful category and Todo mutation publishes exactly one post-commit wake-up containing its committed sync cursor.
-- [x] Validation failure, transaction rollback, idempotency replay, and GET endpoints publish no new event.
-- [x] Events contain only `type`, `latest_cursor`, and `server_time`, use valid SSE framing, and never contain snapshots/tombstones/entity or identity data.
-- [x] Same-user multiple subscribers receive wake-ups; cross-user subscribers do not.
-- [x] Slow-consumer coalescing preserves the greatest pending cursor without blocking the write path.
-- [x] Cancellation/disconnect removes the subscription and repeated connect/disconnect cycles leave no registry leak.
-- [x] Clients can use the event cursor with the existing pull endpoint; lost/coalesced notifications do not alter durable sync rows.
-- [x] Focused and full backend tests pass; Alembic remains at one head; no model, migration, external dependency, or out-of-scope endpoint is added.
+- [ ] `web/` installs, tests, and builds successfully using documented npm commands.
+- [ ] With no stored token, the app presents an accessible token-entry state and writes only the approved localStorage keys after successful `/me` validation.
+- [ ] A valid token resolves and displays the backend identity; no request sends `user_id` and no token appears in URL, visible errors, logs, or committed files.
+- [ ] A valid identity loads and renders only the authenticated default pending Todo list with title, priority, date/time, and category information.
+- [ ] Loading, empty, generic API/network error, retry, unauthorized, stored-token bootstrap, and switch/re-enter states behave correctly.
+- [ ] Unauthorized responses clear identity storage; recoverable non-auth errors keep it.
+- [ ] The layout remains usable on desktop and narrow mobile-width browser viewports with no overlapping or clipped controls/text.
+- [ ] Focused tests cover storage/auth headers, `/me` validation, Todo rendering, all major states, unauthorized clearing, retry, and identity switching.
+- [ ] Production build contains no token/secret, generated output is ignored, and no backend or out-of-scope feature is modified.
 
 ## Verification Plan
 
-- Add focused async tests for auth/headers/device ID, framing/payload, all write families, commit-before-publish, replay/failure silence, per-user fanout, multiple subscribers, slow-consumer coalescing, disconnect cleanup, and no durable side effects.
-- Run focused SSE tests and full `python -m pytest` from `backend/`.
-- Run `python -m alembic heads` and inspect route/dependency scope.
-- Inspect every current `create_sync_change` write site to prove publication occurs only after successful commit and uses the matching cursor.
-- Run `git diff --check`, independently whitespace-check new untracked files, inspect the exact changed-file set, and confirm no model/migration/pull-contract/product-doc change.
+- Run the frontend focused test suite and production build from `web/`.
+- Inspect package/dependency scope, generated artifacts, environment usage, and exact changed files.
+- Verify request construction never includes `user_id`, logs, or URL token material.
+- Exercise mocked normal, empty, unauthorized, network-error, retry, and identity-switch flows.
+- Start the Vite development server and report its URL; when the backend/PostgreSQL service is available, manually smoke-test `/me` and `/todos` through the proxy.
+- Inspect responsive behavior at desktop and narrow viewport sizes and run `git diff --check` plus independent whitespace checks for new files.
 
 ## Risks
 
-- Publishing before commit can wake clients for data that later rolls back.
-- Unbounded or blocking queues can make slow clients stall writes or consume memory.
-- Subscriber cleanup mistakes can leak queues across disconnects or tests.
-- Global rather than per-user fanout can leak activity across identities.
-- Infinite streaming tests can hang unless cancellation and deterministic broker seams are designed carefully.
+- Token handling can leak credentials through debugging, URLs, or committed environment files.
+- Mixing selected alias with authorization can break the backend's token-derived isolation boundary.
+- Local frontend/backend ports can create CORS friction unless the development proxy is configured correctly.
+- A scaffold-only result would not form a usable vertical slice.
+- Unnecessary app architecture can enlarge later PC Web work before product behavior is proven.
 
 ## Coding Output Requirements
 
-Report modified files, SSE framing/headers, broker lifecycle and coalescing, every post-commit publication site, isolation and replay/failure behavior, acceptance results, focused/full test results, Alembic/route/dependency/diff checks, process-local limitation, unresolved issues, and task-outside findings.
+Report modified files, frontend structure/dependencies, token/storage behavior, API/proxy design, visible states, responsive/accessibility checks, acceptance results, test/build/dev-server results, manual backend smoke-test status, diff/artifact/secret checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-22 10:11 +08:00
-
-Result Commit: `b4a2c1ef368df7c1bf64386060c949e8e4300944`
-
-Completion Commit: `c96e2bfb85f624d4c691b328d72b0718f4a8f673`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `c96e2bfb85f624d4c691b328d72b0718f4a8f673` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-017 Closure documents with message `docs(task): close TASK-017`. After remote parity is verified, return to Decision for the Phase 1A completion audit; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-018 from the approved TASK-018 publication, audit, and active workflow-state files. Coding must not start before Git Snapshot completion.

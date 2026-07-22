@@ -1,27 +1,27 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-017
+Task ID: TASK-018
 
-Branch: main
+Branch: pending
 
-Base Commit: `818badeffa575a7358560030046ecac34ae3314f`
+Base Commit: `32894e4c4b8059e812c064dd468d6b5c4fa09bdf`
 
-Working Tree: 8 approved TASK-017 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: No
 
-Snapshot Commit: `ca2895c5b3faca6fdfe259fe2d497ac39a1a0420`
+Snapshot Commit: pending
 
-Reason: approved TASK-017 readiness documents required a durable pre-Coding baseline
+Reason: awaiting Task Review PASS
 
 ## Instructions
 
-Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-017 publication scope; unexpected files block the snapshot.
+Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-018 publication scope; unexpected files block the snapshot.
 
-After completion, update both `handoff/current-task.md` and `tasks/TASK-017-sse-sync-events.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.
+After completion, update both `handoff/current-task.md` and `tasks/TASK-018-pc-web-identity-todo-list.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.

@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 ## Gate Status
 
@@ -10,16 +10,16 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-07-21 11:26 +08:00
+Reviewed at: 2026-07-22 13:11 +08:00
 
-Reviewed task: TASK-017 SSE sync wake-up and in-memory fanout
+Reviewed task: TASK-018 PC Web identity and Todo list vertical slice
 
 ## Required Review
 
-- [x] Goal, scope, exclusions, dependencies, and allowed files form one complete SSE/fanout loop.
-- [x] Post-commit timing, replay/failure silence, cursor source, and all current write sites are explicit.
-- [x] Per-user subscription lifecycle, bounded coalescing, disconnect cleanup, framing, and process-local limits are implementation-ready.
-- [x] Acceptance and verification cover auth, isolation, multiple/slow subscribers, all mutations, failure paths, and no durable changes.
+- [x] Goal, scope, exclusions, dependencies, and allowed files form one usable frontend slice.
+- [x] Token storage, `/me` validation, unauthorized clearing, alias display, and no-`user_id` rules are safe and implementation-ready.
+- [x] API proxy/base design needs no backend/CORS change and the stopped local PostgreSQL service is explicitly dispositioned for live smoke testing.
+- [x] UI states, responsive/accessibility expectations, tests, build, and artifact/secret checks are verifiable.
 - [x] Branch, HEAD, worktree, staged state, changed files, whitespace checks, and Git Snapshot readiness are recorded.
 
 ## Issues
@@ -28,10 +28,22 @@ No blocking issues.
 
 ## Review Evidence
 
+- Reviewed task: TASK-018 PC Web identity and Todo list vertical slice
+- Reviewed at: 2026-07-22 13:11 +08:00
 - Branch: `main`
-- HEAD: `818badeffa575a7358560030046ecac34ae3314f` (`docs(task): close TASK-016`); matches `origin/main`.
-- Worktree Summary: seven modified tracked TASK-017 publication-state files and one untracked TASK-017 archive; no business implementation, model, migration, product-contract, frontend, Android, generated, secret, or unrelated changes.
+- HEAD: `32894e4c4b8059e812c064dd468d6b5c4fa09bdf`
+- Worktree Summary:
+  - ` M docs/phase1a-progress.md`
+  - ` M handoff/code-review-gate.md`
+  - ` M handoff/current-task.md`
+  - ` M handoff/git-commit.md`
+  - ` M handoff/git-snapshot.md`
+  - ` M handoff/project-state.md`
+  - ` M handoff/task-review-gate.md`
+  - `?? docs/phase1a-completion-audit.md`
+  - `?? tasks/TASK-018-pc-web-identity-todo-list.md`
 - Changed Files:
+  - `docs/phase1a-completion-audit.md`
   - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
   - `handoff/current-task.md`
@@ -39,23 +51,31 @@ No blocking issues.
   - `handoff/git-snapshot.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-017-sse-sync-events.md`
-- Staged Changes: none; `git diff --cached --name-status` is empty and `git diff --cached --check` exits 0.
-- `git diff --check`: PASS (exit code 0; non-blocking LF/CRLF conversion warnings only).
-- Independent new-file whitespace check: PASS; `git diff --no-index --check NUL tasks/TASK-017-sse-sync-events.md` exits 0.
-- Git Snapshot readiness: READY; the eight TASK-017 publication-state files belong to the current Decision output and can be captured as the pre-Coding baseline. Coding has not started.
+  - `tasks/TASK-018-pc-web-identity-todo-list.md`
+- Staged Changes: None
+- `git diff --check`: exit 0; only LF-to-CRLF warnings were reported.
+- `git diff --cached --check`: exit 0.
+- Independent new-file whitespace check:
+  - `tasks/TASK-018-pc-web-identity-todo-list.md`: no trailing whitespace; final line is not blank.
+  - `docs/phase1a-completion-audit.md`: no trailing whitespace; final line is not blank.
+  - `git diff --no-index --check NUL <new-file>` emitted no whitespace diagnostics for either new file; exit 1 is the expected no-index difference status.
+- Runtime dependency check:
+  - `web/` does not exist yet.
+  - Node `v24.15.0`; npm `11.12.1`.
+  - Local `postgresql-x64-18` service status: `Stopped`; live proxy smoke testing must either start PostgreSQL/backend or be explicitly reported as not run by Coding.
+- Git Snapshot readiness: READY. The current nine changed files are TASK-018 publication, audit, and active workflow-state files; no staged files, business code, backend code, secrets, dependency directories, build output, logs, or caches were found.
 
 ## Task Review Notes
 
-- TASK-017 is one complete closeable SSE/fanout loop: authenticated `/api/v1/sync/events`, process-local per-user broker, post-commit publication from all existing Todo/category mutations, and focused verification.
-- SSE remains a wake-up channel only. Durable recovery stays in `GET /api/v1/sync/changes`; events must contain only `type`, `latest_cursor`, and `server_time`.
-- Post-commit timing is explicit: publish only after successful commit, using that write's committed `sync_changes.cursor`; validation failure, rollback, idempotency replay, and reads publish nothing.
-- Current write sites to cover are explicit and locatable: category create/update/delete and Todo create/update/complete/reopen/delete.
-- Broker behavior is implementation-ready: keyed by authenticated user ID, independent bounded subscriber queues, non-blocking write path, slow-consumer coalescing to greatest pending cursor, reliable disconnect cleanup, and process-local limitation.
-- Scope excludes models, migrations, persistent sync payload changes, cursor allocation changes, pull API semantics, external brokers/dependencies, frontend, Android, Reminder, recurrence, offline replay, and completed TASK-005 through TASK-016 archives.
+- TASK-018 is a single usable PC Web vertical slice: identity token entry, `/me` validation, token-derived identity display, and authenticated default pending Todo list.
+- The task keeps authorization bound to `Authorization: Bearer <identity_token>` and forbids client-sent `user_id`.
+- Raw token storage is constrained to `localStorage.lifeos.identityToken`; `lifeos.selectedIdentityAlias` is display-only and must not authorize requests.
+- Unauthorized responses must clear identity storage; recoverable non-auth failures preserve storage and allow retry.
+- The relative `/api/v1` base plus Vite proxy avoids backend or CORS changes.
+- Scope excludes backend changes, stable product/API/architecture docs, Today, categories, mutations, SSE, offline/PWA, Android, secrets, generated output, and completed TASK-005 through TASK-017 archives.
 
 ## Instructions
 
 Task Review must update this file before Git Snapshot or Coding starts. PASS and REJECT must include durable Review Evidence: Branch, HEAD, Worktree Summary, Changed Files, Staged Changes, `git diff --check`, independent new-file whitespace check, Git Snapshot readiness, Reviewed task, and Reviewed at.
 
-On PASS, update both `handoff/current-task.md` and `tasks/TASK-017-sse-sync-events.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. If either task-status file cannot be updated, the transition is incomplete.
+On PASS, update both `handoff/current-task.md` and `tasks/TASK-018-pc-web-identity-todo-list.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. If either task-status file cannot be updated, the transition is incomplete.

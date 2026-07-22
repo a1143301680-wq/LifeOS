@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -23,7 +23,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Argon2id bearer token auth | done | `GET /api/v1/me` tests |
 | Response/error envelope | done | Backend tests passing |
 | `idempotency_keys` model | done | Commit `6a85b4a` |
-| Idempotency execution boundary | partial | Implemented for category create; needs reuse across future writes |
+| Idempotency execution boundary | done | Reused across all current Todo/category write endpoints |
 | `sync_changes` model/helper | done | PostgreSQL sequence verified in `ISSUE-20260711-001` |
 | Default Todo category seeding | done | Published in `d1c0dbf`; Code Review PASS; 38 backend tests passed |
 | SSE fanout foundation | done | Published in `b4a2c1e`; Code Review PASS; 101 backend tests passed |
@@ -55,9 +55,21 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `ISSUE-20260711-001` PostgreSQL sync cursor verification | verified | Closed for sequencing |
 | `ISSUE-20260711-002` DB-level active category name uniqueness | verified | Closed for sequencing |
 
+## Platform Completion
+
+| Platform | Status | Evidence / Notes |
+| --- | --- | --- |
+| Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
+| PC Web | next | TASK-018 identity and Todo list slice published |
+| Android | pending | No Kotlin project exists yet |
+| PC/Android end-to-end sync acceptance | pending | Requires both clients |
+
 ## Recommended Task Order
 
-1. Run a Phase 1A completion audit after TASK-017 terminal closure.
+1. Complete TASK-018 PC Web identity and Todo list vertical slice.
+2. Continue PC Web Today/category/mutation/SSE slices.
+3. Build Android Phase 1A client slices.
+4. Run PC/Android end-to-end Phase 1A acceptance.
 
 ## Decision Rule
 
@@ -66,3 +78,5 @@ When choosing the next Coding window task:
 - Prefer closing open P1/P2 issues before adding more endpoints.
 - Prefer small vertical slices that exercise auth, idempotency, sync, and tests.
 - Do not start Reminder, Recurring Todo, Strong Reminder, Android offline replay, or full login work during Phase 1A.
+
+Audit verdict: the Phase 1A backend is complete, but Phase 1A overall remains incomplete until PC Web, Android, and their end-to-end sync acceptance are delivered. See `docs/phase1a-completion-audit.md`.

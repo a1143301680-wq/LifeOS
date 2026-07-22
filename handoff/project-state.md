@@ -4,7 +4,7 @@ Last updated: 2026-07-22
 
 ## Current Phase
 
-Phase 1A: Todo CRUD + Todo category CRUD + two-user isolation + PC/Android sync loop foundation.
+Phase 1A client delivery: backend complete; PC Web, Android, and end-to-end sync acceptance remain.
 
 ## Source Of Truth
 
@@ -61,7 +61,9 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-016 Sync changes pull API completed in result commit `f6f9091`; Code Review: PASS; backend tests: 94 passed.
 - TASK-016 terminal Closure Commit `818bade` was published and the task workflow ended.
 - TASK-017 SSE sync wake-up and in-memory fanout completed in result commit `b4a2c1e`; Code Review: PASS; backend tests: 101 passed.
-- TASK-017 Decision Closure Check passed on 2026-07-22; terminal Closure Commit is the only remaining action before the Phase 1A completion audit.
+- TASK-017 terminal Closure Commit `32894e4` was published and the task workflow ended.
+- Phase 1A completion audit on 2026-07-22 confirmed the backend is complete, while PC Web and Android are absent and end-to-end acceptance remains open.
+- TASK-018 PC Web identity and Todo list vertical slice was published on 2026-07-22 and is awaiting Task Review.
 
 ## Recently Completed
 
@@ -110,7 +112,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next recommended direction is a Phase 1A completion audit after TASK-017 terminal closure. Live task routing is maintained in `handoff/current-task.md`.
+Complete TASK-018 as the first usable PC Web slice, then continue Phase 1A client delivery. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
