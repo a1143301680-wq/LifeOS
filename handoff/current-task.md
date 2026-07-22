@@ -4,128 +4,120 @@ Last updated: 2026-07-21
 
 ## Metadata
 
-- Task ID: TASK-016
-- Task Name: Sync changes pull API
-- Status: COMPLETED
+- Task ID: TASK-017
+- Task Name: SSE sync wake-up and in-memory fanout
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
-  - Durable `sync_changes` model, global cursor allocator, and existing Todo/category write payloads
-  - TASK-015 terminal closure published in `f562773`
+  - Durable sync writes and `GET /api/v1/sync/changes` published through `f6f9091`
+  - TASK-016 terminal closure published in `818bade`
 
 ## Background
 
-Phase 1A Todo and category writes already append user-owned durable sync changes, but clients cannot yet pull them after reconnecting or missing live notifications. The next slice exposes the contracted cursor-based recovery endpoint before SSE wake-up delivery is added.
+Durable pull recovery is complete, but connected PC and Android clients are not yet notified that new changes are available. Phase 1A requires a lightweight SSE wake-up channel backed by process-local fanout; clients always pull durable snapshots or tombstones after receiving a signal.
 
 ## Goal
 
-An authenticated client can pull only its user's durable changes in global cursor order, advance safely across other-user cursor gaps, apply snapshots or tombstones, and continue paging without duplicate or skipped current-user changes.
+An authenticated client can maintain an SSE subscription scoped to its identity and receive a lightweight `sync.available` event after a successful Todo or category write commits, without receiving entity data or affecting durable recovery correctness.
 
 ## Scope
 
 ### In Scope
 
-- `GET /api/v1/sync/changes` only.
-- Global bigint cursor and validated limit query parameters.
-- Current-user filtering, deterministic cursor ordering, limit-plus-one paging, and global high-water advancement.
-- Snapshot/tombstone serialization using existing `sync_changes.payload` records.
-- Authentication, two-user isolation, boundary validation, empty/gapped streams, and focused tests.
+- `GET /api/v1/sync/events` with bearer authentication and optional `device_id`.
+- Process-local, per-user SSE subscription registry and non-blocking wake-up fanout.
+- Publication after each existing Todo/category REST write commits successfully.
+- Exact event payload, SSE framing/headers, subscriber cleanup, isolation, slow-consumer coalescing, and focused tests.
 
 ### Out of Scope
 
-- `GET /api/v1/sync/events`, SSE connections, fanout, pub/sub, or wake-up delivery.
-- New write-side sync events or changes to existing Todo/category write payloads.
-- Client-side cache application, offline operation replay, conflict resolution, cursor retention/compaction, or event sourcing.
-- Todo/category API behavior, frontend, Android, Reminder, or recurrence work.
-- Sync model, sequence, or Alembic migration changes unless Task Review proves one unavoidable.
+- Redis, PostgreSQL LISTEN/NOTIFY, message queues, cross-process or cross-instance fanout, replayable SSE history, or guaranteed event delivery.
+- Entity snapshots/tombstones in SSE, durable cursor replacement, or changes to `GET /api/v1/sync/changes`.
+- New write endpoints, changes to existing write/idempotency/sync payload semantics, or background retry queues.
+- Frontend, Android, reconnect UI, Reminder, recurrence, and offline operation replay.
+- Models, dependencies, settings, or Alembic migrations unless Task Review proves one unavoidable prerequisite.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 3.1, 7, 12, and 14
-- `docs/architecture.md` synchronization model and recovery rules
-- `docs/data-model-phase1.md` section 4.7 and sync endpoint notes
+- `docs/api-phase1a.md` sections 2, 3.1, 12-14
+- `docs/architecture.md` synchronization model
+- `docs/data-model-phase1.md` sections 4.7 and 7
+- `docs/mvp.md` Phase 1A backend scope and acceptance
 - `docs/phase1a-progress.md`
-- `backend/app/models/sync.py`
-- `backend/app/services/sync.py`
-- Existing API router, auth, error, envelope, Todo/category sync payload, and test patterns
+- `backend/app/api/v1/sync.py`, router, auth, time, envelope, and error patterns
+- Existing Todo/category write endpoints and their transaction/idempotency tests
 
 ### Allowed Modify Files
 
-- `backend/app/api/v1/router.py`
-- A focused sync API module under `backend/app/api/v1/`
-- `backend/app/services/sync.py` only for directly reusable pull/high-water helpers
-- A focused sync response schema under `backend/app/schemas/` only if directly needed
-- New or existing focused sync pull tests under `backend/tests/`
+- `backend/app/api/v1/sync.py`
+- A focused process-local SSE broker/helper under `backend/app/services/`
+- `backend/app/api/v1/todos.py` only for post-commit wake-up publication
+- `backend/app/api/v1/todo_categories.py` only for post-commit wake-up publication
+- `backend/app/main.py` only if lifecycle cleanup is directly required
+- New or existing focused SSE/fanout tests under `backend/tests/`
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-016 state files
+- Active handoff, gate, Git record, issue-log, and TASK-017 state files
 
 ### Forbidden Modify Files
 
-- Sync/Todo/category/user models, cursor sequence, or Alembic migrations unless Task Review explicitly approves an unavoidable prerequisite
-- Existing Todo/category write behavior or persisted sync payload shape
-- SSE, event fanout, client cache, conflict resolution, frontend, or Android behavior
+- Models, migrations, persistent sync payloads, cursor allocation, or pull API semantics
+- Existing write validation, mutation, idempotency replay/conflict, transaction, or response behavior beyond post-commit wake-up publication
+- External broker/dependency or multi-worker delivery infrastructure
 - Product requirements, architecture, API contract, or data-model documents unless Task Review returns a genuine contract ambiguity to Decision
-- Completed TASK-005 through TASK-015 archives
+- Frontend, Android, Reminder, recurrence, offline replay, and completed TASK-005 through TASK-016 archives
 
 ## Implementation Requirements
 
-- Add authenticated `GET /api/v1/sync/changes` and include its router under `/api/v1` without changing existing route behavior.
-- Support integer `cursor`, default 0 and minimum 0, and integer `limit`, default 100, minimum 1, maximum 500. Invalid values use the existing validation-error envelope.
-- At request start, read the current global maximum sync cursor as a page high-water mark; use 0 when the table is empty. Reject a requested cursor greater than that high-water mark with `400 validation_error`.
-- Query only rows owned by `current_user`, with `cursor > requested_cursor` and `cursor <= captured_high_water`, ordered by `cursor ASC`. Global gaps caused by other users are valid.
-- Fetch `limit + 1` current-user rows. Return at most `limit` items and set `has_more=true` only when the extra current-user row exists within the captured high-water range.
-- When `has_more=true`, set `next_cursor` to the last returned item's cursor. When `has_more=false`, set `next_cursor` to the captured global high-water mark, including when no current-user rows exist, so clients safely advance across other-user gaps.
-- Serialize each item with `cursor`, `change_type`, `entity_type`, `entity_id`, and `entity_version`, then expose the existing payload fields at item top level: create/update/complete/reopen records include `snapshot`; delete records include `deleted` and `deleted_at`. Do not expose `user_id`, internal row `id`, raw `payload`, or unrelated database fields.
-- Return the contracted top-level list envelope with `items`, integer `next_cursor`, boolean `has_more`, and `server_time`.
-- Preserve payload snapshots/tombstones exactly as stored; this read endpoint must not refetch live entities to rebuild historical changes.
-- Keep the endpoint read-only: no Idempotency-Key requirement, cursor allocation, row mutation, sync change, idempotency record, or event emission.
+- Add authenticated `GET /api/v1/sync/events` to the existing `/sync` router and return `text/event-stream` with no-cache and anti-buffering headers appropriate for SSE.
+- Accept optional `device_id` as connection metadata with a bounded length consistent with current device identifiers. It must not select identity, be persisted, or appear in events.
+- Implement a process-local broker keyed only by authenticated user ID. Each active subscription has an independent bounded queue and is removed reliably when its stream is cancelled or disconnected.
+- Emit data events using valid SSE framing and compact JSON containing exactly `type="sync.available"`, integer `latest_cursor`, and `server_time`. Entity snapshots, tombstones, entity IDs, user IDs, and device IDs are forbidden.
+- Keepalive comments may be emitted during idle periods but must contain no domain payload and must not be treated as `sync.available` events.
+- Publish only after a Todo/category write transaction commits successfully, using the cursor of that write's committed `sync_changes` row. Cover category create/update/delete and Todo create/update/complete/reopen/delete.
+- Idempotency replay, validation failure, rollback, and read endpoints must not publish a new wake-up event. Fanout must not change existing HTTP response bodies or sync cursors.
+- Publishing must be non-blocking for write requests. A slow subscriber may coalesce pending notifications, but its next domain event must carry the greatest published cursor it has not yet consumed.
+- One user's publication must reach all active subscriptions for that user and none for another user. Disconnecting one subscriber must not affect others.
+- A missed or coalesced SSE event is acceptable because clients recover through `GET /api/v1/sync/changes`; SSE is never the durable source of truth.
+- Keep the Phase 1A runtime explicitly process-local. Do not claim cross-worker delivery; focused tests must not require external network services.
 
 ## Acceptance Criteria
 
-- [x] Default authenticated request returns the contracted top-level envelope and changes after cursor 0 in ascending cursor order.
-- [x] Only current-user changes are returned; another user's rows create valid gaps and never leak payload or metadata.
-- [x] Empty database and no-current-user-result cases return empty items, `has_more=false`, and the captured global high-water cursor.
-- [x] Limit-plus-one paging returns every current-user change exactly once across pages; intermediate pages use the last returned cursor and terminal pages advance to the global high water.
-- [x] Default, minimum, maximum, and changed-per-page limits work; negative cursor, zero/oversized limit, malformed values, and future cursor return `400 validation_error`.
-- [x] Snapshot and Todo/category tombstone payloads are emitted at item top level exactly as stored, with nullable entity metadata handled and internal fields excluded.
-- [x] Rows created after the request's captured high water are not mixed into that page and remain discoverable on a later request.
-- [x] Authentication failures use existing behavior and the endpoint performs no writes or cursor allocation.
-- [x] Focused and full backend tests pass; Alembic remains at one head; no migration, SSE route, or out-of-scope behavior is added.
+- [ ] Missing/invalid authentication is rejected before streaming; valid auth returns an SSE response with correct content type and buffering/cache headers.
+- [ ] Optional valid `device_id` is accepted without affecting identity or event payload; invalid length uses existing validation behavior.
+- [ ] Each successful category and Todo mutation publishes exactly one post-commit wake-up containing its committed sync cursor.
+- [ ] Validation failure, transaction rollback, idempotency replay, and GET endpoints publish no new event.
+- [ ] Events contain only `type`, `latest_cursor`, and `server_time`, use valid SSE framing, and never contain snapshots/tombstones/entity or identity data.
+- [ ] Same-user multiple subscribers receive wake-ups; cross-user subscribers do not.
+- [ ] Slow-consumer coalescing preserves the greatest pending cursor without blocking the write path.
+- [ ] Cancellation/disconnect removes the subscription and repeated connect/disconnect cycles leave no registry leak.
+- [ ] Clients can use the event cursor with the existing pull endpoint; lost/coalesced notifications do not alter durable sync rows.
+- [ ] Focused and full backend tests pass; Alembic remains at one head; no model, migration, external dependency, or out-of-scope endpoint is added.
 
 ## Verification Plan
 
-- Add focused tests for auth, defaults, validation, empty streams, two-user gaps, exact ordering, multi-page traversal, high-water advancement, future cursor, concurrent-after-high-water visibility, snapshots/tombstones, nullable metadata, field exclusion, and no-write behavior.
-- Run focused sync pull tests and full `python -m pytest` from `backend/`.
-- Run `python -m alembic heads` and inspect API route scope.
-- Inspect SQL/query behavior for current-user filtering, captured high-water bound, ascending order, and limit-plus-one semantics on SQLite/PostgreSQL-compatible SQLAlchemy.
-- Run `git diff --check`, independently whitespace-check new untracked files, inspect the exact changed-file set, and confirm no model/migration/SSE/product-contract change.
+- Add focused async tests for auth/headers/device ID, framing/payload, all write families, commit-before-publish, replay/failure silence, per-user fanout, multiple subscribers, slow-consumer coalescing, disconnect cleanup, and no durable side effects.
+- Run focused SSE tests and full `python -m pytest` from `backend/`.
+- Run `python -m alembic heads` and inspect route/dependency scope.
+- Inspect every current `create_sync_change` write site to prove publication occurs only after successful commit and uses the matching cursor.
+- Run `git diff --check`, independently whitespace-check new untracked files, inspect the exact changed-file set, and confirm no model/migration/pull-contract/product-doc change.
 
 ## Risks
 
-- Using only the last current-user row as the terminal cursor can cause clients to repeatedly scan other-user gaps.
-- Advancing to a moving global maximum without a captured high water can make page behavior race-dependent.
-- Incorrect `has_more` logic can skip or duplicate changes across pages.
-- Rebuilding snapshots from live entities would corrupt historical recovery semantics.
-- Flattening raw payloads without an explicit response boundary can leak internal fields.
+- Publishing before commit can wake clients for data that later rolls back.
+- Unbounded or blocking queues can make slow clients stall writes or consume memory.
+- Subscriber cleanup mistakes can leak queues across disconnects or tests.
+- Global rather than per-user fanout can leak activity across identities.
+- Infinite streaming tests can hang unless cancellation and deterministic broker seams are designed carefully.
 
 ## Coding Output Requirements
 
-Report modified files, high-water capture and cursor advancement, query/paging logic, snapshot/tombstone serialization, validation and isolation behavior, acceptance results, focused/full test results, Alembic/route/query/diff checks, unresolved issues, and task-outside findings.
+Report modified files, SSE framing/headers, broker lifecycle and coalescing, every post-commit publication site, isolation and replay/failure behavior, acceptance results, focused/full test results, Alembic/route/dependency/diff checks, process-local limitation, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-21 11:06 +08:00
-
-Result Commit: `f6f90912c7ebead4a27d4a6571cc473317f7895f`
-
-Completion Commit: `1d4ffe4db392a61a01e42a173a840573960d8c5c`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `1d4ffe4db392a61a01e42a173a840573960d8c5c` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-016 Closure documents with message `docs(task): close TASK-016`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-017 from the approved publication-state files. Coding must not start before Git Snapshot completion.

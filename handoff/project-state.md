@@ -59,7 +59,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-015 Today Todo aggregation API completed in result commit `2a698f3`; Code Review: PASS; backend tests: 88 passed.
 - TASK-015 terminal Closure Commit `f562773` was published and the task workflow ended.
 - TASK-016 Sync changes pull API completed in result commit `f6f9091`; Code Review: PASS; backend tests: 94 passed.
-- TASK-016 Decision Closure Check passed on 2026-07-21; terminal Closure Commit is the only remaining action before the next task may be published.
+- TASK-016 terminal Closure Commit `818bade` was published and the task workflow ended.
+- TASK-017 SSE sync wake-up and in-memory fanout was published on 2026-07-21 and is awaiting Task Review.
 
 ## Recently Completed
 
@@ -108,7 +109,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-The next Phase 1A business direction is `GET /api/v1/sync/events`. Live task routing is maintained in `handoff/current-task.md`.
+Complete TASK-017 `GET /api/v1/sync/events` with process-local post-commit fanout, then run a Phase 1A completion audit. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

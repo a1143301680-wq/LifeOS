@@ -4,24 +4,24 @@ Last updated: 2026-07-21
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-016
+Task ID: TASK-017
 
-Branch: main
+Branch: pending
 
-Base Commit: `f562773316251f43d5eb9ba704f361eb6f25dc24`
+Base Commit: `818badeffa575a7358560030046ecac34ae3314f`
 
-Working Tree: 8 approved TASK-016 pre-Coding publication-state documents committed separately; no business code
+Working Tree: pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: No
 
-Snapshot Commit: `fdd615855d3f00b7ce085eee0624c1e27e37d53a`
+Snapshot Commit: pending
 
-Reason: approved TASK-016 readiness documents required a durable pre-Coding baseline
+Reason: awaiting Task Review PASS
 
 ## Instructions
 
-Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-016 publication scope; unexpected files block the snapshot.
+Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-017 publication scope; unexpected files block the snapshot.
 
-After completion, update both `handoff/current-task.md` and `tasks/TASK-016-sync-changes-pull.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.
+After completion, update both `handoff/current-task.md` and `tasks/TASK-017-sse-sync-events.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.

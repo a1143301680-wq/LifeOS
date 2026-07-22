@@ -26,7 +26,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Idempotency execution boundary | partial | Implemented for category create; needs reuse across future writes |
 | `sync_changes` model/helper | done | PostgreSQL sequence verified in `ISSUE-20260711-001` |
 | Default Todo category seeding | done | Published in `d1c0dbf`; Code Review PASS; 38 backend tests passed |
-| SSE fanout foundation | pending | Not started |
+| SSE fanout foundation | next | TASK-017 published; awaiting Task Review |
 
 ## Phase 1A Endpoint Progress
 
@@ -46,7 +46,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | `POST /api/v1/todos/{id}/reopen` | done | Published in `c2d167f`; Code Review PASS; 72 backend tests passed |
 | `DELETE /api/v1/todos/{id}` | done | Published in `3a97402`; Code Review PASS; 78 backend tests passed |
 | `GET /api/v1/sync/changes` | done | Published in `f6f9091`; Code Review PASS; 94 backend tests passed |
-| `GET /api/v1/sync/events` | next | SSE wake-up only |
+| `GET /api/v1/sync/events` | next | TASK-017 published with process-local post-commit fanout; awaiting Task Review |
 
 ## Open Issues That Affect Sequencing
 
@@ -57,7 +57,8 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Add `GET /api/v1/sync/events`.
+1. Complete TASK-017 `GET /api/v1/sync/events` and post-commit fanout.
+2. Run a Phase 1A completion audit after TASK-017 terminal closure.
 
 ## Decision Rule
 
