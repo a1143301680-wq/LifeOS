@@ -22,6 +22,7 @@ from app.services.idempotency import (
     store_idempotency_response,
 )
 from app.services.sync import create_sync_change
+from app.services.sync_events import publish_sync_available
 from app.services.todo_list import (
     decode_todo_list_cursor,
     encode_todo_list_cursor,
@@ -266,6 +267,7 @@ async def create_todo(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be created") from exc
@@ -335,6 +337,7 @@ async def complete_todo(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be completed") from exc
@@ -404,6 +407,7 @@ async def reopen_todo(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be reopened") from exc
@@ -465,6 +469,7 @@ async def delete_todo(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be deleted") from exc
@@ -617,6 +622,7 @@ async def update_todo(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "todo could not be updated") from exc

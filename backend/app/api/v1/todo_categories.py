@@ -19,6 +19,7 @@ from app.services.idempotency import (
     store_idempotency_response,
 )
 from app.services.sync import create_sync_change
+from app.services.sync_events import publish_sync_available
 
 router = APIRouter(prefix="/todo-categories", tags=["todo-categories"])
 
@@ -146,6 +147,7 @@ async def create_category(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "category name already exists") from exc
@@ -213,6 +215,7 @@ async def update_category(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except IntegrityError as exc:
         db.rollback()
         raise ApiError(400, "validation_error", "category name already exists") from exc
@@ -272,6 +275,7 @@ async def delete_category(
             response_body=response_body,
         )
         db.commit()
+        publish_sync_available(user_id=current_user.id, latest_cursor=sync_change.cursor)
     except Exception:
         db.rollback()
         raise

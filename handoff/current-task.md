@@ -6,7 +6,7 @@ Last updated: 2026-07-21
 
 - Task ID: TASK-017
 - Task Name: SSE sync wake-up and in-memory fanout
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A backend
 - Dependencies:
@@ -118,6 +118,6 @@ Report modified files, SSE framing/headers, broker lifecycle and coalescing, eve
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-017 from the approved publication-state files. Coding must not start before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-017 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.
