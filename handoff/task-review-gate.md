@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
 
 ## Gate Status
 
@@ -10,17 +10,17 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-07-22 13:11 +08:00
+Reviewed at: 2026-07-23 08:47 +08:00
 
-Reviewed task: TASK-018 PC Web identity and Todo list vertical slice
+Reviewed task: TASK-019 PC Web Today view vertical slice
 
 ## Required Review
 
-- [x] Goal, scope, exclusions, dependencies, and allowed files form one usable frontend slice.
-- [x] Token storage, `/me` validation, unauthorized clearing, alias display, and no-`user_id` rules are safe and implementation-ready.
-- [x] API proxy/base design needs no backend/CORS change and the stopped local PostgreSQL service is explicitly dispositioned for live smoke testing.
-- [x] UI states, responsive/accessibility expectations, tests, build, and artifact/secret checks are verifiable.
-- [x] Branch, HEAD, worktree, staged state, changed files, whitespace checks, and Git Snapshot readiness are recorded.
+- [x] Goal, scope, exclusions, dependencies, and allowed files form one closeable frontend slice.
+- [x] Today API, identity-timezone date behavior, section ordering, and authorization rules are implementation-ready.
+- [x] Existing TASK-018 identity and Todo list behavior is protected from regression.
+- [x] UI states, responsive/accessibility expectations, tests, build, audit, and live-smoke disposition are verifiable.
+- [x] Branch, HEAD, worktree, changed/staged files, whitespace checks, and Git Snapshot readiness are durably recorded.
 
 ## Issues
 
@@ -28,10 +28,14 @@ No blocking issues.
 
 ## Review Evidence
 
-- Reviewed task: TASK-018 PC Web identity and Todo list vertical slice
-- Reviewed at: 2026-07-22 13:11 +08:00
+- Reviewed task: TASK-019 PC Web Today view vertical slice
+- Reviewed at: 2026-07-23 08:47 +08:00
 - Branch: `main`
-- HEAD: `32894e4c4b8059e812c064dd468d6b5c4fa09bdf`
+- HEAD: `dc710ba5fc2b4b2c6f736daea950caf8ea0d065a`
+- Dependency evidence:
+  - TASK-015 Today API commit `2a698f3` is an ancestor of HEAD.
+  - TASK-018 terminal closure commit `dc710ba` is HEAD and `origin/main`.
+  - Existing PC Web foundation is present under `web/`.
 - Worktree Summary:
   - ` M docs/phase1a-progress.md`
   - ` M handoff/code-review-gate.md`
@@ -40,10 +44,8 @@ No blocking issues.
   - ` M handoff/git-snapshot.md`
   - ` M handoff/project-state.md`
   - ` M handoff/task-review-gate.md`
-  - `?? docs/phase1a-completion-audit.md`
-  - `?? tasks/TASK-018-pc-web-identity-todo-list.md`
+  - `?? tasks/TASK-019-pc-web-today-view.md`
 - Changed Files:
-  - `docs/phase1a-completion-audit.md`
   - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
   - `handoff/current-task.md`
@@ -51,31 +53,26 @@ No blocking issues.
   - `handoff/git-snapshot.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-018-pc-web-identity-todo-list.md`
+  - `tasks/TASK-019-pc-web-today-view.md`
 - Staged Changes: None
-- `git diff --check`: exit 0; only LF-to-CRLF warnings were reported.
+- `git diff --check`: exit 0; only LF-to-CRLF working-copy warnings were reported.
 - `git diff --cached --check`: exit 0.
 - Independent new-file whitespace check:
-  - `tasks/TASK-018-pc-web-identity-todo-list.md`: no trailing whitespace; final line is not blank.
-  - `docs/phase1a-completion-audit.md`: no trailing whitespace; final line is not blank.
-  - `git diff --no-index --check NUL <new-file>` emitted no whitespace diagnostics for either new file; exit 1 is the expected no-index difference status.
-- Runtime dependency check:
-  - `web/` does not exist yet.
-  - Node `v24.15.0`; npm `11.12.1`.
-  - Local `postgresql-x64-18` service status: `Stopped`; live proxy smoke testing must either start PostgreSQL/backend or be explicitly reported as not run by Coding.
-- Git Snapshot readiness: READY. The current nine changed files are TASK-018 publication, audit, and active workflow-state files; no staged files, business code, backend code, secrets, dependency directories, build output, logs, or caches were found.
+  - `tasks/TASK-019-pc-web-today-view.md`: no trailing whitespace; final line is not blank.
+  - `git diff --no-index --check NUL tasks/TASK-019-pc-web-today-view.md` emitted no whitespace diagnostics; exit 1 is the expected no-index difference status.
+- Issue-log search: no TASK-019 unresolved entries found.
+- Local service state: `postgresql-x64-18` is `Stopped`; Coding must attempt/start required services for live Vite-proxy smoke testing or record the exact blocker without claiming live integration.
+- Ignored artifacts observed: `web/dist/`, `web/node_modules/`, `web/test-results/`, backend `__pycache__/`, backend `.pytest_cache/`, and `web/*.tsbuildinfo` are ignored and not part of the commitable changed-file set.
+- Git Snapshot readiness: READY. The current eight commitable changes are TASK-019 publication and active workflow-state files only; no staged files, business implementation changes, backend changes, stable product/API/architecture/data-model changes, secrets, dependency directories, build output, logs, or caches are included.
 
 ## Task Review Notes
 
-- TASK-018 is a single usable PC Web vertical slice: identity token entry, `/me` validation, token-derived identity display, and authenticated default pending Todo list.
-- The task keeps authorization bound to `Authorization: Bearer <identity_token>` and forbids client-sent `user_id`.
-- Raw token storage is constrained to `localStorage.lifeos.identityToken`; `lifeos.selectedIdentityAlias` is display-only and must not authorize requests.
-- Unauthorized responses must clear identity storage; recoverable non-auth failures preserve storage and allow retry.
-- The relative `/api/v1` base plus Vite proxy avoids backend or CORS changes.
-- Scope excludes backend changes, stable product/API/architecture docs, Today, categories, mutations, SSE, offline/PWA, Android, secrets, generated output, and completed TASK-005 through TASK-017 archives.
+- TASK-019 is a single closeable PC Web frontend slice: authenticated Today aggregation, compact Today/Todos view switching, date navigation, visible Today states, and preservation of the existing TASK-018 identity/pending-list behavior.
+- The Today API contract is implementation-ready: `GET /api/v1/todos/today?date=YYYY-MM-DD`, bearer authorization, no client-sent `user_id`, four fixed sections, API-preserved ordering, and summary counts.
+- The timezone requirement is explicit enough for Coding: initial date derives from `/me.timezone`; date navigation must use calendar-date arithmetic without UTC conversion drift.
+- Verification is executable with existing frontend scripts: `npm test`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high`.
+- Scope excludes backend, stable docs, category/mutation/SSE/sync-recovery/offline/PWA/Android work, raw tokens, `.env` secrets, generated output, dependency directories, logs, caches, editor files, and completed TASK-005 through TASK-018 archives.
 
 ## Instructions
 
-Task Review must update this file before Git Snapshot or Coding starts. PASS and REJECT must include durable Review Evidence: Branch, HEAD, Worktree Summary, Changed Files, Staged Changes, `git diff --check`, independent new-file whitespace check, Git Snapshot readiness, Reviewed task, and Reviewed at.
-
-On PASS, update both `handoff/current-task.md` and `tasks/TASK-018-pc-web-identity-todo-list.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. If either task-status file cannot be updated, the transition is incomplete.
+On PASS, update both `handoff/current-task.md` and `tasks/TASK-019-pc-web-today-view.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. Persist all evidence required by `docs/workflow.md`; do not start Coding.

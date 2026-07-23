@@ -64,7 +64,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-017 terminal Closure Commit `32894e4` was published and the task workflow ended.
 - Phase 1A completion audit on 2026-07-22 confirmed the backend is complete, while PC Web and Android are absent and end-to-end acceptance remains open.
 - TASK-018 PC Web identity and Todo list vertical slice completed in result commit `ea34afc`; Code Review: PASS; frontend tests/build/e2e/audit passed.
-- TASK-018 Decision Closure Check passed on 2026-07-23; terminal Closure Commit is the only remaining action before the next Phase 1A client task may be published.
+- TASK-018 terminal Closure Commit `dc710ba` was published and the task workflow ended.
+- TASK-019 PC Web Today view was published as the next Phase 1A client slice and awaits Task Review.
 
 ## Recently Completed
 
@@ -113,7 +114,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-After TASK-018 terminal closure, continue Phase 1A PC Web delivery. Live task routing is maintained in `handoff/current-task.md`.
+Run Task Review for TASK-019. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

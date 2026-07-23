@@ -1,27 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-018
+Task ID: TASK-019
 
-Branch: main
+Branch: Pending
 
-Base Commit: `32894e4c4b8059e812c064dd468d6b5c4fa09bdf`
+Base Commit: `dc710ba5fc2b4b2c6f736daea950caf8ea0d065a`
 
-Working Tree: 9 approved TASK-018 pre-Coding publication, audit, and workflow-state documents committed separately; no business code
+Working Tree: Pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: `42f8a962b8688c3a9f0fb728615adad4078d5d65`
+Snapshot Commit: Pending
 
-Reason: approved TASK-018 readiness documents required a durable pre-Coding baseline
+Reason: TASK-019 must pass Task Review before its development baseline is recorded.
 
 ## Instructions
 
-Run only after Task Review passes. Confirm every pre-snapshot change belongs to the approved TASK-018 publication scope; unexpected files block the snapshot.
-
-After completion, update both `handoff/current-task.md` and `tasks/TASK-018-pc-web-identity-todo-list.md` to `Status: IN_PROGRESS`. Post-snapshot status edits may remain local for Coding; do not create a second snapshot commit only for transition metadata.
+Run only after Task Review PASS. Confirm every pre-snapshot change belongs to TASK-019 publication scope, then synchronize both active task files to `IN_PROGRESS` and route to Coding.

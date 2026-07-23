@@ -4,127 +4,128 @@ Last updated: 2026-07-23
 
 ## Metadata
 
-- Task ID: TASK-018
-- Task Name: PC Web identity and Todo list vertical slice
-- Status: COMPLETED
+- Task ID: TASK-019
+- Task Name: PC Web Today view vertical slice
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
-  - Phase 1A backend and sync endpoints published through `b4a2c1e`
-  - TASK-017 terminal closure published in `32894e4`
-  - Phase 1A audit confirms PC Web and Android remain incomplete
+  - TASK-015 Today Todo aggregation API published in `2a698f3`
+  - TASK-018 terminal closure published in `dc710ba`
+  - Existing PC Web identity and pending Todo list foundation under `web/`
 
 ## Background
 
-The Phase 1A backend is complete, but the repository has no PC Web or Android client. This first client slice must produce a usable browser experience rather than a standalone scaffold: enter a bootstrap token, validate the selected identity, and view that identity's pending Todos.
+TASK-018 established token-derived identity and a usable pending Todo list. The next PC Web slice should expose the backend Today aggregation without mixing in category management, Todo mutations, SSE, or Android work.
 
 ## Goal
 
-A user can open the PC Web app, securely enter or reuse a Phase 1A identity token, confirm the resolved identity through `GET /api/v1/me`, and view only that identity's pending Todo list with useful loading, empty, error, retry, and identity-switch states.
+An authenticated PC Web user can open a Today view for the current date in the resolved identity timezone, inspect the backend-provided overdue, due, planned, and recent Inbox sections, and move between dates without losing the existing pending Todo list experience.
 
 ## Scope
 
 ### In Scope
 
-- React + Vite + TypeScript PC Web project under `web/`.
-- Token entry, `/me` identity validation, local token persistence, and clear/re-enter identity flow.
-- Authenticated `GET /api/v1/todos` pending-list integration.
-- Quiet, responsive work-focused UI with loading, empty, error, unauthorized, retry, and identity display states.
-- Focused component/API/storage tests, production build verification, and local development instructions.
+- Add authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` integration.
+- Add a compact Today/Todos view switch without introducing a routing framework.
+- Default Today to the current calendar date in the `/me` identity timezone.
+- Add previous-date, next-date, date-selection, and return-to-today controls.
+- Render the four API sections and pending/completed/overdue summary while preserving server ordering.
+- Handle Today loading, empty, recoverable error/retry, and unauthorized states.
+- Add focused unit/component and Playwright coverage for desktop and narrow viewports.
+- Attempt and record a live Vite-proxy smoke test when PostgreSQL and the backend can be made available.
 
 ### Out of Scope
 
-- Today view, category management, Todo create/edit/complete/delete, filters, pagination controls, or Todo detail screens.
-- SSE connection/refresh, offline cache, service worker/PWA, routing framework, or Android work.
-- Backend API, authentication, CORS, database, or deployment changes.
-- Storing tokens in repository files, URLs, logs, analytics, or visible error details.
-- Marketing/landing content, dashboards outside the Todo list, or broad design-system work.
+- Todo category views or management.
+- Todo create, edit, complete, reopen, or delete actions.
+- SSE refresh, sync cursor storage, offline cache, PWA, or Android work.
+- Backend API, database, authentication, CORS, migration, or seed-data changes.
+- Pagination/filter controls, Todo detail screens, or a routing framework.
+- Changes to stable requirements, architecture, MVP, API-contract, or data-model documents.
 
 ## Related Files
 
 ### Expected Read Files
 
+- `docs/api-phase1a.md` sections 2, 7.2, 9.4, 10.1, and 11
 - `docs/mvp.md` Phase 1A PC Web scope
-- `docs/api-phase1a.md` sections 2, 4, 7.1, 8.1, 9.4, 10.1, and closed PC token decision
-- `docs/architecture.md` identity/access and PC Web responsibilities
-- `docs/phase1a-completion-audit.md`
-- Existing backend envelopes and Todo DTO/list tests only as contract references
+- `web/src/App.tsx`
+- `web/src/App.test.tsx`
+- `web/src/api.ts`
+- `web/src/types.ts`
+- `web/src/styles.css`
+- `web/e2e/identity-todos.spec.ts`
+- Backend Today response DTO/tests only as contract references
 
 ### Allowed Modify Files
 
-- New `web/` React/Vite/TypeScript project files, source, styles, tests, package manifest, and lockfile
-- Root `.gitignore` only for frontend generated/local artifacts
-- `README.md` or `web/README.md` only for concise PC Web setup/run instructions
+- Existing `web/` source, tests, styles, Playwright specs/config, package manifest, and lockfile when justified
+- `web/README.md` for concise updated run/verification instructions
 - `docs/phase1a-progress.md`
-- Active handoff, gate, Git record, issue-log, and TASK-018 state files
+- Active TASK-019 handoff, gate, Git record, and issue-log files
 
 ### Forbidden Modify Files
 
 - Any `backend/` implementation, tests, dependencies, settings, or migrations
-- Product requirements, architecture, MVP, API contract, or data-model documents
-- Today/category/mutation/SSE/offline/Android behavior
-- Raw identity tokens, `.env` secrets, build output, dependency directories, logs, caches, or editor-local files
-- Completed TASK-005 through TASK-017 archives
+- Stable product, architecture, MVP, API-contract, or data-model documents
+- Category, mutation, SSE, sync-recovery, offline/PWA, or Android behavior
+- Raw identity tokens, `.env` secrets, generated output, dependency directories, logs, caches, or editor-local files
+- Completed TASK-005 through TASK-018 archives
 
 ## Implementation Requirements
 
-- Create a maintainable React + Vite + TypeScript app in `web/` with npm scripts for development, test, and production build. Use Vitest and Testing Library for focused behavior tests.
-- Use a relative `/api/v1` base by default and a Vite development proxy to the local backend, with a non-secret environment override when useful. Do not require a backend CORS change for local development.
-- Store the raw token only in `localStorage` key `lifeos.identityToken`. `lifeos.selectedIdentityAlias` may store the alias returned by `/me` for display only and must never authorize requests.
-- Provide a focused identity setup screen with a password-style token input. Never put the token in URLs, UI error details, logs, test snapshots, or committed configuration.
-- Validate submitted/stored tokens with authenticated `GET /api/v1/me`. Authorization always comes from the bearer token; the client must never send `user_id`.
-- On valid identity, show the resolved display name/alias and provide a clear switch/re-enter action that removes both local identity keys and returns to setup.
-- Fetch `GET /api/v1/todos` with the bearer token and render the default pending list using stable Todo DTO fields: title, priority, planned date, due time, and category summary when present.
-- Handle initial identity validation and Todo fetch separately with stable loading states. Provide professional empty, recoverable error, and retry states without exposing backend internals.
-- On `401 unauthorized`, clear invalid local identity data and return to token entry with a concise message. Other failures preserve the token and allow retry.
-- Keep the first screen as the usable application, not a landing page. Use restrained, work-focused composition, responsive layout, accessible labels/focus states, and Lucide icons for familiar actions.
-- Do not add mutations, Today/category views, SSE, pagination UI, or speculative application architecture in this slice.
+- Reuse the existing identity bootstrap, bearer authorization, API error handling, and token-clearing behavior. Never send `user_id` or expose the raw token.
+- Add a typed Today response for `date`, `timezone`, `sections`, `summary`, and `server_time`, and request the selected date as an encoded `YYYY-MM-DD` query value.
+- Derive the initial date from the resolved user's timezone, not the browser's timezone. Use calendar-date arithmetic that cannot shift the selected date through local UTC conversion.
+- Present Today and Todos as two compact application views. Preserve the existing pending Todo list behavior and avoid adding a router for this two-view slice.
+- Render `overdue`, `due`, `planned`, and `inbox_recent` in API order with clear section labels and counts. Do not reassign, merge, or resort Todos on the client.
+- Display the API summary counts for pending, completed, and overdue items. Empty sections and an entirely empty Today response must remain understandable without decorative card nesting.
+- Provide accessible previous/next controls, a labelled date input or equivalent native date selector, and a return-to-today control. Keep dimensions stable at desktop and narrow widths.
+- Keep identity switching and unauthorized handling consistent with TASK-018. A Today `401` clears identity storage; recoverable failures keep the identity and expose retry.
+- Extend tests without deleting credible TASK-018 coverage. Cover timezone-derived initial date, exact request URL/header, section rendering/order, date navigation, empty/error/retry, unauthorized clearing, and switching between Today and Todos.
+- Use the existing frontend stack and dependencies unless a new dependency is demonstrably necessary. Do not introduce speculative state management or design-system abstractions.
+- Inspect the local PostgreSQL/backend availability. If available or startable within normal permissions, run a live `/me`, `/todos`, and `/todos/today` smoke test through the Vite proxy. Otherwise record the exact environment blocker and retain mocked contract/browser evidence; do not modify backend scope to work around it.
 
 ## Acceptance Criteria
 
-- [x] `web/` installs, tests, and builds successfully using documented npm commands.
-- [x] With no stored token, the app presents an accessible token-entry state and writes only the approved localStorage keys after successful `/me` validation.
-- [x] A valid token resolves and displays the backend identity; no request sends `user_id` and no token appears in URL, visible errors, logs, or committed files.
-- [x] A valid identity loads and renders only the authenticated default pending Todo list with title, priority, date/time, and category information.
-- [x] Loading, empty, generic API/network error, retry, unauthorized, stored-token bootstrap, and switch/re-enter states behave correctly.
-- [x] Unauthorized responses clear identity storage; recoverable non-auth errors keep it.
-- [x] The layout remains usable on desktop and narrow mobile-width browser viewports with no overlapping or clipped controls/text.
-- [x] Focused tests cover storage/auth headers, `/me` validation, Todo rendering, all major states, unauthorized clearing, retry, and identity switching.
-- [x] Production build contains no token/secret, generated output is ignored, and no backend or out-of-scope feature is modified.
+- [ ] A valid stored or newly entered identity opens a usable Today view whose initial date matches the identity timezone.
+- [ ] The client sends authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` requests without `user_id` or token leakage.
+- [ ] Today renders all four backend sections in their supplied order and displays pending, completed, and overdue summary counts.
+- [ ] Previous, next, direct date selection, and return-to-today controls request the correct calendar date without timezone drift.
+- [ ] Switching between Today and Todos preserves the existing identity and pending-list behavior.
+- [ ] Loading, entirely empty, section-empty, recoverable error/retry, and unauthorized states behave correctly.
+- [ ] Unauthorized clears approved identity storage; recoverable failures preserve it.
+- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible controls.
+- [ ] Existing tests remain green and focused new tests cover Today API, timezone/date behavior, rendering, navigation, and major failure states.
+- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [ ] Live proxy smoke evidence is recorded when the local services are available; otherwise the exact environment limitation is reported without claiming live integration.
+- [ ] No backend or other out-of-scope Phase 1A feature is modified.
 
 ## Verification Plan
 
-- Run the frontend focused test suite and production build from `web/`.
-- Inspect package/dependency scope, generated artifacts, environment usage, and exact changed files.
-- Verify request construction never includes `user_id`, logs, or URL token material.
-- Exercise mocked normal, empty, unauthorized, network-error, retry, and identity-switch flows.
-- Start the Vite development server and report its URL; when the backend/PostgreSQL service is available, manually smoke-test `/me` and `/todos` through the proxy.
-- Inspect responsive behavior at desktop and narrow viewport sizes and run `git diff --check` plus independent whitespace checks for new files.
+- Run `npm test`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high` from `web/`.
+- Verify mocked Today responses for populated, empty, unauthorized, and recoverable-error flows.
+- Verify the identity timezone initial date and previous/next calendar arithmetic with deterministic tests.
+- Inspect request URLs and authorization headers for exact contract use and absence of `user_id` or raw-token exposure.
+- Inspect desktop and narrow browser views, including date controls, all section labels, summary values, and no horizontal overflow.
+- Attempt the documented live Vite-proxy smoke path if PostgreSQL/backend availability permits it and record the result.
+- Inspect exact changed/ignored files, run `git diff --check`, and independently check new files for whitespace/artifact/secret issues.
 
 ## Risks
 
-- Token handling can leak credentials through debugging, URLs, or committed environment files.
-- Mixing selected alias with authorization can break the backend's token-derived isolation boundary.
-- Local frontend/backend ports can create CORS friction unless the development proxy is configured correctly.
-- A scaffold-only result would not form a usable vertical slice.
-- Unnecessary app architecture can enlarge later PC Web work before product behavior is proven.
+- Browser-local date handling can choose the wrong day for an identity in another timezone.
+- Client-side sorting or section reassignment can silently contradict the Today API contract.
+- Adding navigation can regress the already-published pending Todo list or identity flow.
+- Live integration may remain unverified while the local PostgreSQL service is stopped.
+- A broad frontend architecture change would make this slice harder to review and close.
 
 ## Coding Output Requirements
 
-Report modified files, frontend structure/dependencies, token/storage behavior, API/proxy design, visible states, responsive/accessibility checks, acceptance results, test/build/dev-server results, manual backend smoke-test status, diff/artifact/secret checks, unresolved issues, and task-outside findings.
+Report modified files, typed API changes, timezone/date strategy, view navigation, visible states, responsive/accessibility checks, acceptance results, unit/build/e2e/audit results, live proxy smoke status, diff/artifact/secret checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-23 08:38 +08:00
-
-Result Commit: `ea34afc160335ab18654d6e231dd4eb8ba04b869`
-
-Completion Commit: `594be264b6957f006aafe4821675050e7b9c881e`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `594be264b6957f006aafe4821675050e7b9c881e` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-018 Closure documents with message `docs(task): close TASK-018`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-019 from the approved TASK-019 publication and active workflow-state files. Coding must not start before Git Snapshot completion.
