@@ -115,6 +115,16 @@ Report modified files, frontend structure/dependencies, token/storage behavior, 
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run TASK-018 Decision Closure Check before publishing the next Phase 1A client task.
+Closure Check: PASS
+
+Checked at: 2026-07-23 08:38 +08:00
+
+Result Commit: `ea34afc160335ab18654d6e231dd4eb8ba04b869`
+
+Completion Commit: `594be264b6957f006aafe4821675050e7b9c881e`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `594be264b6957f006aafe4821675050e7b9c881e` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-018 Closure documents with message `docs(task): close TASK-018`. After remote parity is verified, return to Decision; do not run another Closure Check.

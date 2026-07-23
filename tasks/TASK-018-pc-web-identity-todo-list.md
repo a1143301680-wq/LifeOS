@@ -227,4 +227,27 @@ None.
 
 ## Closure
 
-Closure Check: PENDING
+Closure Check: PASS
+
+- Checked At: 2026-07-23 08:38 +08:00
+- Result Commit: `ea34afc160335ab18654d6e231dd4eb8ba04b869`
+- Completion Commit: `594be264b6957f006aafe4821675050e7b9c881e`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `594be264b6957f006aafe4821675050e7b9c881e`.
+- Working Tree Before Closure Docs: clean; generated frontend artifacts remained ignored.
+- Review Evidence: Code Review `PASS`; no blocking issue remained.
+- Test Evidence: Decision reran Vitest (`8 passed`), Playwright (`2 passed`), the production build, and `npm audit --audit-level=high` (`0 vulnerabilities`) on the published completion state.
+- Acceptance Criteria Result: all TASK-018 acceptance criteria confirmed through automated contract/browser verification.
+- Issue Disposition: no TASK-018 issue-log entry or unresolved blocking issue exists. Live PostgreSQL/backend proxy smoke testing remains a non-blocking environment follow-up before broader PC Web integration.
+- Phase/Progress Result: PC Web is correctly recorded as partial; identity validation and the pending Todo list are complete, while Today/category/mutation/SSE slices remain.
+- Remaining Follow-ups:
+  - Start PostgreSQL and the backend and run a live `/me` plus `/todos` proxy smoke test before or during the next PC Web slice.
+  - Continue Phase 1A PC Web delivery after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-018-pc-web-identity-todo-list.md`
+- Commit message: `docs(task): close TASK-018`
+- This commit is terminal and must not trigger another Closure Check or create new state files.
