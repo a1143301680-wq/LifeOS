@@ -6,7 +6,7 @@ Last updated: 2026-07-22
 
 - Task ID: TASK-018
 - Task Name: PC Web identity and Todo list vertical slice
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -115,6 +115,6 @@ Report modified files, frontend structure/dependencies, token/storage behavior, 
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-018 from the approved TASK-018 publication, audit, and active workflow-state files. Coding must not start before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-018 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.
