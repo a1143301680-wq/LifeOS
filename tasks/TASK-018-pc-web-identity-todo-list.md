@@ -4,7 +4,7 @@
 
 - Task ID: TASK-018
 - Task Name: PC Web identity and Todo list vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies: Phase 1A backend through `b4a2c1e`; TASK-017 terminal closure `32894e4`
@@ -50,13 +50,13 @@ Build the first PC Web slice as a usable identity-to-list workflow, not a scaffo
 
 ## Acceptance Criteria
 
-- [ ] Install, focused tests, and production build pass.
-- [ ] Identity entry, stored-token bootstrap, `/me` validation, display, and clear/re-enter behavior are correct.
-- [ ] Token safety and token-derived authorization rules are preserved.
-- [ ] Default pending Todos render with useful DTO fields and no cross-identity input.
-- [ ] Loading, empty, unauthorized, generic error, retry, and switch states are covered.
-- [ ] Desktop/narrow layouts and accessible controls are verified.
-- [ ] No backend/out-of-scope change, secret, or generated artifact is committed.
+- [x] Install, focused tests, and production build pass.
+- [x] Identity entry, stored-token bootstrap, `/me` validation, display, and clear/re-enter behavior are correct.
+- [x] Token safety and token-derived authorization rules are preserved.
+- [x] Default pending Todos render with useful DTO fields and no cross-identity input.
+- [x] Loading, empty, unauthorized, generic error, retry, and switch states are covered.
+- [x] Desktop/narrow layouts and accessible controls are verified.
+- [x] No backend/out-of-scope change, secret, or generated artifact is committed.
 
 ## Verification Plan
 
@@ -215,9 +215,15 @@ None.
 
 ## Git Commit
 
-- Result: PENDING
-- Result Commit: pending
-- Push Result: pending
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-23
+- Branch: main
+- Result Commit: ea34afc160335ab18654d6e231dd4eb8ba04b869
+- Commit Message: `feat(web): add identity Todo list slice`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

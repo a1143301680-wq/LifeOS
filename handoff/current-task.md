@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
 
 ## Metadata
 
 - Task ID: TASK-018
 - Task Name: PC Web identity and Todo list vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -82,15 +82,15 @@ A user can open the PC Web app, securely enter or reuse a Phase 1A identity toke
 
 ## Acceptance Criteria
 
-- [ ] `web/` installs, tests, and builds successfully using documented npm commands.
-- [ ] With no stored token, the app presents an accessible token-entry state and writes only the approved localStorage keys after successful `/me` validation.
-- [ ] A valid token resolves and displays the backend identity; no request sends `user_id` and no token appears in URL, visible errors, logs, or committed files.
-- [ ] A valid identity loads and renders only the authenticated default pending Todo list with title, priority, date/time, and category information.
-- [ ] Loading, empty, generic API/network error, retry, unauthorized, stored-token bootstrap, and switch/re-enter states behave correctly.
-- [ ] Unauthorized responses clear identity storage; recoverable non-auth errors keep it.
-- [ ] The layout remains usable on desktop and narrow mobile-width browser viewports with no overlapping or clipped controls/text.
-- [ ] Focused tests cover storage/auth headers, `/me` validation, Todo rendering, all major states, unauthorized clearing, retry, and identity switching.
-- [ ] Production build contains no token/secret, generated output is ignored, and no backend or out-of-scope feature is modified.
+- [x] `web/` installs, tests, and builds successfully using documented npm commands.
+- [x] With no stored token, the app presents an accessible token-entry state and writes only the approved localStorage keys after successful `/me` validation.
+- [x] A valid token resolves and displays the backend identity; no request sends `user_id` and no token appears in URL, visible errors, logs, or committed files.
+- [x] A valid identity loads and renders only the authenticated default pending Todo list with title, priority, date/time, and category information.
+- [x] Loading, empty, generic API/network error, retry, unauthorized, stored-token bootstrap, and switch/re-enter states behave correctly.
+- [x] Unauthorized responses clear identity storage; recoverable non-auth errors keep it.
+- [x] The layout remains usable on desktop and narrow mobile-width browser viewports with no overlapping or clipped controls/text.
+- [x] Focused tests cover storage/auth headers, `/me` validation, Todo rendering, all major states, unauthorized clearing, retry, and identity switching.
+- [x] Production build contains no token/secret, generated output is ignored, and no backend or out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -115,6 +115,6 @@ Report modified files, frontend structure/dependencies, token/storage behavior, 
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-018 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.
+Required next action: run TASK-018 Decision Closure Check before publishing the next Phase 1A client task.
