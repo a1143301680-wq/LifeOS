@@ -6,7 +6,7 @@ Last updated: 2026-07-23
 
 - Task ID: TASK-019
 - Task Name: PC Web Today view vertical slice
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -126,6 +126,6 @@ Report modified files, typed API changes, timezone/date strategy, view navigatio
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-019 from the approved TASK-019 publication and active workflow-state files. Coding must not start before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-019 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.

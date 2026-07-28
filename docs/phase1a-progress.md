@@ -60,13 +60,13 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | TASK-018 identity and Todo list slice closed in `dc710ba`; TASK-019 Today view is planned |
+| PC Web | partial | TASK-018 identity and Todo list slice closed in `dc710ba`; TASK-019 Today view implemented and awaiting Code Review |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Deliver TASK-019 PC Web Today view.
+1. Review and publish TASK-019 PC Web Today view.
 2. Continue PC Web category/mutation/SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.

@@ -1,4 +1,4 @@
-import type { DataEnvelope, ListEnvelope, Todo, UserIdentity } from "./types";
+import type { DataEnvelope, ListEnvelope, Todo, TodayData, UserIdentity } from "./types";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
 
@@ -41,4 +41,12 @@ export async function getCurrentUser(token: string) {
 export async function getPendingTodos(token: string) {
   const response = await authenticatedGet<ListEnvelope<Todo>>("/todos", token);
   return response.items;
+}
+
+export async function getTodayTodos(token: string, date: string) {
+  const response = await authenticatedGet<DataEnvelope<TodayData>>(
+    `/todos/today?date=${encodeURIComponent(date)}`,
+    token,
+  );
+  return response.data;
 }

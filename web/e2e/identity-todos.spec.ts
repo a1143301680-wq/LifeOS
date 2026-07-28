@@ -32,6 +32,21 @@ const todos = {
   server_time: "2026-07-22T14:00:00+08:00",
 };
 
+const today = {
+  data: {
+    date: "2026-07-23",
+    timezone: "Asia/Shanghai",
+    sections: {
+      overdue: [{ ...todos.items[0], id: "today-overdue", title: "Overdue review notes" }],
+      due: [{ ...todos.items[0], id: "today-due", title: "Prepare weekly review without losing the important details" }],
+      planned: [{ ...todos.items[0], id: "today-planned", title: "Plan tomorrow's focus" }],
+      inbox_recent: [{ ...todos.items[0], id: "today-inbox", title: "Inbox follow-up" }],
+    },
+    summary: { pending_count: 4, completed_count: 2, overdue_count: 1 },
+  },
+  server_time: "2026-07-23T14:00:00+08:00",
+};
+
 async function hasHorizontalOverflow(page: import("@playwright/test").Page) {
   return page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
 }
@@ -40,10 +55,12 @@ for (const viewport of [
   { name: "desktop", width: 1440, height: 900 },
   { name: "narrow", width: 375, height: 812 },
 ]) {
-  test(`${viewport.name} identity-to-list flow fits the viewport`, async ({ page }) => {
+  test(`${viewport.name} Today and Todos flow fits the viewport`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
-    await page.route("**/api/v1/todos", (route) => route.fulfill({ json: todos }));
+    await page.route("**/api/v1/todos**", (route) =>
+      route.fulfill({ json: route.request().url().includes("/today") ? today : todos }),
+    );
 
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Connect your identity" })).toBeVisible();
@@ -53,8 +70,17 @@ for (const viewport of [
     await page.getByLabel("Identity token").fill("browser-test-token");
     await page.getByRole("button", { name: "Continue" }).click();
 
-    await expect(page.getByText("Prepare weekly review without losing the important details")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
+    await expect(page.getByLabel("Selected date")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Previous date" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Next date" })).toBeVisible();
+    await expect(page.getByLabel("Today summary")).toContainText("Completed");
+    await expect(page.getByRole("heading", { name: "Overdue", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Recent Inbox", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Switch identity" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Todos" }).click();
+    await expect(page.getByText("Prepare weekly review without losing the important details")).toBeVisible();
     await expect(page.getByRole("button", { name: "Refresh todos" })).toBeVisible();
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });

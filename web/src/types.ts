@@ -37,3 +37,20 @@ export type ListEnvelope<T> = {
   next_cursor: string | null;
   server_time: string;
 };
+
+export type TodaySectionName = "overdue" | "due" | "planned" | "inbox_recent";
+
+export type TodaySections = Record<TodaySectionName, Todo[]>;
+
+export type TodaySummary = {
+  pending_count: number;
+  completed_count: number;
+  overdue_count: number;
+};
+
+export type TodayData = {
+  date: string;
+  timezone: string;
+  sections: TodaySections;
+  summary: TodaySummary;
+};
