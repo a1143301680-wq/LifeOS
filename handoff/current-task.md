@@ -4,51 +4,53 @@ Last updated: 2026-07-28
 
 ## Metadata
 
-- Task ID: TASK-019
-- Task Name: PC Web Today view vertical slice
-- Status: COMPLETED
+- Task ID: TASK-020
+- Task Name: PC Web category list and create vertical slice
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
-  - TASK-015 Today Todo aggregation API published in `2a698f3`
-  - TASK-018 terminal closure published in `dc710ba`
-  - Existing PC Web identity and pending Todo list foundation under `web/`
+  - Todo Category list/create API published in `52a701f`
+  - Active category-name uniqueness published in `eca0af8`
+  - TASK-019 terminal closure published in `9f96d36`
+  - Existing PC Web identity, Today, and pending Todo views under `web/`
 
 ## Background
 
-TASK-018 established token-derived identity and a usable pending Todo list. The next PC Web slice should expose the backend Today aggregation without mixing in category management, Todo mutations, SSE, or Android work.
+The PC Web app now supports identity validation, Today aggregation, and the pending Todo list. The next closeable slice should let the authenticated user inspect their active categories and create a category with correct idempotency and observable write states, without combining category update/delete or Todo mutations.
 
 ## Goal
 
-An authenticated PC Web user can open a Today view for the current date in the resolved identity timezone, inspect the backend-provided overdue, due, planned, and recent Inbox sections, and move between dates without losing the existing pending Todo list experience.
+An authenticated PC Web user can open a Categories view, see only their active categories in server order, and create a named category with an optional color through a safe, retryable, idempotent workflow.
 
 ## Scope
 
 ### In Scope
 
-- Add authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` integration.
-- Add a compact Today/Todos view switch without introducing a routing framework.
-- Default Today to the current calendar date in the `/me` identity timezone.
-- Add previous-date, next-date, date-selection, and return-to-today controls.
-- Render the four API sections and pending/completed/overdue summary while preserving server ordering.
-- Handle Today loading, empty, recoverable error/retry, and unauthorized states.
-- Add focused unit/component and Playwright coverage for desktop and narrow viewports.
-- Attempt and record a live Vite-proxy smoke test when PostgreSQL and the backend can be made available.
+- Add authenticated `GET /api/v1/todo-categories` integration.
+- Add authenticated `POST /api/v1/todo-categories` integration with a UUID `Idempotency-Key`.
+- Add a compact Categories entry alongside Today and Todos.
+- Render category name, color, Inbox identity, and useful category metadata without exposing system internals.
+- Add an accessible create-category form with required name and optional constrained color selection.
+- Handle category loading, empty, recoverable error/retry, unauthorized, submitting, validation/conflict, success, and failed-create retry states.
+- Preserve existing identity, Today, and pending Todo behavior.
+- Add focused component/API and Playwright coverage at desktop and narrow widths.
+- Attempt and record live Vite-proxy verification when PostgreSQL, backend, and a safe test identity are available.
 
 ### Out of Scope
 
-- Todo category views or management.
-- Todo create, edit, complete, reopen, or delete actions.
+- Category rename, color update, reorder, Inbox modification, or delete.
+- Todo create, edit, complete, reopen, delete, category assignment, detail, filters, or pagination UI.
 - SSE refresh, sync cursor storage, offline cache, PWA, or Android work.
-- Backend API, database, authentication, CORS, migration, or seed-data changes.
-- Pagination/filter controls, Todo detail screens, or a routing framework.
+- Backend API, authentication, database, CORS, migration, or seed-data changes.
+- Free-form icon authoring or a broad icon/category design system.
 - Changes to stable requirements, architecture, MVP, API-contract, or data-model documents.
 
 ## Related Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 7.2, 9.4, 10.1, and 11
+- `docs/api-phase1a.md` sections 2, 7.2, 8.1, 9.1, and 9.2
 - `docs/mvp.md` Phase 1A PC Web scope
 - `web/src/App.tsx`
 - `web/src/App.test.tsx`
@@ -56,86 +58,80 @@ An authenticated PC Web user can open a Today view for the current date in the r
 - `web/src/types.ts`
 - `web/src/styles.css`
 - `web/e2e/identity-todos.spec.ts`
-- Backend Today response DTO/tests only as contract references
+- Backend category schemas and list/create tests only as contract references
 
 ### Allowed Modify Files
 
 - Existing `web/` source, tests, styles, Playwright specs/config, package manifest, and lockfile when justified
 - `web/README.md` for concise updated run/verification instructions
 - `docs/phase1a-progress.md`
-- Active TASK-019 handoff, gate, Git record, and issue-log files
+- Active TASK-020 handoff, gate, Git record, and issue-log files
 
 ### Forbidden Modify Files
 
 - Any `backend/` implementation, tests, dependencies, settings, or migrations
 - Stable product, architecture, MVP, API-contract, or data-model documents
-- Category, mutation, SSE, sync-recovery, offline/PWA, or Android behavior
+- Category update/delete, Todo mutation, SSE, sync-recovery, offline/PWA, or Android behavior
 - Raw identity tokens, `.env` secrets, generated output, dependency directories, logs, caches, or editor-local files
-- Completed TASK-005 through TASK-018 archives
+- Completed TASK-005 through TASK-019 archives
 
 ## Implementation Requirements
 
-- Reuse the existing identity bootstrap, bearer authorization, API error handling, and token-clearing behavior. Never send `user_id` or expose the raw token.
-- Add a typed Today response for `date`, `timezone`, `sections`, `summary`, and `server_time`, and request the selected date as an encoded `YYYY-MM-DD` query value.
-- Derive the initial date from the resolved user's timezone, not the browser's timezone. Use calendar-date arithmetic that cannot shift the selected date through local UTC conversion.
-- Present Today and Todos as two compact application views. Preserve the existing pending Todo list behavior and avoid adding a router for this two-view slice.
-- Render `overdue`, `due`, `planned`, and `inbox_recent` in API order with clear section labels and counts. Do not reassign, merge, or resort Todos on the client.
-- Display the API summary counts for pending, completed, and overdue items. Empty sections and an entirely empty Today response must remain understandable without decorative card nesting.
-- Provide accessible previous/next controls, a labelled date input or equivalent native date selector, and a return-to-today control. Keep dimensions stable at desktop and narrow widths.
-- Keep identity switching and unauthorized handling consistent with TASK-018. A Today `401` clears identity storage; recoverable failures keep the identity and expose retry.
-- Extend tests without deleting credible TASK-018 coverage. Cover timezone-derived initial date, exact request URL/header, section rendering/order, date navigation, empty/error/retry, unauthorized clearing, and switching between Today and Todos.
-- Use the existing frontend stack and dependencies unless a new dependency is demonstrably necessary. Do not introduce speculative state management or design-system abstractions.
-- Inspect the local PostgreSQL/backend availability. If available or startable within normal permissions, run a live `/me`, `/todos`, and `/todos/today` smoke test through the Vite proxy. Otherwise record the exact environment blocker and retain mocked contract/browser evidence; do not modify backend scope to work around it.
+- Reuse the existing identity bootstrap, bearer authorization, unauthorized clearing, and recoverable-error behavior. Never send `user_id` or expose the raw token.
+- Add a typed active-category DTO for `id`, `name`, `color`, `icon`, `is_inbox`, `sort_order`, `created_at`, and `updated_at`.
+- Fetch `GET /api/v1/todo-categories` when Categories is first opened and on explicit retry/refresh. Preserve the order returned by the server; do not client-sort.
+- Add Categories to the existing compact workspace navigation without introducing a routing framework or speculative global state layer.
+- Show Inbox distinctly but do not offer any Inbox mutation. Render absent color/icon values gracefully.
+- Provide a labelled create form. Name must be trimmed, non-empty, and limited to the backend maximum of 120 characters before submission. Use a small fixed set of accessible color swatches plus a no-color choice; do not accept arbitrary unsafe style strings.
+- Do not send `is_inbox`, `user_id`, timestamps, or client-calculated `sort_order`. Omit optional `color` when no color is selected.
+- Generate a UUID `Idempotency-Key` for each logical create attempt. A recoverable retry of the same unchanged payload must reuse the same key; changing the payload after failure must invalidate that attempt and generate a new key.
+- Disable duplicate submissions while a create is in flight. On success, clear the form and refetch the category list so server ordering remains authoritative.
+- Map expected `400 validation_error` responses to concise user-facing validation feedback without displaying backend internals. Network/server failures must preserve the form and allow retry. A `401` clears identity storage and returns to token setup.
+- Keep Today and Todos behavior and tests intact. Avoid broad extraction/refactoring unless directly required to prevent meaningful duplication in this slice.
+- Inspect local service and safe test-identity availability. If available, run live `/me`, category list, and category create verification through the Vite proxy without leaving accidental test data. Otherwise record the exact limitation and do not claim live integration.
 
 ## Acceptance Criteria
 
-- [x] A valid stored or newly entered identity opens a usable Today view whose initial date matches the identity timezone.
-- [x] The client sends authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` requests without `user_id` or token leakage.
-- [x] Today renders all four backend sections in their supplied order and displays pending, completed, and overdue summary counts.
-- [x] Previous, next, direct date selection, and return-to-today controls request the correct calendar date without timezone drift.
-- [x] Switching between Today and Todos preserves the existing identity and pending-list behavior.
-- [x] Loading, entirely empty, section-empty, recoverable error/retry, and unauthorized states behave correctly.
-- [x] Unauthorized clears approved identity storage; recoverable failures preserve it.
-- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible controls.
-- [x] Existing tests remain green and focused new tests cover Today API, timezone/date behavior, rendering, navigation, and major failure states.
-- [x] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [x] Live proxy smoke evidence is recorded when the local services are available; otherwise the exact environment limitation is reported without claiming live integration.
-- [x] No backend or other out-of-scope Phase 1A feature is modified.
+- [ ] A valid identity can open Categories and load only the authenticated user's active categories in server order.
+- [ ] Category rows show name, optional color, and a clear non-editable Inbox distinction.
+- [ ] The create form submits only an allowed trimmed name and optional approved color to `POST /api/v1/todo-categories`.
+- [ ] Every logical create attempt sends bearer authorization and a valid UUID `Idempotency-Key`, without `user_id`, `is_inbox`, token leakage, or client `sort_order`.
+- [ ] An unchanged recoverable retry reuses its idempotency key; editing the failed payload causes the next submission to use a new key.
+- [ ] Duplicate submission is prevented while pending; success clears the form and refreshes the server-ordered list.
+- [ ] Loading, empty, list error/retry, create validation/conflict, create network/server error/retry, success, and unauthorized states behave correctly.
+- [ ] Unauthorized list or create responses clear approved identity storage; recoverable failures preserve identity and form values.
+- [ ] Switching among Today, Todos, and Categories preserves the published behavior of the earlier views.
+- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible form/navigation controls.
+- [ ] Existing tests remain green and focused new tests cover category requests, rendering, idempotent retry, validation, success refresh, and major failure states.
+- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [ ] Live proxy evidence is recorded when services and a safe identity are available; otherwise the exact limitation is reported without claiming live integration.
+- [ ] No backend, category update/delete, Todo mutation, SSE, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
 - Run `npm test`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high` from `web/`.
-- Verify mocked Today responses for populated, empty, unauthorized, and recoverable-error flows.
-- Verify the identity timezone initial date and previous/next calendar arithmetic with deterministic tests.
-- Inspect request URLs and authorization headers for exact contract use and absence of `user_id` or raw-token exposure.
-- Inspect desktop and narrow browser views, including date controls, all section labels, summary values, and no horizontal overflow.
-- Attempt the documented live Vite-proxy smoke path if PostgreSQL/backend availability permits it and record the result.
-- Inspect exact changed/ignored files, run `git diff --check`, and independently check new files for whitespace/artifact/secret issues.
+- Verify mocked category list responses for populated, empty, unauthorized, and recoverable-error flows.
+- Inspect create request body and headers, including UUID idempotency generation/reuse and forbidden-field absence.
+- Verify successful create refetches and renders server order; verify failed create preserves form values and correct retry behavior.
+- Exercise Today/Todos/Categories switching and existing identity switching.
+- Inspect desktop and narrow browser views for navigation, category rows, create form, feedback, focus behavior, and no horizontal overflow.
+- Attempt the documented live Vite-proxy path when services and safe identity data permit it; record the exact result.
+- Inspect exact changed/ignored files, run `git diff --check`, and independently check new files for whitespace, artifact, and secret issues.
 
 ## Risks
 
-- Browser-local date handling can choose the wrong day for an identity in another timezone.
-- Client-side sorting or section reassignment can silently contradict the Today API contract.
-- Adding navigation can regress the already-published pending Todo list or identity flow.
-- Live integration may remain unverified while the local PostgreSQL service is stopped.
-- A broad frontend architecture change would make this slice harder to review and close.
+- Incorrect idempotency-key lifecycle can create duplicate categories after ambiguous network failures.
+- Client-side sorting can diverge from backend category ordering.
+- Displaying a color value directly as CSS can permit malformed styling unless constrained or safely validated.
+- Adding a third view can regress the existing Today/Todos navigation and responsive header.
+- Live write verification can leave test categories in a real user's data if cleanup is not planned.
 
 ## Coding Output Requirements
 
-Report modified files, typed API changes, timezone/date strategy, view navigation, visible states, responsive/accessibility checks, acceptance results, unit/build/e2e/audit results, live proxy smoke status, diff/artifact/secret checks, unresolved issues, and task-outside findings.
+Report modified files, typed category API changes, idempotency-key lifecycle, request payload constraints, navigation/form/list behavior, visible states, responsive/accessibility checks, acceptance results, unit/build/e2e/audit results, live proxy status and cleanup, diff/artifact/secret checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-07-28 08:39 +08:00
-
-Result Commit: `d57fd9af38176583634c698e4c9a6276dd384177`
-
-Completion Commit: `aead2226d46b0663c858f94a71b1d26c55b9eb92`
-
-Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `aead2226d46b0663c858f94a71b1d26c55b9eb92` before Closure documentation edits.
-
-Required next action: commit and push only the Decision-approved TASK-019 Closure documents with message `docs(task): close TASK-019`. After remote parity is verified, return to Decision; do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-020 from the approved TASK-020 publication and active workflow-state files. Coding must not start before Git Snapshot completion.

@@ -66,7 +66,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-018 PC Web identity and Todo list vertical slice completed in result commit `ea34afc`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-018 terminal Closure Commit `dc710ba` was published and the task workflow ended.
 - TASK-019 PC Web Today view completed in result commit `d57fd9a`; Code Review: PASS; frontend tests/build/e2e/audit passed.
-- TASK-019 Decision Closure Check passed on 2026-07-28; terminal Closure Commit is the only remaining action before the next Phase 1A client task may be published.
+- TASK-019 terminal Closure Commit `9f96d36` was published and the task workflow ended.
+- TASK-020 PC Web category list/create was published as the next Phase 1A client slice and awaits Task Review.
 
 ## Recently Completed
 
@@ -115,7 +116,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Publish the TASK-019 terminal Closure Commit, then continue Phase 1A PC Web delivery. Live task routing is maintained in `handoff/current-task.md`.
+Run Task Review for TASK-020. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

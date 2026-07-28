@@ -60,14 +60,14 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | TASK-018 identity/list closed in `dc710ba`; TASK-019 Today view published in `d57fd9a` |
+| PC Web | partial | Identity/list and Today views closed through `9f96d36`; TASK-020 category list/create is planned |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Publish the TASK-019 terminal Closure Commit.
-2. Continue PC Web category/mutation/SSE slices.
+1. Deliver TASK-020 PC Web category list/create.
+2. Continue PC Web category update/delete, Todo mutation, and SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
 

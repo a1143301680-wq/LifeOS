@@ -1,25 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-07-23
+Last updated: 2026-07-28
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-019
+Task ID: TASK-020
 
-Branch: main
+Branch: Pending
 
-Base Commit: `dc710ba5fc2b4b2c6f736daea950caf8ea0d065a`
+Base Commit: `9f96d36a1009d411e40585ab325222cf987ff46c`
 
-Working Tree: 8 approved TASK-019 pre-Coding publication and active workflow-state documents committed separately; no business code
+Working Tree: Pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: `6925aaf2269e18eebff12e96565be3e4cde80190`
+Snapshot Commit: Pending
 
-Reason: approved TASK-019 readiness documents required a durable pre-Coding baseline
+Reason: TASK-020 must pass Task Review before its development baseline is recorded.
 
 ## Instructions
 
-Run only after Task Review PASS. Confirm every pre-snapshot change belongs to TASK-019 publication scope, then synchronize both active task files to `IN_PROGRESS` and route to Coding.
+Run only after Task Review PASS. Confirm every pre-snapshot change belongs to TASK-020 publication scope, then synchronize both active task files to `IN_PROGRESS` and route to Coding.
