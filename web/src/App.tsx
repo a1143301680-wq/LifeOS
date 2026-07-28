@@ -4,6 +4,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Folder,
+  FolderOpen,
   Inbox,
   KeyRound,
   LogOut,
@@ -11,14 +13,34 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { ApiError, getCurrentUser, getPendingTodos, getTodayTodos } from "./api";
+import {
+  ApiError,
+  createTodoCategory,
+  getCurrentUser,
+  getPendingTodos,
+  getTodayTodos,
+  getTodoCategories,
+} from "./api";
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
-import type { Todo, TodayData, TodaySectionName, UserIdentity } from "./types";
+import type { Todo, TodoCategory, TodayData, TodaySectionName, UserIdentity } from "./types";
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
-type AppView = "today" | "todos";
+type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
+type AppView = "today" | "todos" | "categories";
+type FailedCreateAttempt = {
+  fingerprint: string;
+  idempotencyKey: string;
+};
+
+const categoryColors = [
+  { name: "Slate", value: "#64748b" },
+  { name: "Blue", value: "#2563eb" },
+  { name: "Green", value: "#16a34a" },
+  { name: "Amber", value: "#d97706" },
+  { name: "Red", value: "#dc2626" },
+];
 
 const todaySections: Array<{ key: TodaySectionName; label: string; description: string }> = [
   { key: "overdue", label: "Overdue", description: "Due before this date" },
@@ -115,6 +137,39 @@ function TodayContent({ data, timezone }: { data: TodayData; timezone: string })
   );
 }
 
+function categoryColor(color: string | null) {
+  return color && /^#[0-9a-fA-F]{6}$/.test(color) ? color : null;
+}
+
+function CategoryList({ categories }: { categories: TodoCategory[] }) {
+  return (
+    <ul className="category-list" aria-label="Todo categories">
+      {categories.map((category) => {
+        const color = categoryColor(category.color);
+        return (
+          <li className="category-row" key={category.id}>
+            <span
+              className={`category-color${color ? "" : " category-color-empty"}`}
+              style={color ? { backgroundColor: color } : undefined}
+              aria-label={color ? `Color ${color}` : "No color"}
+            />
+            <div className="category-content">
+              <h2>{category.name}</h2>
+              <p>
+                {category.is_inbox ? (
+                  <><Inbox aria-hidden="true" />Default Inbox</>
+                ) : (
+                  <><Folder aria-hidden="true" />{category.icon ? `Icon: ${category.icon}` : "No icon"}</>
+                )}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export default function App() {
   const [initialToken] = useState(readIdentityToken);
   const [activeToken, setActiveToken] = useState<string | null>(initialToken);
@@ -127,6 +182,13 @@ export default function App() {
   const [todayStatus, setTodayStatus] = useState<LoadStatus>("idle");
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todoStatus, setTodoStatus] = useState<LoadStatus>("idle");
+  const [categories, setCategories] = useState<TodoCategory[]>([]);
+  const [categoryStatus, setCategoryStatus] = useState<LoadStatus>("idle");
+  const [categoryName, setCategoryName] = useState("");
+  const [selectedCategoryColor, setSelectedCategoryColor] = useState("");
+  const [createStatus, setCreateStatus] = useState<CreateStatus>("idle");
+  const [createMessage, setCreateMessage] = useState<string | null>(null);
+  const [failedCreateAttempt, setFailedCreateAttempt] = useState<FailedCreateAttempt | null>(null);
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -141,6 +203,13 @@ export default function App() {
     setTodayStatus("idle");
     setTodos([]);
     setTodoStatus("idle");
+    setCategories([]);
+    setCategoryStatus("idle");
+    setCategoryName("");
+    setSelectedCategoryColor("");
+    setCreateStatus("idle");
+    setCreateMessage(null);
+    setFailedCreateAttempt(null);
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
@@ -171,6 +240,20 @@ export default function App() {
         return;
       }
       setTodoStatus("error");
+    }
+  }, [returnToSetup]);
+
+  const loadCategories = useCallback(async (token: string) => {
+    setCategoryStatus("loading");
+    try {
+      setCategories(await getTodoCategories(token));
+      setCategoryStatus("ready");
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      setCategoryStatus("error");
     }
   }, [returnToSetup]);
 
@@ -228,6 +311,68 @@ export default function App() {
     if (activeToken && todoStatus === "idle") void loadTodos(activeToken);
   }
 
+  function openCategories() {
+    setView("categories");
+    if (activeToken && categoryStatus === "idle") void loadCategories(activeToken);
+  }
+
+  async function submitCategory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeToken || createStatus === "submitting") return;
+
+    const name = categoryName.trim();
+    if (!name) {
+      setFailedCreateAttempt(null);
+      setCreateStatus("validation");
+      setCreateMessage("Enter a category name.");
+      return;
+    }
+    if (name.length > 120) {
+      setFailedCreateAttempt(null);
+      setCreateStatus("validation");
+      setCreateMessage("Category name must be 120 characters or fewer.");
+      return;
+    }
+
+    const payload = selectedCategoryColor ? { name, color: selectedCategoryColor } : { name };
+    const fingerprint = JSON.stringify(payload);
+    const idempotencyKey = failedCreateAttempt?.fingerprint === fingerprint
+      ? failedCreateAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setCreateStatus("submitting");
+    setCreateMessage(null);
+    try {
+      await createTodoCategory(activeToken, idempotencyKey, payload);
+      setCategoryName("");
+      setSelectedCategoryColor("");
+      setFailedCreateAttempt(null);
+      setCreateStatus("success");
+      setCreateMessage("Category created.");
+      await loadCategories(activeToken);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 400) {
+        setFailedCreateAttempt(null);
+        setCreateStatus("validation");
+        setCreateMessage("Check the category name and try again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedCreateAttempt(null);
+        setCreateStatus("validation");
+        setCreateMessage("This create request conflicts with an earlier attempt. Review the form and try again.");
+        return;
+      }
+      setFailedCreateAttempt({ fingerprint, idempotencyKey });
+      setCreateStatus("error");
+      setCreateMessage("Could not create category. Try again.");
+    }
+  }
+
   if (identityStatus === "checking" && !identity) {
     return <main className="center-stage" aria-live="polite"><div className="status-mark"><ShieldCheck aria-hidden="true" /></div><p className="status-label">Checking your identity...</p></main>;
   }
@@ -247,7 +392,11 @@ export default function App() {
   }
 
   if (identity) {
-    const currentStatus = view === "today" ? todayStatus : todoStatus;
+    const currentStatus = view === "today"
+      ? todayStatus
+      : view === "todos"
+        ? todoStatus
+        : categoryStatus;
     return (
       <main className="workspace-shell">
         <header className="app-header">
@@ -255,6 +404,7 @@ export default function App() {
           <nav className="view-switch" aria-label="Workspace views">
             <button aria-current={view === "today" ? "page" : undefined} onClick={() => setView("today")}>Today</button>
             <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos}>Todos</button>
+            <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories}>Categories</button>
           </nav>
           <div className="identity-control">
             <span className="identity-dot" aria-hidden="true" /><span>{identity.display_name}</span>
@@ -285,7 +435,7 @@ export default function App() {
               ) : null}
               {todayStatus === "ready" && todayData ? <TodayContent data={todayData} timezone={identity.timezone} /> : null}
             </>
-          ) : (
+          ) : view === "todos" ? (
             <>
               <div className="section-heading">
                 <div><p className="eyebrow">Pending</p><h1>Todos</h1></div>
@@ -297,6 +447,80 @@ export default function App() {
               ) : null}
               {todoStatus === "ready" && todos.length === 0 ? <div className="empty-state"><Inbox aria-hidden="true" /><h2>Nothing pending</h2><p>Your open todos will appear here.</p></div> : null}
               {todoStatus === "ready" && todos.length > 0 ? <ul className="todo-list" aria-label="Pending todos">{todos.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={identity.timezone} />)}</ul> : null}
+            </>
+          ) : (
+            <>
+              <div className="section-heading">
+                <div><p className="eyebrow">Organize</p><h1>Categories</h1></div>
+                <button className="icon-button bordered" onClick={() => activeToken && void loadCategories(activeToken)} disabled={categoryStatus === "loading"} title="Refresh categories" aria-label="Refresh categories"><RefreshCw className={categoryStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
+              </div>
+              <div className="categories-layout">
+                <div className="categories-results">
+                  {categoryStatus === "loading" ? <div className="list-status" role="status">Loading categories...</div> : null}
+                  {categoryStatus === "error" ? (
+                    <div className="list-status error-state" role="alert"><div><strong>Could not load categories</strong><p>Your identity is still connected.</p></div><button className="secondary-button" onClick={() => activeToken && void loadCategories(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div>
+                  ) : null}
+                  {categoryStatus === "ready" && categories.length === 0 ? <div className="empty-state"><FolderOpen aria-hidden="true" /><h2>No categories yet</h2><p>Create a category to organize your work.</p></div> : null}
+                  {categoryStatus === "ready" && categories.length > 0 ? <CategoryList categories={categories} /> : null}
+                </div>
+                <aside className="category-create" aria-labelledby="create-category-title">
+                  <div className="category-create-heading">
+                    <p className="eyebrow">New category</p>
+                    <h2 id="create-category-title">Create category</h2>
+                  </div>
+                  <form onSubmit={submitCategory} className="category-form">
+                    <label htmlFor="category-name">Category name</label>
+                    <input
+                      id="category-name"
+                      value={categoryName}
+                      onChange={(event) => {
+                        setCategoryName(event.target.value);
+                        setFailedCreateAttempt(null);
+                        if (createStatus !== "submitting") {
+                          setCreateStatus("idle");
+                          setCreateMessage(null);
+                        }
+                      }}
+                      maxLength={120}
+                      autoComplete="off"
+                      disabled={createStatus === "submitting"}
+                      aria-invalid={createStatus === "validation" ? "true" : undefined}
+                      aria-describedby={createMessage ? "category-create-message" : undefined}
+                    />
+                    <fieldset disabled={createStatus === "submitting"}>
+                      <legend>Category color</legend>
+                      <div className="color-options">
+                        <label className="color-option no-color">
+                          <input type="radio" name="category-color" value="" checked={!selectedCategoryColor} onChange={() => {
+                            setSelectedCategoryColor("");
+                            setFailedCreateAttempt(null);
+                            setCreateStatus("idle");
+                            setCreateMessage(null);
+                          }} />
+                          <span aria-hidden="true" />
+                          <span>No color</span>
+                        </label>
+                        {categoryColors.map((color) => (
+                          <label className="color-option" key={color.value}>
+                            <input type="radio" name="category-color" value={color.value} checked={selectedCategoryColor === color.value} onChange={() => {
+                              setSelectedCategoryColor(color.value);
+                              setFailedCreateAttempt(null);
+                              setCreateStatus("idle");
+                              setCreateMessage(null);
+                            }} />
+                            <span className="color-option-swatch" style={{ backgroundColor: color.value }} aria-hidden="true" />
+                            <span>{color.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <button className="primary-button" type="submit" disabled={createStatus === "submitting"}>
+                      {createStatus === "submitting" ? "Creating..." : createStatus === "error" ? "Retry create" : "Create category"}
+                    </button>
+                  </form>
+                  {createMessage ? <p id="category-create-message" className={`create-message create-message-${createStatus}`} role={createStatus === "success" ? "status" : "alert"}>{createMessage}</p> : null}
+                </aside>
+              </div>
             </>
           )}
           <span className="sr-only" aria-live="polite">{currentStatus === "loading" ? "Loading" : ""}</span>

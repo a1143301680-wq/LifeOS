@@ -11,6 +11,17 @@ export type TodoCategorySummary = {
   is_deleted: boolean;
 };
 
+export type TodoCategory = {
+  id: string;
+  name: string;
+  color: string | null;
+  icon: string | null;
+  is_inbox: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Todo = {
   id: string;
   category_id: string | null;
@@ -30,6 +41,12 @@ export type Todo = {
 export type DataEnvelope<T> = {
   data: T;
   server_time: string;
+};
+
+export type WriteEnvelope<T> = DataEnvelope<T> & {
+  sync: {
+    cursor: number;
+  };
 };
 
 export type ListEnvelope<T> = {

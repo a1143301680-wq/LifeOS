@@ -1,21 +1,34 @@
-import type { DataEnvelope, ListEnvelope, Todo, TodayData, UserIdentity } from "./types";
+import type {
+  DataEnvelope,
+  ListEnvelope,
+  Todo,
+  TodoCategory,
+  TodayData,
+  UserIdentity,
+  WriteEnvelope,
+} from "./types";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
 
 export class ApiError extends Error {
-  constructor(public readonly status: number) {
+  constructor(
+    public readonly status: number,
+    public readonly code: string | null = null,
+  ) {
     super("Request failed");
     this.name = "ApiError";
   }
 }
 
-async function authenticatedGet<T>(path: string, token: string): Promise<T> {
+async function authenticatedRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
+      ...init,
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+        ...init?.headers,
       },
     });
   } catch {
@@ -23,7 +36,14 @@ async function authenticatedGet<T>(path: string, token: string): Promise<T> {
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status);
+    let code: string | null = null;
+    try {
+      const body = await response.json() as { error?: { code?: unknown } };
+      code = typeof body.error?.code === "string" ? body.error.code : null;
+    } catch {
+      // Status remains sufficient when an error body is absent or malformed.
+    }
+    throw new ApiError(response.status, code);
   }
 
   try {
@@ -34,19 +54,44 @@ async function authenticatedGet<T>(path: string, token: string): Promise<T> {
 }
 
 export async function getCurrentUser(token: string) {
-  const response = await authenticatedGet<DataEnvelope<UserIdentity>>("/me", token);
+  const response = await authenticatedRequest<DataEnvelope<UserIdentity>>("/me", token);
   return response.data;
 }
 
 export async function getPendingTodos(token: string) {
-  const response = await authenticatedGet<ListEnvelope<Todo>>("/todos", token);
+  const response = await authenticatedRequest<ListEnvelope<Todo>>("/todos", token);
   return response.items;
 }
 
 export async function getTodayTodos(token: string, date: string) {
-  const response = await authenticatedGet<DataEnvelope<TodayData>>(
+  const response = await authenticatedRequest<DataEnvelope<TodayData>>(
     `/todos/today?date=${encodeURIComponent(date)}`,
     token,
+  );
+  return response.data;
+}
+
+export async function getTodoCategories(token: string) {
+  const response = await authenticatedRequest<ListEnvelope<TodoCategory>>("/todo-categories", token);
+  return response.items;
+}
+
+export async function createTodoCategory(
+  token: string,
+  idempotencyKey: string,
+  payload: { name: string; color?: string },
+) {
+  const response = await authenticatedRequest<WriteEnvelope<TodoCategory>>(
+    "/todo-categories",
+    token,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    },
   );
   return response.data;
 }

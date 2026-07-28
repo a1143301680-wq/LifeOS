@@ -6,7 +6,7 @@ Last updated: 2026-07-28
 
 - Task ID: TASK-020
 - Task Name: PC Web category list and create vertical slice
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -132,6 +132,6 @@ Report modified files, typed category API changes, idempotency-key lifecycle, re
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-020 from the approved TASK-020 publication and active workflow-state files. Coding must not start before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-020 implementation. Keep both task-status files at `REVIEWING` until the result commit is published, then Git Commit updates them to `COMPLETED`.
