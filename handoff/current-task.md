@@ -6,7 +6,7 @@ Last updated: 2026-07-28
 
 - Task ID: TASK-020
 - Task Name: PC Web category list and create vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -132,6 +132,6 @@ Report modified files, typed category API changes, idempotency-key lifecycle, re
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-020 implementation. Keep both task-status files at `REVIEWING` until the result commit is published, then Git Commit updates them to `COMPLETED`.
+Required next action: run Decision Closure Check for TASK-020 after verifying result commit `ce3d4ec72e2fdf81d957e883b6603a94a04ca8c9`.

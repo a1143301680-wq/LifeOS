@@ -1,6 +1,6 @@
 # TASK-020: PC Web category list and create vertical slice
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -184,7 +184,17 @@ None required for TASK-020.
 
 ## Git Commit
 
-Pending.
+Result: PASS
+
+Committed by: Git Commit window
+
+Committed at: 2026-07-28
+
+Result Commit: `ce3d4ec72e2fdf81d957e883b6603a94a04ca8c9`
+
+Commit Message: `feat(web): add category list and create view`
+
+Pushed to: `origin/main`
 
 ## Closure
 
