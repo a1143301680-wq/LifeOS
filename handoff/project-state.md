@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-23
+Last updated: 2026-07-28
 
 ## Current Phase
 
@@ -65,7 +65,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - Phase 1A completion audit on 2026-07-22 confirmed the backend is complete, while PC Web and Android are absent and end-to-end acceptance remains open.
 - TASK-018 PC Web identity and Todo list vertical slice completed in result commit `ea34afc`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-018 terminal Closure Commit `dc710ba` was published and the task workflow ended.
-- TASK-019 PC Web Today view was published as the next Phase 1A client slice and awaits Task Review.
+- TASK-019 PC Web Today view completed in result commit `d57fd9a`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 
 ## Recently Completed
 
@@ -114,7 +114,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-019. Live task routing is maintained in `handoff/current-task.md`.
+Run TASK-019 Decision Closure Check, then continue Phase 1A client delivery. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

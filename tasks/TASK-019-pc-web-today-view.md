@@ -1,6 +1,6 @@
 # TASK-019: PC Web Today view vertical slice
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -171,7 +171,15 @@ None.
 
 ## Git Commit
 
-Pending.
+- Result: PASS
+- Committed by: Git Commit window
+- Committed at: 2026-07-28
+- Branch: main
+- Result Commit: d57fd9af38176583634c698e4c9a6276dd384177
+- Commit Message: `feat(web): add Today view`
+- Push Target: origin/main
+- Code Review Result: PASS
+- Completion Record: this Git Commit completion metadata commit
 
 ## Closure
 

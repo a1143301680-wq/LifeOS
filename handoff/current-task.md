@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-07-23
+Last updated: 2026-07-28
 
 ## Metadata
 
 - Task ID: TASK-019
 - Task Name: PC Web Today view vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -89,18 +89,18 @@ An authenticated PC Web user can open a Today view for the current date in the r
 
 ## Acceptance Criteria
 
-- [ ] A valid stored or newly entered identity opens a usable Today view whose initial date matches the identity timezone.
-- [ ] The client sends authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` requests without `user_id` or token leakage.
-- [ ] Today renders all four backend sections in their supplied order and displays pending, completed, and overdue summary counts.
-- [ ] Previous, next, direct date selection, and return-to-today controls request the correct calendar date without timezone drift.
-- [ ] Switching between Today and Todos preserves the existing identity and pending-list behavior.
-- [ ] Loading, entirely empty, section-empty, recoverable error/retry, and unauthorized states behave correctly.
-- [ ] Unauthorized clears approved identity storage; recoverable failures preserve it.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible controls.
-- [ ] Existing tests remain green and focused new tests cover Today API, timezone/date behavior, rendering, navigation, and major failure states.
-- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy smoke evidence is recorded when the local services are available; otherwise the exact environment limitation is reported without claiming live integration.
-- [ ] No backend or other out-of-scope Phase 1A feature is modified.
+- [x] A valid stored or newly entered identity opens a usable Today view whose initial date matches the identity timezone.
+- [x] The client sends authenticated `GET /api/v1/todos/today?date=YYYY-MM-DD` requests without `user_id` or token leakage.
+- [x] Today renders all four backend sections in their supplied order and displays pending, completed, and overdue summary counts.
+- [x] Previous, next, direct date selection, and return-to-today controls request the correct calendar date without timezone drift.
+- [x] Switching between Today and Todos preserves the existing identity and pending-list behavior.
+- [x] Loading, entirely empty, section-empty, recoverable error/retry, and unauthorized states behave correctly.
+- [x] Unauthorized clears approved identity storage; recoverable failures preserve it.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible controls.
+- [x] Existing tests remain green and focused new tests cover Today API, timezone/date behavior, rendering, navigation, and major failure states.
+- [x] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy smoke evidence is recorded when the local services are available; otherwise the exact environment limitation is reported without claiming live integration.
+- [x] No backend or other out-of-scope Phase 1A feature is modified.
 
 ## Verification Plan
 
@@ -126,6 +126,6 @@ Report modified files, typed API changes, timezone/date strategy, view navigatio
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-019 implementation and review-state files. Keep task status `REVIEWING` until Git Commit publishes the result.
+Required next action: run TASK-019 Decision Closure Check before publishing the next Phase 1A client task.
