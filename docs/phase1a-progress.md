@@ -66,7 +66,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Run TASK-019 Decision Closure Check.
+1. Publish the TASK-019 terminal Closure Commit.
 2. Continue PC Web category/mutation/SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
