@@ -198,4 +198,28 @@ Pushed to: `origin/main`
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-07-29 08:34 +08:00
+- Result Commit: `ce3d4ec72e2fdf81d957e883b6603a94a04ca8c9`
+- Completion Commit: `8500740282891a103e38c9aae891df94eed61481`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `8500740282891a103e38c9aae891df94eed61481`.
+- Working Tree Before Closure Docs: clean; generated frontend artifacts remained ignored.
+- Review Evidence: Code Review `PASS`; no blocking issue or task-outside repository finding remained.
+- Test Evidence: Decision reran Vitest (`27 passed`), Playwright (`2 passed`), the production build, and `npm audit --audit-level=high` (`0 vulnerabilities`) on the published completion state.
+- Acceptance Criteria Result: all TASK-020 acceptance criteria are confirmed. The live proxy criterion is satisfied by explicit evidence and environment disposition, not by claiming an authenticated live write.
+- Issue Disposition: no TASK-020 issue-log entry or unresolved P0/P1/P2 issue exists. Coding verified that the Vite proxy reached FastAPI and received the expected invalid-bearer `401`; no safe raw test identity token was available, so no live category was created and no test data was left. PostgreSQL is stopped at Closure time.
+- Phase/Progress Result: PC Web remains partial; identity, Today, pending Todo, category list, and category create are complete. Category update/delete, Todo mutations, and SSE remain.
+- Remaining Follow-ups:
+  - Run an authenticated live category-create smoke check with planned cleanup once a safe test identity token is available.
+  - Continue Phase 1A PC Web delivery after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `docs/phase1a-progress.md`
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-020-pc-web-category-list-create.md`
+- Commit message: `docs(task): close TASK-020`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

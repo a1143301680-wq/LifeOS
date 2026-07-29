@@ -92,20 +92,20 @@ An authenticated PC Web user can open a Categories view, see only their active c
 
 ## Acceptance Criteria
 
-- [ ] A valid identity can open Categories and load only the authenticated user's active categories in server order.
-- [ ] Category rows show name, optional color, and a clear non-editable Inbox distinction.
-- [ ] The create form submits only an allowed trimmed name and optional approved color to `POST /api/v1/todo-categories`.
-- [ ] Every logical create attempt sends bearer authorization and a valid UUID `Idempotency-Key`, without `user_id`, `is_inbox`, token leakage, or client `sort_order`.
-- [ ] An unchanged recoverable retry reuses its idempotency key; editing the failed payload causes the next submission to use a new key.
-- [ ] Duplicate submission is prevented while pending; success clears the form and refreshes the server-ordered list.
-- [ ] Loading, empty, list error/retry, create validation/conflict, create network/server error/retry, success, and unauthorized states behave correctly.
-- [ ] Unauthorized list or create responses clear approved identity storage; recoverable failures preserve identity and form values.
-- [ ] Switching among Today, Todos, and Categories preserves the published behavior of the earlier views.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible form/navigation controls.
-- [ ] Existing tests remain green and focused new tests cover category requests, rendering, idempotent retry, validation, success refresh, and major failure states.
-- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy evidence is recorded when services and a safe identity are available; otherwise the exact limitation is reported without claiming live integration.
-- [ ] No backend, category update/delete, Todo mutation, SSE, or other out-of-scope feature is modified.
+- [x] A valid identity can open Categories and load only the authenticated user's active categories in server order.
+- [x] Category rows show name, optional color, and a clear non-editable Inbox distinction.
+- [x] The create form submits only an allowed trimmed name and optional approved color to `POST /api/v1/todo-categories`.
+- [x] Every logical create attempt sends bearer authorization and a valid UUID `Idempotency-Key`, without `user_id`, `is_inbox`, token leakage, or client `sort_order`.
+- [x] An unchanged recoverable retry reuses its idempotency key; editing the failed payload causes the next submission to use a new key.
+- [x] Duplicate submission is prevented while pending; success clears the form and refreshes the server-ordered list.
+- [x] Loading, empty, list error/retry, create validation/conflict, create network/server error/retry, success, and unauthorized states behave correctly.
+- [x] Unauthorized list or create responses clear approved identity storage; recoverable failures preserve identity and form values.
+- [x] Switching among Today, Todos, and Categories preserves the published behavior of the earlier views.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, or inaccessible form/navigation controls.
+- [x] Existing tests remain green and focused new tests cover category requests, rendering, idempotent retry, validation, success refresh, and major failure states.
+- [x] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy evidence is recorded when services and a safe identity are available; otherwise the exact limitation is reported without claiming live integration.
+- [x] No backend, category update/delete, Todo mutation, SSE, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -132,6 +132,16 @@ Report modified files, typed category API changes, idempotency-key lifecycle, re
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-020 after verifying result commit `ce3d4ec72e2fdf81d957e883b6603a94a04ca8c9`.
+Closure Check: PASS
+
+Checked at: 2026-07-29 08:34 +08:00
+
+Result Commit: `ce3d4ec72e2fdf81d957e883b6603a94a04ca8c9`
+
+Completion Commit: `8500740282891a103e38c9aae891df94eed61481`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `8500740282891a103e38c9aae891df94eed61481` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-020 Closure documents with message `docs(task): close TASK-020`. After remote parity is verified, return to Decision; do not run another Closure Check.
