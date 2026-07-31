@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-07-28
+Last updated: 2026-07-31
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -60,13 +60,13 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | Identity, Today, Todos, and category list/create closed through `342b9ae`; TASK-021 category update/delete is planned |
+| PC Web | partial | Identity, Today, Todos, and category list/create closed through `342b9ae`; TASK-021 category update/delete is implemented and awaiting Code Review |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Deliver TASK-021 PC Web category update/delete.
+1. Review and publish TASK-021 PC Web category update/delete.
 2. Continue PC Web Todo mutation and SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.

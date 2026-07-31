@@ -110,7 +110,7 @@ h1, h2, p { margin-top: 0; }
 
 .identity-form input:hover { border-color: #7f887c; }
 
-.primary-button, .secondary-button {
+.primary-button, .secondary-button, .danger-button {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -123,7 +123,9 @@ h1, h2, p { margin-top: 0; }
 
 .primary-button { margin-top: 6px; border: 0; color: #fff; background: var(--green); }
 .primary-button:hover { background: var(--green-dark); }
-.primary-button svg, .secondary-button svg { width: 17px; height: 17px; }
+.primary-button svg, .secondary-button svg, .danger-button svg { width: 17px; height: 17px; }
+.danger-button { border: 0; color: #fff; background: var(--red); }
+.danger-button:hover { background: #963c30; }
 
 .form-message { margin: 14px 0 0; color: #9a3529; font-size: 13px; line-height: 1.5; }
 
@@ -378,7 +380,7 @@ h1, h2, p { margin-top: 0; }
 .category-row {
   min-height: 82px;
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr);
+  grid-template-columns: 18px minmax(0, 1fr) 82px;
   align-items: center;
   gap: 16px;
   padding: 16px 8px 16px 0;
@@ -408,6 +410,25 @@ h1, h2, p { margin-top: 0; }
 .category-content h2 { margin: 0; overflow-wrap: anywhere; font-size: 16px; line-height: 1.35; }
 .category-content p { margin: 7px 0 0; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .category-content svg { width: 14px; height: 14px; }
+
+.category-actions {
+  width: 82px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.danger-icon:hover { color: #963c30; background: #f5e5e2; }
+
+.category-notice {
+  min-height: 24px;
+  margin: -12px 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.category-notice-success { color: var(--green); }
+.category-notice-error { color: #9a3529; }
 
 .category-create {
   padding-left: 32px;
@@ -475,6 +496,23 @@ h1, h2, p { margin-top: 0; }
 }
 
 .category-form .primary-button { width: 100%; margin-top: 10px; }
+.category-form-actions {
+  display: grid;
+  gap: 9px;
+}
+
+.category-form-actions .primary-button { margin-top: 10px; }
+.category-form-actions .secondary-button,
+.category-form-actions .danger-button { width: 100%; }
+
+.delete-copy {
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.delete-copy strong { color: var(--ink); }
 .create-message { margin: 14px 0 0; font-size: 12px; line-height: 1.5; }
 .create-message-success { color: var(--green); }
 .create-message-validation, .create-message-error { color: #9a3529; }

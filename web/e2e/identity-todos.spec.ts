@@ -69,16 +69,19 @@ for (const viewport of [
   test(`${viewport.name} Today, Todos, and Categories flow fits the viewport`, async ({ page }) => {
     let categoryItems = [inboxCategory];
     let createRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
+    let editRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
+    let deleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
     await page.route("**/api/v1/todos**", (route) =>
       route.fulfill({ json: route.request().url().includes("/today") ? today : todos }),
     );
-    await page.route("**/api/v1/todo-categories", async (route) => {
-      if (route.request().method() === "POST") {
+    await page.route("**/api/v1/todo-categories**", async (route) => {
+      const request = route.request();
+      if (request.method() === "POST") {
         createRequest = {
-          body: route.request().postDataJSON(),
-          idempotencyKey: route.request().headers()["idempotency-key"],
+          body: request.postDataJSON(),
+          idempotencyKey: request.headers()["idempotency-key"],
         };
         categoryItems = [
           inboxCategory,
@@ -98,6 +101,44 @@ for (const viewport of [
             data: categoryItems[1],
             sync: { cursor: 12 },
             server_time: "2026-07-23T14:01:00+08:00",
+          },
+        });
+        return;
+      }
+      if (request.method() === "PATCH") {
+        editRequest = {
+          body: request.postDataJSON(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        categoryItems = categoryItems.map((category) =>
+          category.id === "b3fab414-b101-4d35-aa6e-350f92126ea3"
+            ? { ...category, name: "Wellness", color: "#2563eb" }
+            : category,
+        );
+        await route.fulfill({
+          json: {
+            data: categoryItems[1],
+            sync: { cursor: 13 },
+            server_time: "2026-07-23T14:02:00+08:00",
+          },
+        });
+        return;
+      }
+      if (request.method() === "DELETE") {
+        deleteRequest = {
+          body: request.postData(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        categoryItems = [inboxCategory];
+        await route.fulfill({
+          json: {
+            data: {
+              id: "b3fab414-b101-4d35-aa6e-350f92126ea3",
+              deleted: true,
+              deleted_at: "2026-07-23T14:03:00+08:00",
+            },
+            sync: { cursor: 14 },
+            server_time: "2026-07-23T14:03:00+08:00",
           },
         });
         return;
@@ -146,6 +187,35 @@ for (const viewport of [
     expect(createRequest).not.toBeNull();
     expect(createRequest!.body).toEqual({ name: "Health", color: "#16a34a" });
     expect(createRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    await expect(page.getByRole("button", { name: "Edit Inbox" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Delete Inbox" })).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Edit Health" }).click();
+    await expect(page.getByRole("heading", { name: "Edit Health" })).toBeVisible();
+    await page.getByLabel("Edit category name").fill(" Wellness ");
+    await page.getByRole("radio", { name: "Blue" }).check();
+    await page.getByRole("button", { name: "Save changes" }).click();
+
+    await expect(page.getByText("Category updated.")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Wellness" })).toBeVisible();
+    expect(editRequest).not.toBeNull();
+    expect(editRequest!.body).toEqual({ name: "Wellness", color: "#2563eb" });
+    expect(editRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+
+    await page.getByRole("button", { name: "Delete Wellness" }).click();
+    await expect(page.getByRole("heading", { name: "Delete Wellness?" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Cancel delete" })).toBeFocused();
+    await page.getByRole("button", { name: "Delete category" }).click();
+
+    await expect(page.getByText("Category deleted.")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Wellness" })).toHaveCount(0);
+    expect(deleteRequest).not.toBeNull();
+    expect(deleteRequest!.body).toBeNull();
+    expect(deleteRequest!.idempotencyKey).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
     expect(await hasHorizontalOverflow(page)).toBe(false);

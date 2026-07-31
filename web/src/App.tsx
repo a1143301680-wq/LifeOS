@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -9,17 +9,21 @@ import {
   Inbox,
   KeyRound,
   LogOut,
+  Pencil,
   RefreshCw,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
 
 import {
   ApiError,
   createTodoCategory,
+  deleteTodoCategory,
   getCurrentUser,
   getPendingTodos,
   getTodayTodos,
   getTodoCategories,
+  updateTodoCategory,
 } from "./api";
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
@@ -32,6 +36,15 @@ type AppView = "today" | "todos" | "categories";
 type FailedCreateAttempt = {
   fingerprint: string;
   idempotencyKey: string;
+};
+type FailedEditAttempt = FailedCreateAttempt;
+type FailedDeleteAttempt = {
+  categoryId: string;
+  idempotencyKey: string;
+};
+type CategoryNotice = {
+  kind: "success" | "error";
+  message: string;
 };
 
 const categoryColors = [
@@ -141,7 +154,49 @@ function categoryColor(color: string | null) {
   return color && /^#[0-9a-fA-F]{6}$/.test(color) ? color : null;
 }
 
-function CategoryList({ categories }: { categories: TodoCategory[] }) {
+function CategoryColorOptions({
+  groupName,
+  selectedColor,
+  onChange,
+  disabled = false,
+}: {
+  groupName: string;
+  selectedColor: string;
+  onChange: (color: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <fieldset disabled={disabled}>
+      <legend>Category color</legend>
+      <div className="color-options">
+        <label className="color-option no-color">
+          <input type="radio" name={groupName} value="" checked={!selectedColor} onChange={() => onChange("")} />
+          <span aria-hidden="true" />
+          <span>No color</span>
+        </label>
+        {categoryColors.map((color) => (
+          <label className="color-option" key={color.value}>
+            <input type="radio" name={groupName} value={color.value} checked={selectedColor === color.value} onChange={() => onChange(color.value)} />
+            <span className="color-option-swatch" style={{ backgroundColor: color.value }} aria-hidden="true" />
+            <span>{color.name}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function CategoryList({
+  categories,
+  onEdit,
+  onDelete,
+  actionsDisabled,
+}: {
+  categories: TodoCategory[];
+  onEdit: (category: TodoCategory) => void;
+  onDelete: (category: TodoCategory) => void;
+  actionsDisabled: boolean;
+}) {
   return (
     <ul className="category-list" aria-label="Todo categories">
       {categories.map((category) => {
@@ -163,6 +218,10 @@ function CategoryList({ categories }: { categories: TodoCategory[] }) {
                 )}
               </p>
             </div>
+            <div className="category-actions">
+              <button className="icon-button" type="button" onClick={() => onEdit(category)} disabled={actionsDisabled} title={`Edit ${category.name}`} aria-label={`Edit ${category.name}`}><Pencil aria-hidden="true" /></button>
+              {!category.is_inbox ? <button className="icon-button danger-icon" type="button" onClick={() => onDelete(category)} disabled={actionsDisabled} title={`Delete ${category.name}`} aria-label={`Delete ${category.name}`}><Trash2 aria-hidden="true" /></button> : null}
+            </div>
           </li>
         );
       })}
@@ -171,6 +230,8 @@ function CategoryList({ categories }: { categories: TodoCategory[] }) {
 }
 
 export default function App() {
+  const editInFlight = useRef(false);
+  const deleteInFlight = useRef(false);
   const [initialToken] = useState(readIdentityToken);
   const [activeToken, setActiveToken] = useState<string | null>(initialToken);
   const [identity, setIdentity] = useState<UserIdentity | null>(null);
@@ -189,6 +250,17 @@ export default function App() {
   const [createStatus, setCreateStatus] = useState<CreateStatus>("idle");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
   const [failedCreateAttempt, setFailedCreateAttempt] = useState<FailedCreateAttempt | null>(null);
+  const [editTarget, setEditTarget] = useState<TodoCategory | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("");
+  const [editStatus, setEditStatus] = useState<CreateStatus>("idle");
+  const [editMessage, setEditMessage] = useState<string | null>(null);
+  const [failedEditAttempt, setFailedEditAttempt] = useState<FailedEditAttempt | null>(null);
+  const [categoryNotice, setCategoryNotice] = useState<CategoryNotice | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TodoCategory | null>(null);
+  const [deleteStatus, setDeleteStatus] = useState<CreateStatus>("idle");
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+  const [failedDeleteAttempt, setFailedDeleteAttempt] = useState<FailedDeleteAttempt | null>(null);
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -210,6 +282,17 @@ export default function App() {
     setCreateStatus("idle");
     setCreateMessage(null);
     setFailedCreateAttempt(null);
+    setEditTarget(null);
+    setEditName("");
+    setEditColor("");
+    setEditStatus("idle");
+    setEditMessage(null);
+    setFailedEditAttempt(null);
+    setCategoryNotice(null);
+    setDeleteTarget(null);
+    setDeleteStatus("idle");
+    setDeleteMessage(null);
+    setFailedDeleteAttempt(null);
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
@@ -314,6 +397,155 @@ export default function App() {
   function openCategories() {
     setView("categories");
     if (activeToken && categoryStatus === "idle") void loadCategories(activeToken);
+  }
+
+  function openCategoryEditor(category: TodoCategory) {
+    setDeleteTarget(null);
+    setEditTarget(category);
+    setEditName(category.name);
+    setEditColor(categoryColor(category.color) ?? "");
+    setEditStatus("idle");
+    setEditMessage(null);
+    setFailedEditAttempt(null);
+    setCategoryNotice(null);
+  }
+
+  function openCategoryDelete(category: TodoCategory) {
+    if (category.is_inbox) return;
+    cancelCategoryEditor();
+    setDeleteTarget(category);
+    setDeleteStatus("idle");
+    setDeleteMessage(null);
+    setFailedDeleteAttempt(null);
+    setCategoryNotice(null);
+  }
+
+  function cancelCategoryDelete() {
+    setDeleteTarget(null);
+    setDeleteStatus("idle");
+    setDeleteMessage(null);
+    setFailedDeleteAttempt(null);
+  }
+
+  function cancelCategoryEditor() {
+    setEditTarget(null);
+    setEditName("");
+    setEditColor("");
+    setEditStatus("idle");
+    setEditMessage(null);
+    setFailedEditAttempt(null);
+  }
+
+  async function submitCategoryEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeToken || !editTarget || editStatus === "submitting" || editInFlight.current) return;
+
+    const name = editName.trim();
+    if (!name) {
+      setFailedEditAttempt(null);
+      setEditStatus("validation");
+      setEditMessage("Enter a category name.");
+      return;
+    }
+    if (name.length > 120) {
+      setFailedEditAttempt(null);
+      setEditStatus("validation");
+      setEditMessage("Category name must be 120 characters or fewer.");
+      return;
+    }
+
+    const payload = { name, color: editColor || null };
+    const fingerprint = JSON.stringify(payload);
+    const idempotencyKey = failedEditAttempt?.fingerprint === fingerprint
+      ? failedEditAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setEditStatus("submitting");
+    setEditMessage(null);
+    editInFlight.current = true;
+    try {
+      await updateTodoCategory(activeToken, editTarget.id, idempotencyKey, payload);
+      cancelCategoryEditor();
+      setCategoryNotice({ kind: "success", message: "Category updated." });
+      await loadCategories(activeToken);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 400) {
+        setFailedEditAttempt(null);
+        setEditStatus("validation");
+        setEditMessage("Check the category name and try again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedEditAttempt(null);
+        setEditStatus("validation");
+        setEditMessage("This edit conflicts with an earlier attempt. Review the form and try again.");
+        return;
+      }
+      if (error instanceof ApiError && (error.status === 404 || error.status === 410)) {
+        cancelCategoryEditor();
+        setCategoryNotice({ kind: "error", message: "That category is no longer available. The list has been refreshed." });
+        await loadCategories(activeToken);
+        return;
+      }
+      setFailedEditAttempt({ fingerprint, idempotencyKey });
+      setEditStatus("error");
+      setEditMessage("Could not update category. Try again.");
+    } finally {
+      editInFlight.current = false;
+    }
+  }
+
+  async function confirmCategoryDelete() {
+    if (!activeToken || !deleteTarget || deleteTarget.is_inbox || deleteStatus === "submitting" || deleteInFlight.current) {
+      return;
+    }
+
+    const categoryId = deleteTarget.id;
+    const idempotencyKey = failedDeleteAttempt?.categoryId === categoryId
+      ? failedDeleteAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setDeleteStatus("submitting");
+    setDeleteMessage(null);
+    deleteInFlight.current = true;
+    try {
+      await deleteTodoCategory(activeToken, categoryId, idempotencyKey);
+      cancelCategoryDelete();
+      setCategoryNotice({ kind: "success", message: "Category deleted." });
+      await loadCategories(activeToken);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && (error.status === 404 || error.status === 410)) {
+        cancelCategoryDelete();
+        setCategoryNotice({ kind: "error", message: "That category is no longer available. The list has been refreshed." });
+        await loadCategories(activeToken);
+        return;
+      }
+      if (error instanceof ApiError && error.status === 400) {
+        setFailedDeleteAttempt(null);
+        setDeleteStatus("validation");
+        setDeleteMessage("This category cannot be deleted.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedDeleteAttempt(null);
+        setDeleteStatus("validation");
+        setDeleteMessage("This category conflicts with a newer change. Refresh and try again.");
+        return;
+      }
+      setFailedDeleteAttempt({ categoryId, idempotencyKey });
+      setDeleteStatus("error");
+      setDeleteMessage("Delete failed. Check your connection and try again.");
+    } finally {
+      deleteInFlight.current = false;
+    }
   }
 
   async function submitCategory(event: FormEvent<HTMLFormElement>) {
@@ -452,8 +684,9 @@ export default function App() {
             <>
               <div className="section-heading">
                 <div><p className="eyebrow">Organize</p><h1>Categories</h1></div>
-                <button className="icon-button bordered" onClick={() => activeToken && void loadCategories(activeToken)} disabled={categoryStatus === "loading"} title="Refresh categories" aria-label="Refresh categories"><RefreshCw className={categoryStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
+                <button className="icon-button bordered" onClick={() => activeToken && void loadCategories(activeToken)} disabled={categoryStatus === "loading" || editTarget !== null || deleteTarget !== null} title="Refresh categories" aria-label="Refresh categories"><RefreshCw className={categoryStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
               </div>
+              {categoryNotice ? <p className={`category-notice category-notice-${categoryNotice.kind}`} role={categoryNotice.kind === "success" ? "status" : "alert"}>{categoryNotice.message}</p> : null}
               <div className="categories-layout">
                 <div className="categories-results">
                   {categoryStatus === "loading" ? <div className="list-status" role="status">Loading categories...</div> : null}
@@ -461,8 +694,68 @@ export default function App() {
                     <div className="list-status error-state" role="alert"><div><strong>Could not load categories</strong><p>Your identity is still connected.</p></div><button className="secondary-button" onClick={() => activeToken && void loadCategories(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div>
                   ) : null}
                   {categoryStatus === "ready" && categories.length === 0 ? <div className="empty-state"><FolderOpen aria-hidden="true" /><h2>No categories yet</h2><p>Create a category to organize your work.</p></div> : null}
-                  {categoryStatus === "ready" && categories.length > 0 ? <CategoryList categories={categories} /> : null}
+                  {categoryStatus === "ready" && categories.length > 0 ? <CategoryList categories={categories} onEdit={openCategoryEditor} onDelete={openCategoryDelete} actionsDisabled={editTarget !== null || deleteTarget !== null || createStatus === "submitting"} /> : null}
                 </div>
+                {deleteTarget ? (
+                  <aside className="category-create delete-confirmation" aria-labelledby="delete-category-title">
+                    <div className="category-create-heading">
+                      <p className="eyebrow">Confirm deletion</p>
+                      <h2 id="delete-category-title">Delete {deleteTarget.name}?</h2>
+                    </div>
+                    <p className="delete-copy">This removes <strong>{deleteTarget.name}</strong> from the active category list.</p>
+                    <div className="category-form-actions">
+                      <button className="danger-button" type="button" onClick={() => void confirmCategoryDelete()} disabled={deleteStatus === "submitting"}>
+                        {deleteStatus === "submitting" ? "Deleting..." : deleteStatus === "error" ? "Retry delete" : "Delete category"}
+                      </button>
+                      <button className="secondary-button" type="button" onClick={cancelCategoryDelete} disabled={deleteStatus === "submitting"} autoFocus>Cancel delete</button>
+                    </div>
+                    {deleteMessage ? <p className={`create-message create-message-${deleteStatus}`} role="alert">{deleteMessage}</p> : null}
+                  </aside>
+                ) : editTarget ? (
+                  <aside className="category-create" aria-labelledby="edit-category-title">
+                    <div className="category-create-heading">
+                      <p className="eyebrow">Category details</p>
+                      <h2 id="edit-category-title">Edit {editTarget.name}</h2>
+                    </div>
+                    <form className="category-form" onSubmit={submitCategoryEdit}>
+                      <label htmlFor="edit-category-name">Edit category name</label>
+                      <input
+                        id="edit-category-name"
+                        value={editName}
+                        onChange={(event) => {
+                          setEditName(event.target.value);
+                          setFailedEditAttempt(null);
+                          if (editStatus !== "submitting") {
+                            setEditStatus("idle");
+                            setEditMessage(null);
+                          }
+                        }}
+                        maxLength={120}
+                        autoComplete="off"
+                        autoFocus
+                        disabled={editStatus === "submitting"}
+                        aria-invalid={editStatus === "validation" ? "true" : undefined}
+                        aria-describedby={editMessage ? "category-edit-message" : undefined}
+                      />
+                      <CategoryColorOptions
+                        groupName="edit-category-color"
+                        selectedColor={editColor}
+                        disabled={editStatus === "submitting"}
+                        onChange={(color) => {
+                          setEditColor(color);
+                          setFailedEditAttempt(null);
+                          setEditStatus("idle");
+                          setEditMessage(null);
+                        }}
+                      />
+                      <div className="category-form-actions">
+                        <button className="primary-button" type="submit" disabled={editStatus === "submitting"}>{editStatus === "submitting" ? "Saving..." : editStatus === "error" ? "Retry save" : "Save changes"}</button>
+                        <button className="secondary-button" type="button" onClick={cancelCategoryEditor} disabled={editStatus === "submitting"}>Cancel edit</button>
+                      </div>
+                    </form>
+                    {editMessage ? <p id="category-edit-message" className={`create-message create-message-${editStatus}`} role="alert">{editMessage}</p> : null}
+                  </aside>
+                ) : (
                 <aside className="category-create" aria-labelledby="create-category-title">
                   <div className="category-create-heading">
                     <p className="eyebrow">New category</p>
@@ -487,39 +780,24 @@ export default function App() {
                       aria-invalid={createStatus === "validation" ? "true" : undefined}
                       aria-describedby={createMessage ? "category-create-message" : undefined}
                     />
-                    <fieldset disabled={createStatus === "submitting"}>
-                      <legend>Category color</legend>
-                      <div className="color-options">
-                        <label className="color-option no-color">
-                          <input type="radio" name="category-color" value="" checked={!selectedCategoryColor} onChange={() => {
-                            setSelectedCategoryColor("");
-                            setFailedCreateAttempt(null);
-                            setCreateStatus("idle");
-                            setCreateMessage(null);
-                          }} />
-                          <span aria-hidden="true" />
-                          <span>No color</span>
-                        </label>
-                        {categoryColors.map((color) => (
-                          <label className="color-option" key={color.value}>
-                            <input type="radio" name="category-color" value={color.value} checked={selectedCategoryColor === color.value} onChange={() => {
-                              setSelectedCategoryColor(color.value);
-                              setFailedCreateAttempt(null);
-                              setCreateStatus("idle");
-                              setCreateMessage(null);
-                            }} />
-                            <span className="color-option-swatch" style={{ backgroundColor: color.value }} aria-hidden="true" />
-                            <span>{color.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </fieldset>
+                    <CategoryColorOptions
+                      groupName="category-color"
+                      selectedColor={selectedCategoryColor}
+                      disabled={createStatus === "submitting"}
+                      onChange={(color) => {
+                        setSelectedCategoryColor(color);
+                        setFailedCreateAttempt(null);
+                        setCreateStatus("idle");
+                        setCreateMessage(null);
+                      }}
+                    />
                     <button className="primary-button" type="submit" disabled={createStatus === "submitting"}>
                       {createStatus === "submitting" ? "Creating..." : createStatus === "error" ? "Retry create" : "Create category"}
                     </button>
                   </form>
                   {createMessage ? <p id="category-create-message" className={`create-message create-message-${createStatus}`} role={createStatus === "success" ? "status" : "alert"}>{createMessage}</p> : null}
                 </aside>
+                )}
               </div>
             </>
           )}

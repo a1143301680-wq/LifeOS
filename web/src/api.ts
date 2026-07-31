@@ -95,3 +95,44 @@ export async function createTodoCategory(
   );
   return response.data;
 }
+
+export async function updateTodoCategory(
+  token: string,
+  categoryId: string,
+  idempotencyKey: string,
+  payload: { name: string; color: string | null },
+) {
+  const response = await authenticatedRequest<WriteEnvelope<TodoCategory>>(
+    `/todo-categories/${encodeURIComponent(categoryId)}`,
+    token,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+  return response.data;
+}
+
+export async function deleteTodoCategory(
+  token: string,
+  categoryId: string,
+  idempotencyKey: string,
+) {
+  const response = await authenticatedRequest<
+    WriteEnvelope<{ id: string; deleted: boolean; deleted_at: string }>
+  >(
+    `/todo-categories/${encodeURIComponent(categoryId)}`,
+    token,
+    {
+      method: "DELETE",
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+    },
+  );
+  return response.data;
+}
