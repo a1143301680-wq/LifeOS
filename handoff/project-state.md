@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-28
+Last updated: 2026-07-31
 
 ## Current Phase
 
@@ -69,7 +69,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-019 terminal Closure Commit `9f96d36` was published and the task workflow ended.
 - TASK-020 PC Web category list/create completed in result commit `ce3d4ec`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-020 terminal Closure Commit `342b9ae` was published and the task workflow ended.
-- TASK-021 PC Web category update/delete was published as the next Phase 1A client slice and awaits Task Review.
+- TASK-021 PC Web category update/delete completed in result commit `137ea03`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 
 ## Recently Completed
 
@@ -118,7 +118,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-021. Live task routing is maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-021. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

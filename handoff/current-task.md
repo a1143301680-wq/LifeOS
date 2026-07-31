@@ -6,7 +6,7 @@ Last updated: 2026-07-31
 
 - Task ID: TASK-021
 - Task Name: PC Web category update and delete vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -136,6 +136,6 @@ Report modified files, PATCH/DELETE API changes, edit/delete idempotency lifecyc
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-021 implementation. Keep both task-status files at `REVIEWING` until the result commit is published, then Git Commit updates them to `COMPLETED`.
+Required next action: run Decision Closure Check for TASK-021 after verifying result commit `137ea03592d005f463a98b3301c81d30d704da7c`.

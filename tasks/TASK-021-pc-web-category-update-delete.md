@@ -1,6 +1,6 @@
 # TASK-021: PC Web category update and delete vertical slice
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -186,7 +186,17 @@ None required for TASK-021.
 
 ## Git Commit
 
-Pending.
+Result: PASS
+
+Committed by: Git Commit window
+
+Committed at: 2026-07-31
+
+Result Commit: `137ea03592d005f463a98b3301c81d30d704da7c`
+
+Commit Message: `feat(web): add category edit and delete`
+
+Pushed to: `origin/main`
 
 ## Closure
 
