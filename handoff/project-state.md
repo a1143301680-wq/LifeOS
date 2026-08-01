@@ -70,6 +70,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-020 PC Web category list/create completed in result commit `ce3d4ec`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-020 terminal Closure Commit `342b9ae` was published and the task workflow ended.
 - TASK-021 PC Web category update/delete completed in result commit `137ea03`; Code Review: PASS; frontend tests/build/e2e/audit passed.
+- TASK-021 Decision Closure Check passed on 2026-08-01; terminal Closure Commit is the only remaining action before the next Phase 1A client task may be published.
 
 ## Recently Completed
 
@@ -118,7 +119,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Decision Closure Check for TASK-021. Live task routing is maintained in `handoff/current-task.md`.
+Publish the TASK-021 terminal Closure Commit, then continue Phase 1A PC Web delivery. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

@@ -94,22 +94,22 @@ An authenticated PC Web user can edit an active category's name and optional app
 
 ## Acceptance Criteria
 
-- [ ] An authenticated user can open an active category editor populated with its current name and color, then cancel without issuing a request.
-- [ ] A valid edit sends only trimmed `name` and approved `color` or `null` to the correct PATCH endpoint with bearer authorization and a UUID `Idempotency-Key`.
-- [ ] Unchanged recoverable edit retry reuses its idempotency key; changing the failed payload generates a new key.
-- [ ] Edit validation/conflict, stale/deleted resource, network/server retry, unauthorized, in-flight, cancel, and success states behave correctly.
-- [ ] Inbox name/color editing works, but Inbox never exposes or enables deletion.
-- [ ] A normal category can be selected for deletion only through an explicit confirmation naming that category; cancel sends no request.
-- [ ] Delete sends no body or forbidden identity fields, uses bearer authorization and a UUID `Idempotency-Key`, and prevents duplicate in-flight submission.
-- [ ] An unchanged recoverable delete retry reuses its idempotency key; a later newly opened delete flow uses a new key.
-- [ ] Delete validation/conflict, stale/deleted resource, network/server retry, unauthorized, cancel, and success states behave correctly.
-- [ ] Successful edit/delete closes transient UI and refetches the server-ordered active-category list.
-- [ ] Switching among Today, Todos, and Categories and existing category creation remain correct.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent confirmation behavior.
-- [ ] Existing tests remain green and focused new tests cover request contracts, Inbox protection, idempotent retries, stale resources, successful refresh, and major failure states.
-- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy evidence and cleanup are recorded when services and a safe identity are available; otherwise the exact limitation is reported without claiming live integration.
-- [ ] No backend, Todo mutation, SSE, category reorder/icon, or other out-of-scope feature is modified.
+- [x] An authenticated user can open an active category editor populated with its current name and color, then cancel without issuing a request.
+- [x] A valid edit sends only trimmed `name` and approved `color` or `null` to the correct PATCH endpoint with bearer authorization and a UUID `Idempotency-Key`.
+- [x] Unchanged recoverable edit retry reuses its idempotency key; changing the failed payload generates a new key.
+- [x] Edit validation/conflict, stale/deleted resource, network/server retry, unauthorized, in-flight, cancel, and success states behave correctly.
+- [x] Inbox name/color editing works, but Inbox never exposes or enables deletion.
+- [x] A normal category can be selected for deletion only through an explicit confirmation naming that category; cancel sends no request.
+- [x] Delete sends no body or forbidden identity fields, uses bearer authorization and a UUID `Idempotency-Key`, and prevents duplicate in-flight submission.
+- [x] An unchanged recoverable delete retry reuses its idempotency key; a later newly opened delete flow uses a new key.
+- [x] Delete validation/conflict, stale/deleted resource, network/server retry, unauthorized, cancel, and success states behave correctly.
+- [x] Successful edit/delete closes transient UI and refetches the server-ordered active-category list.
+- [x] Switching among Today, Todos, and Categories and existing category creation remain correct.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent confirmation behavior.
+- [x] Existing tests remain green and focused new tests cover request contracts, Inbox protection, idempotent retries, stale resources, successful refresh, and major failure states.
+- [x] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy evidence and cleanup are recorded when services and a safe identity are available; otherwise the exact limitation is reported without claiming live integration.
+- [x] No backend, Todo mutation, SSE, category reorder/icon, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -136,6 +136,16 @@ Report modified files, PATCH/DELETE API changes, edit/delete idempotency lifecyc
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-021 after verifying result commit `137ea03592d005f463a98b3301c81d30d704da7c`.
+Closure Check: PASS
+
+Checked at: 2026-08-01 23:37 +08:00
+
+Result Commit: `137ea03592d005f463a98b3301c81d30d704da7c`
+
+Completion Commit: `078748a4e3421c5cbd63ab30b74ee012bd2c4c83`
+
+Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `078748a4e3421c5cbd63ab30b74ee012bd2c4c83` before Closure documentation edits.
+
+Required next action: commit and push only the Decision-approved TASK-021 Closure documents with message `docs(task): close TASK-021`. After remote parity is verified, return to Decision; do not run another Closure Check.

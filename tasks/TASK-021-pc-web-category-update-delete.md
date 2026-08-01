@@ -200,4 +200,28 @@ Pushed to: `origin/main`
 
 ## Closure
 
-Pending.
+Closure Check: PASS
+
+- Checked At: 2026-08-01 23:37 +08:00
+- Result Commit: `137ea03592d005f463a98b3301c81d30d704da7c`
+- Completion Commit: `078748a4e3421c5cbd63ab30b74ee012bd2c4c83`
+- Remote Verification: local `main`, `origin/main`, and remote `refs/heads/main` all matched `078748a4e3421c5cbd63ab30b74ee012bd2c4c83`.
+- Working Tree Before Closure Docs: clean; generated frontend artifacts remained ignored.
+- Review Evidence: Code Review `PASS`; no blocking issue or task-outside finding remained.
+- Test Evidence: Decision reran Vitest (`45 passed`), Playwright (`2 passed`), the production build, and `npm audit --audit-level=high` (`0 vulnerabilities`) on the published completion state.
+- Acceptance Criteria Result: all TASK-021 acceptance criteria are confirmed through contract, component, browser, and repository evidence. No authenticated live-write success is claimed.
+- Issue Disposition: no TASK-021 issue-log entry or unresolved P0/P1/P2 issue exists. At Closure time PostgreSQL, FastAPI, and Vite were running, but the repository has no dedicated disposable identity or safely recoverable raw test token. Decision did not borrow a real user identity or execute destructive PATCH/DELETE calls.
+- Phase/Progress Result: PC Web remains partial; identity, Today, pending Todos, and essential category CRUD are complete. Todo mutations and SSE remain.
+- Remaining Follow-ups:
+  - Run authenticated live category edit/delete smoke verification with disposable data and confirmed cleanup once a dedicated test identity is provisioned.
+  - Continue Phase 1A PC Web delivery after the terminal Closure Commit.
+
+Terminal Closure Commit approval:
+
+- Approved files:
+  - `docs/phase1a-progress.md`
+  - `handoff/current-task.md`
+  - `handoff/project-state.md`
+  - `tasks/TASK-021-pc-web-category-update-delete.md`
+- Commit message: `docs(task): close TASK-021`
+- This commit is terminal and must not trigger another Closure Check or create new state files.

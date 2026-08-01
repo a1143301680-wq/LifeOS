@@ -66,7 +66,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Run Decision Closure Check for TASK-021 PC Web category update/delete.
+1. Publish the TASK-021 terminal Closure Commit.
 2. Continue PC Web Todo mutation and SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
