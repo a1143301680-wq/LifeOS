@@ -60,14 +60,14 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | Identity, Today, Todos, category list/create, and category update/delete published through result commit `137ea03` |
+| PC Web | partial | Identity, Today, Todos, and category CRUD closed through `501d6c2`; TASK-022 Todo quick-create is planned |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Publish the TASK-021 terminal Closure Commit.
-2. Continue PC Web Todo mutation and SSE slices.
+1. Deliver TASK-022 PC Web Todo quick-create.
+2. Continue PC Web Todo edit/action and SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
 
