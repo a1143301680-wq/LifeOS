@@ -6,7 +6,7 @@ Last updated: 2026-08-02
 
 - Task ID: TASK-022
 - Task Name: PC Web Todo quick-create vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -141,6 +141,6 @@ Report modified files, Todo-create API/payload, idempotency lifecycle, Today/Tod
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-022 file set. Keep TASK-022 at REVIEWING until Git Commit publishes the result and updates both task-status files to COMPLETED.
+Required next action: run Decision Closure Check for TASK-022 after verifying result commit `5a1a433da980c1ec98eec69fac2162a695a19deb` and completion record publication.

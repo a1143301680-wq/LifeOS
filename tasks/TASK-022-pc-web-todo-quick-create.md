@@ -1,6 +1,6 @@
 # TASK-022: PC Web Todo quick-create vertical slice
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -184,7 +184,30 @@ Snapshot Commit: `4e36d976a52aedd0c0806ed5adf1090df18d71c2`
 
 ## Git Commit
 
-Pending.
+Result: PASS
+
+Committed by: Git Commit window
+
+Committed at: 2026-08-02
+
+Result Commit: `5a1a433da980c1ec98eec69fac2162a695a19deb`
+
+Commit Message: `feat(web): add todo quick create`
+
+Push Target: `origin/main`
+
+Files Committed:
+
+- `docs/phase1a-progress.md`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-022-pc-web-todo-quick-create.md`
+- `web/e2e/identity-todos.spec.ts`
+- `web/src/App.test.tsx`
+- `web/src/App.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
+- `web/src/types.ts`
 
 ## Closure
 

@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-07-31
+Last updated: 2026-08-02
 
 ## Current Phase
 
@@ -71,7 +71,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-020 terminal Closure Commit `342b9ae` was published and the task workflow ended.
 - TASK-021 PC Web category update/delete completed in result commit `137ea03`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-021 terminal Closure Commit `501d6c2` was published and the task workflow ended.
-- TASK-022 PC Web Todo quick-create was published as the next Phase 1A client slice and awaits Task Review.
+- TASK-022 PC Web Todo quick-create completed in result commit `5a1a433`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 
 ## Recently Completed
 
@@ -120,7 +120,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-022. Live task routing is maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-022. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
