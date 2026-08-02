@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-08-01
+Last updated: 2026-08-02
 
 ## Metadata
 
 - Task ID: TASK-022
 - Task Name: PC Web Todo quick-create vertical slice
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -141,6 +141,6 @@ Report modified files, Todo-create API/payload, idempotency lifecycle, Today/Tod
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-022 from the approved publication and workflow-state files. Do not start Coding before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-022 file set. Keep TASK-022 at REVIEWING until Git Commit publishes the result and updates both task-status files to COMPLETED.

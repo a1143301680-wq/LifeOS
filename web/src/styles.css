@@ -23,13 +23,13 @@ html { min-width: 320px; background: var(--canvas); }
 
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 
 button { cursor: pointer; }
 
 button:disabled { cursor: wait; opacity: 0.65; }
 
-button:focus-visible, input:focus-visible, a:focus-visible {
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
   outline: 3px solid rgba(36, 107, 75, 0.3);
   outline-offset: 3px;
 }
@@ -126,6 +126,7 @@ h1, h2, p { margin-top: 0; }
 .primary-button svg, .secondary-button svg, .danger-button svg { width: 17px; height: 17px; }
 .danger-button { border: 0; color: #fff; background: var(--red); }
 .danger-button:hover { background: #963c30; }
+.primary-button.compact { min-height: 38px; height: 38px; margin-top: 0; padding: 0 13px; font-size: 12px; }
 
 .form-message { margin: 14px 0 0; color: #9a3529; font-size: 13px; line-height: 1.5; }
 
@@ -230,6 +231,7 @@ h1, h2, p { margin-top: 0; }
 
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; }
 .section-heading h1 { margin: 0; font-size: 34px; line-height: 1; letter-spacing: 0; }
+.section-actions { display: flex; align-items: center; gap: 8px; }
 
 .todo-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 
@@ -289,6 +291,7 @@ h1, h2, p { margin-top: 0; }
 
 .today-heading h1 { margin: 0; font-size: 34px; line-height: 1; letter-spacing: 0; }
 .date-label { margin: 9px 0 0; color: var(--muted); font-size: 13px; }
+.today-actions { display: flex; align-items: center; gap: 10px; }
 
 .date-controls {
   display: grid;
@@ -323,6 +326,28 @@ h1, h2, p { margin-top: 0; }
 }
 
 .secondary-button.compact { min-height: 38px; height: 38px; padding: 0 13px; font-size: 12px; }
+
+.quick-create {
+  margin: 0 0 30px;
+  padding: 22px 0;
+  display: grid;
+  grid-template-columns: 138px minmax(0, 1fr);
+  gap: 28px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.quick-create-heading h2 { margin: 0; font-size: 17px; line-height: 1.35; }
+.quick-create-form { min-width: 0; display: grid; grid-template-columns: minmax(190px, 1.6fr) repeat(3, minmax(120px, 1fr)); gap: 12px; align-items: end; }
+.quick-create-field { min-width: 0; display: grid; gap: 7px; }
+.quick-create-field label { color: var(--muted); font-size: 11px; font-weight: 750; }
+.quick-create-field input, .quick-create-field select { width: 100%; min-width: 0; height: 42px; padding: 0 10px; border: 1px solid #bfc5bb; border-radius: 5px; color: var(--ink); background: var(--surface); }
+.quick-create-actions { grid-column: 1 / -1; display: flex; gap: 9px; }
+.quick-create-actions .primary-button, .quick-create-actions .secondary-button { min-width: 128px; margin-top: 0; }
+.quick-create-form .create-message { grid-column: 1 / -1; margin-top: 0; }
+.todo-notice { min-height: 24px; margin: -12px 0 18px; font-size: 13px; line-height: 1.5; }
+.todo-notice-success { color: var(--green); }
+.todo-notice-error { color: #9a3529; }
 
 .today-summary {
   display: grid;
@@ -531,8 +556,17 @@ h1, h2, p { margin-top: 0; }
   .identity-control { gap: 7px; }
   .identity-control > span:not(.identity-dot) { display: none; }
   .today-heading { align-items: stretch; flex-direction: column; gap: 22px; }
+  .today-actions { align-items: stretch; flex-direction: column; }
+  .today-actions > .primary-button { width: 100%; }
   .date-controls { grid-template-columns: 38px minmax(0, 1fr) 38px; }
   .secondary-button.compact { grid-column: 1 / -1; }
+  .section-heading { align-items: flex-start; gap: 18px; }
+  .section-actions { flex: 0 0 auto; }
+  .quick-create { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .quick-create-form { grid-template-columns: minmax(0, 1fr); }
+  .quick-create-actions, .quick-create-form .create-message { grid-column: 1; }
+  .quick-create-actions { display: grid; }
+  .quick-create-actions .primary-button, .quick-create-actions .secondary-button { width: 100%; }
   .today-summary > div { min-height: 80px; padding: 16px 12px; }
   .today-summary strong { font-size: 22px; }
   .today-section + .today-section { margin-top: 34px; }

@@ -2,6 +2,7 @@ import type {
   DataEnvelope,
   ListEnvelope,
   Todo,
+  TodoCreatePayload,
   TodoCategory,
   TodayData,
   UserIdentity,
@@ -68,6 +69,22 @@ export async function getTodayTodos(token: string, date: string) {
     `/todos/today?date=${encodeURIComponent(date)}`,
     token,
   );
+  return response.data;
+}
+
+export async function createTodo(
+  token: string,
+  idempotencyKey: string,
+  payload: TodoCreatePayload,
+) {
+  const response = await authenticatedRequest<WriteEnvelope<Todo>>("/todos", token, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify(payload),
+  });
   return response.data;
 }
 

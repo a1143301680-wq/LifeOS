@@ -71,11 +71,28 @@ for (const viewport of [
     let createRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     let editRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     let deleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
+    let todoCreateRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
-    await page.route("**/api/v1/todos**", (route) =>
-      route.fulfill({ json: route.request().url().includes("/today") ? today : todos }),
-    );
+    await page.route("**/api/v1/todos**", async (route) => {
+      const request = route.request();
+      if (request.method() === "POST") {
+        todoCreateRequest = {
+          body: request.postDataJSON(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        await route.fulfill({
+          status: 201,
+          json: {
+            data: { ...todos.items[0], id: "created-todo", title: "Capture follow-up", priority: "low", planned_date: null },
+            sync: { cursor: 15 },
+            server_time: "2026-07-23T14:04:00+08:00",
+          },
+        });
+        return;
+      }
+      await route.fulfill({ json: request.url().includes("/today") ? today : todos });
+    });
     await page.route("**/api/v1/todo-categories**", async (route) => {
       const request = route.request();
       if (request.method() === "POST") {
@@ -169,9 +186,31 @@ for (const viewport of [
     await expect(page.getByRole("heading", { name: "Recent Inbox", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Switch identity" })).toBeVisible();
 
+    const selectedTodayDate = await page.getByLabel("Selected date").inputValue();
+    const todayAddButton = page.getByRole("button", { name: "Add todo" });
+    await todayAddButton.click();
+    await expect(page.getByRole("heading", { name: "Quick add todo" })).toBeVisible();
+    await expect(page.getByLabel("Todo title")).toBeFocused();
+    await expect(page.getByLabel("Planned date")).toHaveValue(selectedTodayDate);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+    await page.getByRole("button", { name: "Cancel todo" }).click();
+    await expect(todayAddButton).toBeFocused();
+
     await page.getByRole("button", { name: "Todos" }).click();
     await expect(page.getByText("Prepare weekly review without losing the important details")).toBeVisible();
     await expect(page.getByRole("button", { name: "Refresh todos" })).toBeVisible();
+    await page.getByRole("button", { name: "Add todo" }).click();
+    await expect(page.getByLabel("Planned date")).toHaveValue("");
+    await page.getByLabel("Todo title").fill(" Capture follow-up ");
+    await page.getByLabel("Priority").selectOption("low");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+    await page.getByRole("button", { name: "Create todo" }).click();
+    await expect(page.getByText("Todo created.")).toBeVisible();
+    expect(todoCreateRequest).not.toBeNull();
+    expect(todoCreateRequest!.body).toEqual({ title: "Capture follow-up", priority: "low" });
+    expect(todoCreateRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
     expect(await hasHorizontalOverflow(page)).toBe(false);
 
     await page.getByRole("button", { name: "Categories" }).click();

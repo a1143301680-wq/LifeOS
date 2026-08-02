@@ -10,6 +10,7 @@ import {
   KeyRound,
   LogOut,
   Pencil,
+  Plus,
   RefreshCw,
   ShieldCheck,
   Trash2,
@@ -17,6 +18,7 @@ import {
 
 import {
   ApiError,
+  createTodo,
   createTodoCategory,
   deleteTodoCategory,
   getCurrentUser,
@@ -27,12 +29,14 @@ import {
 } from "./api";
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
-import type { Todo, TodoCategory, TodayData, TodaySectionName, UserIdentity } from "./types";
+import type { Todo, TodoCategory, TodoCreatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
 type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
 type AppView = "today" | "todos" | "categories";
+type QuickCreateOrigin = "today" | "todos";
+type TodoPriority = Todo["priority"];
 type FailedCreateAttempt = {
   fingerprint: string;
   idempotencyKey: string;
@@ -46,6 +50,7 @@ type CategoryNotice = {
   kind: "success" | "error";
   message: string;
 };
+type TodoNotice = CategoryNotice;
 
 const categoryColors = [
   { name: "Slate", value: "#64748b" },
@@ -232,6 +237,9 @@ function CategoryList({
 export default function App() {
   const editInFlight = useRef(false);
   const deleteInFlight = useRef(false);
+  const quickCreateTrigger = useRef<HTMLButtonElement | null>(null);
+  const restoreQuickCreateFocus = useRef(false);
+  const todoCreateInFlight = useRef(false);
   const [initialToken] = useState(readIdentityToken);
   const [activeToken, setActiveToken] = useState<string | null>(initialToken);
   const [identity, setIdentity] = useState<UserIdentity | null>(null);
@@ -261,6 +269,15 @@ export default function App() {
   const [deleteStatus, setDeleteStatus] = useState<CreateStatus>("idle");
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
   const [failedDeleteAttempt, setFailedDeleteAttempt] = useState<FailedDeleteAttempt | null>(null);
+  const [quickCreateOrigin, setQuickCreateOrigin] = useState<QuickCreateOrigin | null>(null);
+  const [todoTitle, setTodoTitle] = useState("");
+  const [todoCategoryId, setTodoCategoryId] = useState("");
+  const [todoPriority, setTodoPriority] = useState<TodoPriority>("medium");
+  const [todoPlannedDate, setTodoPlannedDate] = useState("");
+  const [todoCreateStatus, setTodoCreateStatus] = useState<CreateStatus>("idle");
+  const [todoCreateMessage, setTodoCreateMessage] = useState<string | null>(null);
+  const [failedTodoAttempt, setFailedTodoAttempt] = useState<FailedCreateAttempt | null>(null);
+  const [todoNotice, setTodoNotice] = useState<TodoNotice | null>(null);
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -293,6 +310,15 @@ export default function App() {
     setDeleteStatus("idle");
     setDeleteMessage(null);
     setFailedDeleteAttempt(null);
+    setQuickCreateOrigin(null);
+    setTodoTitle("");
+    setTodoCategoryId("");
+    setTodoPriority("medium");
+    setTodoPlannedDate("");
+    setTodoCreateStatus("idle");
+    setTodoCreateMessage(null);
+    setFailedTodoAttempt(null);
+    setTodoNotice(null);
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
@@ -373,6 +399,13 @@ export default function App() {
     if (initialToken) void validateIdentity(initialToken, true);
   }, [initialToken, validateIdentity]);
 
+  useEffect(() => {
+    if (quickCreateOrigin === null && restoreQuickCreateFocus.current) {
+      restoreQuickCreateFocus.current = false;
+      quickCreateTrigger.current?.focus();
+    }
+  }, [quickCreateOrigin]);
+
   async function submitIdentity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const token = tokenInput.trim();
@@ -396,7 +429,168 @@ export default function App() {
 
   function openCategories() {
     setView("categories");
+    if (activeToken && (categoryStatus === "idle" || categoryStatus === "error")) void loadCategories(activeToken);
+  }
+
+  function openQuickCreate(origin: QuickCreateOrigin, trigger: HTMLButtonElement) {
+    quickCreateTrigger.current = trigger;
+    setQuickCreateOrigin(origin);
+    setTodoTitle("");
+    setTodoCategoryId("");
+    setTodoPriority("medium");
+    setTodoPlannedDate(origin === "today" ? selectedDate : "");
+    setTodoCreateStatus("idle");
+    setTodoCreateMessage(null);
+    setFailedTodoAttempt(null);
+    setTodoNotice(null);
     if (activeToken && categoryStatus === "idle") void loadCategories(activeToken);
+  }
+
+  function cancelQuickCreate() {
+    restoreQuickCreateFocus.current = true;
+    setQuickCreateOrigin(null);
+    setTodoTitle("");
+    setTodoCategoryId("");
+    setTodoPriority("medium");
+    setTodoPlannedDate("");
+    setTodoCreateStatus("idle");
+    setTodoCreateMessage(null);
+    setFailedTodoAttempt(null);
+  }
+
+  function updateTodoDraft(update: () => void) {
+    update();
+    setFailedTodoAttempt(null);
+    if (todoCreateStatus !== "submitting") {
+      setTodoCreateStatus("idle");
+      setTodoCreateMessage(null);
+    }
+  }
+
+  async function submitTodo(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeToken || !quickCreateOrigin || todoCreateStatus === "submitting" || todoCreateInFlight.current) return;
+
+    const title = todoTitle.trim();
+    if (!title) {
+      setFailedTodoAttempt(null);
+      setTodoCreateStatus("validation");
+      setTodoCreateMessage("Enter a todo title.");
+      return;
+    }
+    if (title.length > 500) {
+      setFailedTodoAttempt(null);
+      setTodoCreateStatus("validation");
+      setTodoCreateMessage("Todo title must be 500 characters or fewer.");
+      return;
+    }
+
+    const payload: TodoCreatePayload = { title, priority: todoPriority };
+    if (todoCategoryId) payload.category_id = todoCategoryId;
+    if (todoPlannedDate) payload.planned_date = todoPlannedDate;
+    const fingerprint = JSON.stringify(payload);
+    const idempotencyKey = failedTodoAttempt?.fingerprint === fingerprint
+      ? failedTodoAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setTodoCreateStatus("submitting");
+    setTodoCreateMessage(null);
+    todoCreateInFlight.current = true;
+    try {
+      await createTodo(activeToken, idempotencyKey, payload);
+      restoreQuickCreateFocus.current = true;
+      setQuickCreateOrigin(null);
+      setTodoTitle("");
+      setTodoCategoryId("");
+      setTodoPriority("medium");
+      setTodoPlannedDate("");
+      setTodoCreateStatus("idle");
+      setFailedTodoAttempt(null);
+      setTodoNotice({ kind: "success", message: "Todo created." });
+
+      const refreshes: Promise<void>[] = [];
+      if (todayStatus !== "idle" && selectedDate) refreshes.push(loadToday(activeToken, selectedDate));
+      if (todoStatus !== "idle") refreshes.push(loadTodos(activeToken));
+      await Promise.all(refreshes);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (
+        todoCategoryId &&
+        error instanceof ApiError &&
+        (error.status === 404 || error.status === 410)
+      ) {
+        setTodoCategoryId("");
+        setFailedTodoAttempt(null);
+        setTodoCreateStatus("validation");
+        setTodoCreateMessage("That category is no longer available. Choose another category or use Inbox / Default.");
+        await loadCategories(activeToken);
+        return;
+      }
+      if (error instanceof ApiError && error.status === 400) {
+        setFailedTodoAttempt(null);
+        setTodoCreateStatus("validation");
+        setTodoCreateMessage("Check the todo details and try again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedTodoAttempt(null);
+        setTodoCreateStatus("validation");
+        setTodoCreateMessage("This create request conflicts with an earlier attempt. Review the form and try again.");
+        return;
+      }
+      setFailedTodoAttempt({ fingerprint, idempotencyKey });
+      setTodoCreateStatus("error");
+      setTodoCreateMessage("Could not create todo. Try again.");
+    } finally {
+      todoCreateInFlight.current = false;
+    }
+  }
+
+  function quickCreateForm() {
+    if (!quickCreateOrigin) return null;
+    return (
+      <section className="quick-create" aria-labelledby="quick-create-title">
+        <div className="quick-create-heading">
+          <p className="eyebrow">New task</p>
+          <h2 id="quick-create-title">Quick add todo</h2>
+        </div>
+        <form className="quick-create-form" onSubmit={submitTodo}>
+          <div className="quick-create-field quick-create-title-field">
+            <label htmlFor="todo-title">Todo title</label>
+            <input id="todo-title" value={todoTitle} onChange={(event) => updateTodoDraft(() => setTodoTitle(event.target.value))} maxLength={500} autoComplete="off" autoFocus disabled={todoCreateStatus === "submitting"} aria-invalid={todoCreateStatus === "validation" ? "true" : undefined} aria-describedby={todoCreateMessage ? "todo-create-message" : undefined} />
+          </div>
+          <div className="quick-create-field">
+            <label htmlFor="todo-category">Category</label>
+            <select id="todo-category" value={todoCategoryId} onChange={(event) => updateTodoDraft(() => setTodoCategoryId(event.target.value))} disabled={todoCreateStatus === "submitting"}>
+              <option value="">Inbox / Default</option>
+              {categories.filter((category) => !category.is_inbox).map((category) => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="quick-create-field">
+            <label htmlFor="todo-priority">Priority</label>
+            <select id="todo-priority" value={todoPriority} onChange={(event) => updateTodoDraft(() => setTodoPriority(event.target.value as TodoPriority))} disabled={todoCreateStatus === "submitting"}>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div className="quick-create-field">
+            <label htmlFor="todo-planned-date">Planned date</label>
+            <input id="todo-planned-date" type="date" value={todoPlannedDate} onChange={(event) => updateTodoDraft(() => setTodoPlannedDate(event.target.value))} disabled={todoCreateStatus === "submitting"} />
+          </div>
+          <div className="quick-create-actions">
+            <button className="primary-button" type="submit" disabled={todoCreateStatus === "submitting"}>{todoCreateStatus === "submitting" ? "Creating..." : todoCreateStatus === "error" ? "Retry create" : "Create todo"}</button>
+            <button className="secondary-button" type="button" onClick={cancelQuickCreate} disabled={todoCreateStatus === "submitting"}>Cancel todo</button>
+          </div>
+          {todoCreateMessage ? <p id="todo-create-message" className={`create-message create-message-${todoCreateStatus}`} role="alert">{todoCreateMessage}</p> : null}
+        </form>
+      </section>
+    );
   }
 
   function openCategoryEditor(category: TodoCategory) {
@@ -634,9 +828,9 @@ export default function App() {
         <header className="app-header">
           <a className="wordmark" href="#main-content" aria-label="LifeOS home">LifeOS</a>
           <nav className="view-switch" aria-label="Workspace views">
-            <button aria-current={view === "today" ? "page" : undefined} onClick={() => setView("today")}>Today</button>
-            <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos}>Todos</button>
-            <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories}>Categories</button>
+            <button aria-current={view === "today" ? "page" : undefined} onClick={() => setView("today")} disabled={quickCreateOrigin !== null}>Today</button>
+            <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={quickCreateOrigin !== null}>Todos</button>
+            <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={quickCreateOrigin !== null}>Categories</button>
           </nav>
           <div className="identity-control">
             <span className="identity-dot" aria-hidden="true" /><span>{identity.display_name}</span>
@@ -653,13 +847,18 @@ export default function App() {
                   <h1>Today</h1>
                   <p className="date-label">{selectedDate ? calendarDateLabel(selectedDate) : ""}</p>
                 </div>
-                <div className="date-controls">
+                <div className="today-actions">
+                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("today", event.currentTarget)} disabled={quickCreateOrigin !== null}><Plus aria-hidden="true" />Add todo</button>
+                  <div className="date-controls">
                   <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, -1))} title="Previous date" aria-label="Previous date"><ChevronLeft aria-hidden="true" /></button>
                   <label className="date-input"><span>Selected date</span><input type="date" value={selectedDate} onChange={(event) => selectTodayDate(event.target.value)} /></label>
                   <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, 1))} title="Next date" aria-label="Next date"><ChevronRight aria-hidden="true" /></button>
                   <button className="secondary-button compact" aria-label="Return to today" onClick={() => selectTodayDate(todayDate)} disabled={selectedDate === todayDate}>Today</button>
+                  </div>
                 </div>
               </div>
+              {todoNotice ? <p className={`todo-notice todo-notice-${todoNotice.kind}`} role={todoNotice.kind === "success" ? "status" : "alert"}>{todoNotice.message}</p> : null}
+              {quickCreateOrigin === "today" ? quickCreateForm() : null}
 
               {todayStatus === "loading" ? <div className="list-status" role="status">Loading Today...</div> : null}
               {todayStatus === "error" ? (
@@ -671,8 +870,13 @@ export default function App() {
             <>
               <div className="section-heading">
                 <div><p className="eyebrow">Pending</p><h1>Todos</h1></div>
-                <button className="icon-button bordered" onClick={() => activeToken && void loadTodos(activeToken)} disabled={todoStatus === "loading"} title="Refresh todos" aria-label="Refresh todos"><RefreshCw className={todoStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
+                <div className="section-actions">
+                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("todos", event.currentTarget)} disabled={quickCreateOrigin !== null}><Plus aria-hidden="true" />Add todo</button>
+                  <button className="icon-button bordered" onClick={() => activeToken && void loadTodos(activeToken)} disabled={todoStatus === "loading"} title="Refresh todos" aria-label="Refresh todos"><RefreshCw className={todoStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
+                </div>
               </div>
+              {todoNotice ? <p className={`todo-notice todo-notice-${todoNotice.kind}`} role={todoNotice.kind === "success" ? "status" : "alert"}>{todoNotice.message}</p> : null}
+              {quickCreateOrigin === "todos" ? quickCreateForm() : null}
               {todoStatus === "loading" ? <div className="list-status" role="status">Loading your todos...</div> : null}
               {todoStatus === "error" ? (
                 <div className="list-status error-state" role="alert"><div><strong>Could not load todos</strong><p>Your identity is still connected.</p></div><button className="secondary-button" onClick={() => activeToken && void loadTodos(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div>
