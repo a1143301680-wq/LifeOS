@@ -72,6 +72,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-021 PC Web category update/delete completed in result commit `137ea03`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-021 terminal Closure Commit `501d6c2` was published and the task workflow ended.
 - TASK-022 PC Web Todo quick-create completed in result commit `5a1a433`; Code Review: PASS; frontend tests/build/e2e/audit passed.
+- TASK-022 Decision Closure Check passed on 2026-08-02; only the terminal closure-document commit remains before the workflow ends.
 
 ## Recently Completed
 
@@ -120,7 +121,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Decision Closure Check for TASK-022. Live task routing is maintained in `handoff/current-task.md`.
+Publish the exact-scope TASK-022 terminal Closure Commit described in `handoff/current-task.md`; after remote parity is verified, return control to Decision to select the next PC Web slice.
 
 ## Notes For Windows
 

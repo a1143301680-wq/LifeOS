@@ -211,4 +211,43 @@ Files Committed:
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-08-02 10:49 +08:00
+
+Result Commit: `5a1a433da980c1ec98eec69fac2162a695a19deb`
+
+Completion Commit: `a7703d26b58affd3d2d3c7676e24cbbd8c8075aa`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `a7703d26b58affd3d2d3c7676e24cbbd8c8075aa` before closure-document edits.
+
+### Independent Verification
+
+- `npm test` from `web/`: PASS, 2 files and 55 tests.
+- `npm run build` from `web/`: PASS, TypeScript and Vite production build.
+- `npm run test:e2e` from `web/`: PASS, 2 Playwright tests at desktop and narrow widths.
+- `npm audit --audit-level=high` from `web/`: PASS, 0 vulnerabilities.
+- All 17 acceptance criteria were confirmed from implementation, Code Review evidence, and the independent verification above.
+- No unresolved P0, P1, or P2 issue blocks closure.
+
+### Evidence And Risk Disposition
+
+- Coding recorded a Vite-proxy request with an invalid bearer returning expected HTTP 401 and creating no Todo. PostgreSQL was stopped and no application listeners were available during Closure Check, so authenticated live creation was not repeated.
+- No disposable raw identity token was available. Authenticated live create/cleanup remains unclaimed and may be repeated later with safe disposable data.
+- Code Review's non-blocking category-picker retry suggestion is deferred to the next Todo form/edit slice that naturally touches category loading; default Inbox remains usable.
+- PC Web remains partial after this slice: Todo edit/actions and SSE integration are still pending, followed by Android and cross-client acceptance.
+
+### Terminal Closure Commit
+
+Approved files:
+
+- `docs/phase1a-progress.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-022-pc-web-todo-quick-create.md`
+
+Recommended commit message: `docs(task): close TASK-022`
+
+After this exact-scope commit is pushed and remote parity is verified, return control to Decision. This is the terminal Closure Commit for TASK-022; do not run another Closure Check for it.

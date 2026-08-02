@@ -98,23 +98,23 @@ An authenticated PC Web user can quickly create a pending Todo with a required t
 
 ## Acceptance Criteria
 
-- [ ] Today and Todos expose a clear accessible quick-create command; opening and canceling it sends no request and restores a sensible focus target.
-- [ ] Opening from Today defaults `planned_date` to the selected Today calendar date; opening from Todos defaults it to unset without timezone drift.
-- [ ] The form validates a trimmed non-empty title up to 500 characters and constrains priority to high/medium/low.
-- [ ] Category choices preserve server order; selecting Inbox/default omits `category_id`, while a selected active normal category sends its UUID.
-- [ ] Create sends only approved fields to `POST /api/v1/todos` with bearer authorization and a valid UUID `Idempotency-Key`.
-- [ ] No request sends `user_id`, status, note, due time, client ID, timestamps, or other forbidden fields.
-- [ ] An unchanged recoverable retry reuses its idempotency key; changing any failed payload field causes a new key.
-- [ ] Duplicate in-flight submission is prevented; cancel/reopen starts a fresh draft and logical attempt.
-- [ ] Validation, idempotency conflict, stale/deleted category, network/server retry, unauthorized, in-flight, cancel, and success states behave correctly.
-- [ ] A stale selected category triggers category refresh, resets to Inbox/default, preserves other draft fields, and allows a new create attempt.
-- [ ] Successful create closes and clears the draft and refetches every relevant already-loaded Today/Todos dataset in server order.
-- [ ] Existing identity, Today, Todos, category list/create/update/delete, and identity-switch behavior remains correct.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent form focus.
-- [ ] Existing tests remain green and focused new tests cover payloads, date defaults, category semantics, idempotent retry, stale category, success refresh, and major failure states.
-- [ ] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy evidence and cleanup are recorded when services and a disposable identity are available; otherwise the exact limitation is reported without claiming live integration.
-- [ ] No backend, Todo edit/action, SSE, note/due-time, or other out-of-scope feature is modified.
+- [x] Today and Todos expose a clear accessible quick-create command; opening and canceling it sends no request and restores a sensible focus target.
+- [x] Opening from Today defaults `planned_date` to the selected Today calendar date; opening from Todos defaults it to unset without timezone drift.
+- [x] The form validates a trimmed non-empty title up to 500 characters and constrains priority to high/medium/low.
+- [x] Category choices preserve server order; selecting Inbox/default omits `category_id`, while a selected active normal category sends its UUID.
+- [x] Create sends only approved fields to `POST /api/v1/todos` with bearer authorization and a valid UUID `Idempotency-Key`.
+- [x] No request sends `user_id`, status, note, due time, client ID, timestamps, or other forbidden fields.
+- [x] An unchanged recoverable retry reuses its idempotency key; changing any failed payload field causes a new key.
+- [x] Duplicate in-flight submission is prevented; cancel/reopen starts a fresh draft and logical attempt.
+- [x] Validation, idempotency conflict, stale/deleted category, network/server retry, unauthorized, in-flight, cancel, and success states behave correctly.
+- [x] A stale selected category triggers category refresh, resets to Inbox/default, preserves other draft fields, and allows a new create attempt.
+- [x] Successful create closes and clears the draft and refetches every relevant already-loaded Today/Todos dataset in server order.
+- [x] Existing identity, Today, Todos, category list/create/update/delete, and identity-switch behavior remains correct.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent form focus.
+- [x] Existing tests remain green and focused new tests cover payloads, date defaults, category semantics, idempotent retry, stale category, success refresh, and major failure states.
+- [x] Production build and dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy evidence and cleanup are recorded when services and a disposable identity are available; otherwise the exact limitation is reported without claiming live integration.
+- [x] No backend, Todo edit/action, SSE, note/due-time, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -141,6 +141,16 @@ Report modified files, Todo-create API/payload, idempotency lifecycle, Today/Tod
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-022 after verifying result commit `5a1a433da980c1ec98eec69fac2162a695a19deb` and completion record publication.
+Closure Check: PASS
+
+Checked at: 2026-08-02 10:49 +08:00
+
+Result Commit: `5a1a433da980c1ec98eec69fac2162a695a19deb`
+
+Completion Commit: `a7703d26b58affd3d2d3c7676e24cbbd8c8075aa`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `a7703d26b58affd3d2d3c7676e24cbbd8c8075aa` before these closure-document edits.
+
+Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-022-pc-web-todo-quick-create.md` with message `docs(task): close TASK-022`; then return control to Decision. This terminal Closure Commit ends TASK-022 and must not trigger another Closure Check.
