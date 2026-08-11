@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-08-02
+Last updated: 2026-08-04
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -60,14 +60,14 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | Identity, Today, Todos, category CRUD, and Todo quick-create closed through TASK-022 result commit `5a1a433`; Decision Closure Check passed and terminal closure commit is pending |
+| PC Web | partial | Identity, Today, Todos, category CRUD, and Todo quick-create closed through TASK-022 terminal closure `275f4a2`; TASK-023 core Todo edit is planned |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Publish the exact-scope TASK-022 terminal Closure Commit, then return to Decision.
-2. Continue PC Web Todo edit/action and SSE slices.
+1. Deliver TASK-023 PC Web Todo core edit.
+2. Continue PC Web Todo action and SSE slices.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
 
