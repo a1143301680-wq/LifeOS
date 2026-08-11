@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-08-04
+Last updated: 2026-08-11
 
 ## Metadata
 
 - Task ID: TASK-023
 - Task Name: PC Web Todo core edit vertical slice
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -146,6 +146,6 @@ Report modified files, Todo-update API/payload, category and date semantics, ide
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-023 from the approved publication and workflow-state files. Do not start Coding before Git Snapshot completion.
+Required next action: commit and push the Code Review-approved TASK-023 file set. Keep TASK-023 at REVIEWING until Git Commit publishes the result and updates both task-status files to COMPLETED.

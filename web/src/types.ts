@@ -45,6 +45,13 @@ export type TodoCreatePayload = {
   planned_date?: string;
 };
 
+export type TodoUpdatePayload = {
+  title: string;
+  category_id: string;
+  priority: Todo["priority"];
+  planned_date: string | null;
+};
+
 export type DataEnvelope<T> = {
   data: T;
   server_time: string;

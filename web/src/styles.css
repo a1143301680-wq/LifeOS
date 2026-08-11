@@ -238,7 +238,7 @@ h1, h2, p { margin-top: 0; }
 .todo-row {
   min-height: 102px;
   display: grid;
-  grid-template-columns: 4px minmax(0, 1fr);
+  grid-template-columns: 4px minmax(0, 1fr) 38px;
   gap: 20px;
   padding: 23px 18px 23px 0;
   border-bottom: 1px solid var(--line);
@@ -251,6 +251,8 @@ h1, h2, p { margin-top: 0; }
 .priority-medium { background: var(--yellow); }
 .priority-low { background: var(--green); }
 .todo-content { min-width: 0; }
+.todo-edit-button { align-self: center; border: 1px solid transparent; }
+.todo-edit-button:hover { border-color: var(--line); }
 .todo-title-line { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .todo-title-line h3 { margin: 0; min-width: 0; overflow-wrap: anywhere; font-size: 17px; line-height: 1.4; }
 
@@ -570,7 +572,7 @@ h1, h2, p { margin-top: 0; }
   .today-summary > div { min-height: 80px; padding: 16px 12px; }
   .today-summary strong { font-size: 22px; }
   .today-section + .today-section { margin-top: 34px; }
-  .todo-row { gap: 14px; padding-right: 4px; }
+  .todo-row { grid-template-columns: 4px minmax(0, 1fr) 38px; gap: 12px; padding-right: 0; }
   .todo-title-line { align-items: flex-start; flex-direction: column; gap: 5px; }
   .todo-meta { gap: 8px 14px; }
   .error-state { align-items: flex-start; flex-direction: column; padding: 28px 0; }

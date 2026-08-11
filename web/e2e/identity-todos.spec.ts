@@ -72,6 +72,7 @@ for (const viewport of [
     let editRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     let deleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
     let todoCreateRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
+    let todoEditRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
     await page.route("**/api/v1/todos**", async (route) => {
@@ -87,6 +88,20 @@ for (const viewport of [
             data: { ...todos.items[0], id: "created-todo", title: "Capture follow-up", priority: "low", planned_date: null },
             sync: { cursor: 15 },
             server_time: "2026-07-23T14:04:00+08:00",
+          },
+        });
+        return;
+      }
+      if (request.method() === "PATCH") {
+        todoEditRequest = {
+          body: request.postDataJSON(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        await route.fulfill({
+          json: {
+            data: { ...todos.items[0], title: "Prepare monthly review", priority: "medium", planned_date: null },
+            sync: { cursor: 16 },
+            server_time: "2026-07-23T14:05:00+08:00",
           },
         });
         return;
@@ -199,6 +214,27 @@ for (const viewport of [
     await page.getByRole("button", { name: "Todos" }).click();
     await expect(page.getByText("Prepare weekly review without losing the important details")).toBeVisible();
     await expect(page.getByRole("button", { name: "Refresh todos" })).toBeVisible();
+    await page.getByRole("button", { name: "Edit Prepare weekly review without losing the important details" }).click();
+    await expect(page.getByRole("heading", { name: "Edit todo" })).toBeVisible();
+    await expect(page.getByLabel("Todo title")).toBeFocused();
+    await expect(page.getByLabel("Category")).toHaveValue(inboxCategory.id);
+    await page.getByLabel("Todo title").fill(" Prepare monthly review ");
+    await page.getByLabel("Priority").selectOption("medium");
+    await page.getByLabel("Planned date").fill("");
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page.getByText("Todo updated.")).toBeVisible();
+    expect(todoEditRequest).not.toBeNull();
+    expect(todoEditRequest!.body).toEqual({
+      title: "Prepare monthly review",
+      category_id: inboxCategory.id,
+      priority: "medium",
+      planned_date: null,
+    });
+    expect(todoEditRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
     await page.getByRole("button", { name: "Add todo" }).click();
     await expect(page.getByLabel("Planned date")).toHaveValue("");
     await page.getByLabel("Todo title").fill(" Capture follow-up ");

@@ -3,6 +3,7 @@ import type {
   ListEnvelope,
   Todo,
   TodoCreatePayload,
+  TodoUpdatePayload,
   TodoCategory,
   TodayData,
   UserIdentity,
@@ -85,6 +86,27 @@ export async function createTodo(
     },
     body: JSON.stringify(payload),
   });
+  return response.data;
+}
+
+export async function updateTodo(
+  token: string,
+  todoId: string,
+  idempotencyKey: string,
+  payload: TodoUpdatePayload,
+) {
+  const response = await authenticatedRequest<WriteEnvelope<Todo>>(
+    `/todos/${encodeURIComponent(todoId)}`,
+    token,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    },
+  );
   return response.data;
 }
 

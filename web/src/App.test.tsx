@@ -271,6 +271,360 @@ test("switches between Today and the existing pending Todo list", async () => {
   expect(requests.filter((url) => url === "/api/v1/todos")).toHaveLength(1);
 });
 
+test("opens and cancels a populated Todo editor with restored row focus", async () => {
+  storedIdentity();
+  const patchRequests: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (init?.method === "PATCH") patchRequests.push(url);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  expect(await screen.findByText("Prepare weekly review")).toBeInTheDocument();
+
+  const editButton = screen.getByRole("button", { name: "Edit Prepare weekly review" });
+  await userEvent.click(editButton);
+
+  expect(await screen.findByRole("heading", { name: "Edit todo" })).toBeInTheDocument();
+  expect(screen.getByLabelText("Todo title")).toHaveValue("Prepare weekly review");
+  expect(screen.getByLabelText("Todo title")).toHaveFocus();
+  expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[0].id);
+  expect(screen.getByLabelText("Priority")).toHaveValue("high");
+  expect(screen.getByLabelText("Planned date")).toHaveValue("2026-07-23");
+
+  await userEvent.click(screen.getByRole("button", { name: "Cancel todo edit" }));
+  expect(screen.queryByRole("heading", { name: "Edit todo" })).not.toBeInTheDocument();
+  expect(editButton).toHaveFocus();
+  expect(patchRequests).toEqual([]);
+});
+
+test("updates a Todo with the four-field payload and refreshes loaded lists", async () => {
+  storedIdentity();
+  let todosGets = 0;
+  let patchRequest: { url: string; headers: Headers; body: Record<string, unknown> } | null = null;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") {
+      todosGets += 1;
+      return jsonResponse(populatedTodosResponse);
+    }
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") {
+      patchRequest = { url, headers: new Headers(init.headers), body: JSON.parse(String(init.body)) as Record<string, unknown> };
+      return jsonResponse({ data: { ...todo, title: "Updated review", category_id: categoriesResponse.items[1].id, planned_date: null }, sync: { cursor: 31 }, server_time: meResponse.server_time });
+    }
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  const title = await screen.findByLabelText("Todo title");
+  await userEvent.clear(title);
+  await userEvent.type(title, "  Updated review  ");
+  await userEvent.selectOptions(screen.getByLabelText("Category"), categoriesResponse.items[1].id);
+  await userEvent.selectOptions(screen.getByLabelText("Priority"), "low");
+  fireEvent.change(screen.getByLabelText("Planned date"), { target: { value: "" } });
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(await screen.findByText("Todo updated.")).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Edit todo" })).not.toBeInTheDocument();
+  expect(todosGets).toBe(2);
+  await waitFor(() => expect(screen.getByRole("button", { name: "Edit Prepare weekly review" })).toHaveFocus());
+  expect(patchRequest).not.toBeNull();
+  expect(patchRequest!.url).toBe(`/api/v1/todos/${todo.id}`);
+  expect(patchRequest!.headers.get("Authorization")).toBe("Bearer stored-token");
+  expect(patchRequest!.headers.get("Idempotency-Key")).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  expect(patchRequest!.body).toEqual({
+    title: "Updated review",
+    category_id: categoriesResponse.items[1].id,
+    priority: "low",
+    planned_date: null,
+  });
+  expect(patchRequest!.body).not.toHaveProperty("user_id");
+  expect(patchRequest!.body).not.toHaveProperty("note");
+  expect(patchRequest!.body).not.toHaveProperty("status");
+});
+
+test("requires active categories and retries category loading before Todo edit submission", async () => {
+  storedIdentity();
+  let categoryGets = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) {
+      categoryGets += 1;
+      return categoryGets === 1 ? jsonResponse({ error: { code: "internal_error" } }, 500) : jsonResponse(categoriesResponse);
+    }
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+
+  expect(await screen.findByText("Could not load categories. Retry before saving.")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Retry categories" }));
+  await waitFor(() => expect(screen.getByLabelText("Category")).toBeEnabled());
+  expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[0].id);
+  expect(categoryGets).toBe(2);
+});
+
+test("falls back to the active Inbox when a Todo references a historical category", async () => {
+  storedIdentity();
+  const historicalTodo = {
+    ...todo,
+    category_id: "e48813e2-cdc1-4abc-b15f-0c1db56993d9",
+    category: { id: "e48813e2-cdc1-4abc-b15f-0c1db56993d9", name: "Old Work", is_deleted: true },
+  };
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse({ ...todosResponse, items: [historicalTodo] });
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+
+  await waitFor(() => expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[0].id));
+  expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
+});
+
+test("reuses a Todo edit idempotency key for unchanged recovery and replaces it after a field change", async () => {
+  storedIdentity();
+  const keys: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") {
+      keys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      return jsonResponse({ error: { code: "internal_error" } }, 500);
+    }
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled());
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  expect(await screen.findByText("Could not update todo. Try again.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Retry save" }));
+  await waitFor(() => expect(keys).toHaveLength(2));
+  expect(keys[1]).toBe(keys[0]);
+
+  await userEvent.type(screen.getByLabelText("Todo title"), " revised");
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() => expect(keys).toHaveLength(3));
+  expect(keys[2]).not.toBe(keys[1]);
+});
+
+test("recovers a stale Todo category to Inbox while preserving the rest of the draft", async () => {
+  storedIdentity();
+  const workTodo = { ...todo, category_id: categoriesResponse.items[1].id };
+  let categoryGets = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse({ ...todosResponse, items: [workTodo] });
+    if (url.endsWith("/todo-categories")) {
+      categoryGets += 1;
+      return jsonResponse(categoryGets === 1 ? categoriesResponse : { ...categoriesResponse, items: [categoriesResponse.items[0]] });
+    }
+    if (init?.method === "PATCH") return jsonResponse({ error: { code: "deleted_resource" } }, 410);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[1].id));
+  await userEvent.type(screen.getByLabelText("Todo title"), " preserved");
+  await userEvent.selectOptions(screen.getByLabelText("Priority"), "low");
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(await screen.findByText("That category is no longer available. Inbox has been selected; review and save again.")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Edit todo" })).toBeInTheDocument();
+  expect(screen.getByLabelText("Todo title")).toHaveValue("Prepare weekly review preserved");
+  expect(screen.getByLabelText("Priority")).toHaveValue("low");
+  expect(screen.getByLabelText("Planned date")).toHaveValue("2026-07-23");
+  expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[0].id);
+});
+
+test("closes a stale Todo editor and refreshes every loaded Todo view", async () => {
+  storedIdentity();
+  let todayGets = 0;
+  let todosGets = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) {
+      todayGets += 1;
+      return jsonResponse(todayResponseFor());
+    }
+    if (url === "/api/v1/todos") {
+      todosGets += 1;
+      return jsonResponse(populatedTodosResponse);
+    }
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") return jsonResponse({ error: { code: "not_found" } }, 404);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled());
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(await screen.findByText("That todo is no longer available. Loaded lists have been refreshed.")).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Edit todo" })).not.toBeInTheDocument();
+  expect(todayGets).toBe(2);
+  expect(todosGets).toBe(2);
+});
+
+test("rejects a blank Todo edit title without sending PATCH", async () => {
+  storedIdentity();
+  let patchCount = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (init?.method === "PATCH") patchCount += 1;
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  const title = await screen.findByLabelText("Todo title");
+  await userEvent.clear(title);
+  await userEvent.type(title, "   ");
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(screen.getByText("Enter a todo title.")).toBeInTheDocument();
+  expect(title).toHaveAttribute("aria-invalid", "true");
+  expect(patchCount).toBe(0);
+
+  fireEvent.change(title, { target: { value: "x".repeat(501) } });
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  expect(screen.getByText("Todo title must be 500 characters or fewer.")).toBeInTheDocument();
+  expect(patchCount).toBe(0);
+});
+
+test.each([
+  [400, "Check the todo details and try again."],
+  [409, "This edit conflicts with an earlier attempt. Review the form and try again."],
+])("keeps the Todo editor recoverable after a %i response", async (status, expectedMessage) => {
+  storedIdentity();
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") return jsonResponse({ error: { code: status === 400 ? "validation_error" : "idempotency_conflict" } }, status);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled());
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(await screen.findByText(expectedMessage)).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Edit todo" })).toBeInTheDocument();
+  expect(screen.getByLabelText("Todo title")).toHaveValue(todo.title);
+});
+
+test("clears local identity when Todo edit authorization expires", async () => {
+  storedIdentity();
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") return jsonResponse({ error: { code: "unauthorized" } }, 401);
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled());
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+  expect(await screen.findByText("Your identity expired. Enter the token again.")).toBeInTheDocument();
+  expect(screen.getByLabelText("Identity token")).toBeInTheDocument();
+  expect(localStorage.getItem("lifeos.identityToken")).toBeNull();
+});
+
+test("blocks duplicate Todo edit submission while PATCH is pending", async () => {
+  storedIdentity();
+  let patchCount = 0;
+  let resolvePatch!: (response: Response) => void;
+  const pendingPatch = new Promise<Response>((resolve) => { resolvePatch = resolve; });
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    if (url.endsWith("/todo-categories")) return jsonResponse(categoriesResponse);
+    if (init?.method === "PATCH") {
+      patchCount += 1;
+      return pendingPatch;
+    }
+    return jsonResponse(todosResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Edit Prepare weekly review" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled());
+  await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Saving..." }));
+  expect(patchCount).toBe(1);
+
+  resolvePatch(jsonResponse({ data: todo, sync: { cursor: 32 }, server_time: meResponse.server_time }));
+  expect(await screen.findByText("Todo updated.")).toBeInTheDocument();
+  expect(patchCount).toBe(1);
+});
+
 test("loads categories with bearer authorization and preserves server order", async () => {
   storedIdentity();
   const requests: Array<{ url: string; authorization: string | null }> = [];
