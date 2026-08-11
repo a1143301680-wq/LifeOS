@@ -100,26 +100,26 @@ An authenticated PC Web user can edit a visible pending Todo's title, active cat
 
 ## Acceptance Criteria
 
-- [ ] Todo rows in Today and Todos expose a clear accessible edit command without making the whole row an ambiguous action target.
-- [ ] Opening the editor initializes title, active category, priority, and planned date from the selected Todo and places focus sensibly.
-- [ ] Cancel sends no request, discards the draft, and restores focus to the originating edit command.
-- [ ] Title is trimmed, non-empty, and at most 500 characters; priority is constrained to high/medium/low.
-- [ ] Category choices preserve server order; Inbox sends its active UUID, and deleted or unavailable categories are not selectable.
-- [ ] Planned date is sent unchanged as `YYYY-MM-DD`, and clearing it sends `null` without timezone drift.
-- [ ] PATCH sends only `title`, `category_id`, `priority`, and `planned_date` with bearer authorization and a valid UUID `Idempotency-Key`.
-- [ ] PATCH never sends `user_id`, status, note, due time, version, timestamps, or other forbidden fields, preserving omitted note/due values.
-- [ ] An unchanged recoverable retry reuses its idempotency key; changing any failed submitted field causes a new key.
-- [ ] Duplicate in-flight submission is prevented; cancel/reopen starts a fresh logical attempt.
-- [ ] Category loading retries when the editor opens from idle/error; load failure has an explicit retry and cannot submit a guessed category.
-- [ ] A stale selected category refreshes categories, selects active Inbox when available, preserves other fields, and permits a new attempt.
-- [ ] Missing/deleted Todo, validation, idempotency conflict, network/server retry, unauthorized, in-flight, cancel, and success states behave safely.
-- [ ] Successful edit closes the draft and refetches every relevant already-loaded Today/Todos dataset in server order.
-- [ ] Existing identity, Today, Todos, category CRUD, quick-create, and identity-switch behavior remains correct.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent focus.
-- [ ] Focused tests cover exact payloads, initialization, clear date, category semantics/retry, idempotent retry, stale Todo/category, success refresh, and major failure states.
-- [ ] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
-- [ ] No backend, note/due-time, Todo status/delete, SSE, Android, or other out-of-scope feature is modified.
+- [x] Todo rows in Today and Todos expose a clear accessible edit command without making the whole row an ambiguous action target.
+- [x] Opening the editor initializes title, active category, priority, and planned date from the selected Todo and places focus sensibly.
+- [x] Cancel sends no request, discards the draft, and restores focus to the originating edit command.
+- [x] Title is trimmed, non-empty, and at most 500 characters; priority is constrained to high/medium/low.
+- [x] Category choices preserve server order; Inbox sends its active UUID, and deleted or unavailable categories are not selectable.
+- [x] Planned date is sent unchanged as `YYYY-MM-DD`, and clearing it sends `null` without timezone drift.
+- [x] PATCH sends only `title`, `category_id`, `priority`, and `planned_date` with bearer authorization and a valid UUID `Idempotency-Key`.
+- [x] PATCH never sends `user_id`, status, note, due time, version, timestamps, or other forbidden fields, preserving omitted note/due values.
+- [x] An unchanged recoverable retry reuses its idempotency key; changing any failed submitted field causes a new key.
+- [x] Duplicate in-flight submission is prevented; cancel/reopen starts a fresh logical attempt.
+- [x] Category loading retries when the editor opens from idle/error; load failure has an explicit retry and cannot submit a guessed category.
+- [x] A stale selected category refreshes categories, selects active Inbox when available, preserves other fields, and permits a new attempt.
+- [x] Missing/deleted Todo, validation, idempotency conflict, network/server retry, unauthorized, in-flight, cancel, and success states behave safely.
+- [x] Successful edit closes the draft and refetches every relevant already-loaded Today/Todos dataset in server order.
+- [x] Existing identity, Today, Todos, category CRUD, quick-create, and identity-switch behavior remains correct.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent focus.
+- [x] Focused tests cover exact payloads, initialization, clear date, category semantics/retry, idempotent retry, stale Todo/category, success refresh, and major failure states.
+- [x] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
+- [x] No backend, note/due-time, Todo status/delete, SSE, Android, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -146,6 +146,18 @@ Report modified files, Todo-update API/payload, category and date semantics, ide
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-023 after verifying result commit `af3dcd327246e1d56c730646e745488a8965844c` and completion record publication.
+Closure Check: PASS
+
+Checked at: 2026-08-11 23:16 +08:00
+
+Result Commit: `af3dcd327246e1d56c730646e745488a8965844c`
+
+Completion Commit: `5db6fdf34d062c21a0c5305a541f665489aaf62f`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `5db6fdf34d062c21a0c5305a541f665489aaf62f` before these closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-023-pc-web-todo-core-edit.md` with message `docs(task): close TASK-023`; then return control to Decision. This terminal Closure Commit ends TASK-023 and must not trigger another Closure Check.

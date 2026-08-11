@@ -75,6 +75,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-022 Decision Closure Check passed on 2026-08-02.
 - TASK-022 terminal Closure Commit `275f4a2` was published and the task workflow ended.
 - TASK-023 PC Web Todo core edit completed in result commit `af3dcd3`; Code Review: PASS; frontend tests/build/e2e/audit passed.
+- TASK-023 Decision Closure Check passed on 2026-08-11; only the terminal closure-document commit remains before the workflow ends.
 
 ## Recently Completed
 
@@ -123,7 +124,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Decision Closure Check for TASK-023 PC Web Todo core edit. Live task routing is maintained in `handoff/current-task.md`.
+Publish the exact-scope TASK-023 terminal Closure Commit described in `handoff/current-task.md`; after remote parity is verified, return control to Decision to select the next PC Web slice.
 
 ## Notes For Windows
 

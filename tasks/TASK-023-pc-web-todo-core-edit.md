@@ -216,4 +216,51 @@ Files Committed:
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-08-11 23:16 +08:00
+
+Result Commit: `af3dcd327246e1d56c730646e745488a8965844c`
+
+Completion Commit: `5db6fdf34d062c21a0c5305a541f665489aaf62f`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `5db6fdf34d062c21a0c5305a541f665489aaf62f` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+### Independent Verification
+
+- `npm test -- --run` from `web/`: PASS, 2 files and 67 tests.
+- `npm run build` from `web/`: PASS, TypeScript and Vite production build.
+- `npm run test:e2e` from `web/`: PASS, 2 Playwright tests at desktop and narrow widths.
+- `npm audit --audit-level=high` from `web/`: PASS, 0 vulnerabilities.
+- Code Review: PASS with no blocking findings.
+- All 20 acceptance criteria were confirmed from implementation, Code Review evidence, and the independent verification above.
+
+### Issue Disposition
+
+- No unresolved TASK-023 P0, P1, or P2 issue is recorded in `handoff/issue-log.md`.
+- Authenticated live Vite-proxy PATCH and cleanup remain unverified because no dedicated disposable identity token/data set was available; PostgreSQL was stopped and ports 8000/5173 were not listening during Closure Check.
+- This environment limitation is non-blocking under the approved task: no real user data was touched and no authenticated live-write claim is made. Repeat later only with safe disposable data and confirmed cleanup.
+- No other follow-up is required to close TASK-023.
+
+### Remaining Follow-ups
+
+- Continue PC Web Todo status actions and SSE refresh as separate slices after terminal closure.
+- Preserve note/due-time editing and Todo deletion as separately prioritized work; they were outside TASK-023.
+- PC Web remains partial, followed by Android and cross-client Phase 1A acceptance.
+
+### Terminal Closure Commit
+
+Approved files:
+
+- `docs/phase1a-progress.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-023-pc-web-todo-core-edit.md`
+
+Recommended commit message: `docs(task): close TASK-023`
+
+After this exact-scope commit is pushed and remote parity is verified, return control to Decision. This is the terminal Closure Commit for TASK-023; do not run another Closure Check for it.
