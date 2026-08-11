@@ -6,7 +6,7 @@ Last updated: 2026-08-11
 
 - Task ID: TASK-023
 - Task Name: PC Web Todo core edit vertical slice
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -146,6 +146,6 @@ Report modified files, Todo-update API/payload, category and date semantics, ide
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review-approved TASK-023 file set. Keep TASK-023 at REVIEWING until Git Commit publishes the result and updates both task-status files to COMPLETED.
+Required next action: run Decision Closure Check for TASK-023 after verifying result commit `af3dcd327246e1d56c730646e745488a8965844c` and completion record publication.

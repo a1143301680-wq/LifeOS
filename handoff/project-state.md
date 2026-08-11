@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-08-04
+Last updated: 2026-08-11
 
 ## Current Phase
 
@@ -74,7 +74,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-022 PC Web Todo quick-create completed in result commit `5a1a433`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 - TASK-022 Decision Closure Check passed on 2026-08-02.
 - TASK-022 terminal Closure Commit `275f4a2` was published and the task workflow ended.
-- TASK-023 PC Web Todo core edit was published as `PLANNED`; Task Review is the next role.
+- TASK-023 PC Web Todo core edit completed in result commit `af3dcd3`; Code Review: PASS; frontend tests/build/e2e/audit passed.
 
 ## Recently Completed
 
@@ -123,7 +123,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-023 PC Web Todo core edit. Live task routing is maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-023 PC Web Todo core edit. Live task routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

@@ -1,6 +1,6 @@
 # TASK-023: PC Web Todo core edit vertical slice
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -189,7 +189,30 @@ Snapshot Commit: `433495c077dead61a2e16b7c9da71f73a109948f`
 
 ## Git Commit
 
-Pending.
+Result: PASS
+
+Committed by: Git Commit window
+
+Committed at: 2026-08-11
+
+Result Commit: `af3dcd327246e1d56c730646e745488a8965844c`
+
+Commit Message: `feat(web): add todo core edit`
+
+Push Target: `origin/main`
+
+Files Committed:
+
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-023-pc-web-todo-core-edit.md`
+- `web/e2e/identity-todos.spec.ts`
+- `web/package-lock.json`
+- `web/src/App.test.tsx`
+- `web/src/App.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
+- `web/src/types.ts`
 
 ## Closure
 
