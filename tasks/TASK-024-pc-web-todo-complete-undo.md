@@ -206,4 +206,51 @@ TASK-024 remains `REVIEWING` until Git Commit succeeds. Git Commit may commit an
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-08-13 09:17 +08:00
+
+Result Commit: `28dfcc4a338970d0241702f3d088c674b3530a70`
+
+Completion Commit: `808e71f8d1a7096ed52c58fca00b4066e8826b06`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `808e71f8d1a7096ed52c58fca00b4066e8826b06` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+### Independent Verification
+
+- `npm test -- --run` from `web/`: PASS, 2 files and 83 tests.
+- `npm run build` from `web/`: PASS, TypeScript and Vite production build.
+- `npm run test:e2e` from `web/`: PASS, 2 Playwright tests at desktop and narrow widths.
+- `npm audit --audit-level=high` from `web/`: PASS, 0 vulnerabilities.
+- Code Review: PASS with no blocking findings.
+- All 20 acceptance criteria were confirmed from implementation, Code Review evidence, and the independent verification above.
+
+### Issue Disposition
+
+- No unresolved TASK-024 P0, P1, or P2 issue is recorded in `handoff/issue-log.md`.
+- Authenticated live Vite-proxy complete/reopen and cleanup remain unverified because PostgreSQL was stopped, ports 8000/5173/4173 were not listening, and no dedicated disposable identity/data set was available during Closure Check.
+- This environment limitation is non-blocking under the approved task: no real user data was touched and no authenticated live-write claim is made. Repeat later only with safe disposable data and confirmed cleanup.
+- No other follow-up is required to close TASK-024.
+
+### Remaining Follow-ups
+
+- Continue PC Web SSE refresh as the next planned client slice after terminal closure.
+- Completed-list/filter, persistent reopen, Todo deletion, note/due-time editing, and Android remain separately prioritized work.
+- PC Web remains partial until remaining Phase 1A web scope is closed, followed by Android and cross-client acceptance.
+
+### Terminal Closure Commit
+
+Approved files:
+
+- `docs/phase1a-progress.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-024-pc-web-todo-complete-undo.md`
+
+Recommended commit message: `docs(task): close TASK-024`
+
+After this exact-scope commit is pushed and remote parity is verified, return control to Decision. This is the terminal Closure Commit for TASK-024; do not run another Closure Check for it.

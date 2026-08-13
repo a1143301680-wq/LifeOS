@@ -100,26 +100,26 @@ An authenticated PC Web user can complete a visible pending Todo from Today or T
 
 ## Acceptance Criteria
 
-- [ ] Pending Todo rows in Today and Todos expose distinct accessible edit and complete controls with stable layout.
-- [ ] Complete sends a bodyless authenticated `POST /api/v1/todos/{id}/complete` with a valid UUID `Idempotency-Key` and no `user_id`.
-- [ ] Duplicate complete submission is prevented while the request is in flight.
-- [ ] An unchanged recoverable complete retry reuses its key; abandoning it or acting on another Todo uses a new key.
-- [ ] Successful complete announces the Todo title and exposes Undo for exactly that latest completed Todo.
-- [ ] Undo sends a separate bodyless authenticated `POST /api/v1/todos/{id}/reopen` with its own UUID `Idempotency-Key`.
-- [ ] Duplicate Undo submission is prevented; an unchanged recoverable Undo retry reuses its reopen key.
-- [ ] Successful Undo announces restoration and clears the prior Undo action.
-- [ ] Completing another Todo, replacing/dismissing the notice, identity change, or logout clears the previous Undo context without a request.
-- [ ] Successful complete and reopen each refetch every relevant already-loaded Today/Todos dataset in server order.
-- [ ] A mutation success followed by refresh failure is not retried as a mutation; confirmed state and applicable Undo remain clear while dataset retry is available.
-- [ ] Missing/deleted Todo and invalid-state responses show safe feedback, clear stale action state as appropriate, and refresh loaded Todo data without leaking cross-user existence.
-- [ ] Idempotency conflict, network/server retry, unauthorized, in-flight, and success states behave safely for complete and Undo.
-- [ ] Open quick-create/edit drafts are not silently submitted, overwritten, or merged by Todo actions; conflicting controls remain unambiguous.
-- [ ] Existing identity, Today, Todos, category CRUD, quick-create, core edit, and identity-switch behavior remains correct.
-- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, unstable row sizing, inaccessible controls, or incoherent focus.
-- [ ] Focused tests cover exact bodyless requests, independent key lifecycles, duplicate guards, transient Undo ownership, stale states, refresh failure, and success refresh.
-- [ ] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [ ] Live proxy complete/reopen evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
-- [ ] No backend, completed-list/filter, delete/cancel, persistent reopen, SSE, Android, or other out-of-scope feature is modified.
+- [x] Pending Todo rows in Today and Todos expose distinct accessible edit and complete controls with stable layout.
+- [x] Complete sends a bodyless authenticated `POST /api/v1/todos/{id}/complete` with a valid UUID `Idempotency-Key` and no `user_id`.
+- [x] Duplicate complete submission is prevented while the request is in flight.
+- [x] An unchanged recoverable complete retry reuses its key; abandoning it or acting on another Todo uses a new key.
+- [x] Successful complete announces the Todo title and exposes Undo for exactly that latest completed Todo.
+- [x] Undo sends a separate bodyless authenticated `POST /api/v1/todos/{id}/reopen` with its own UUID `Idempotency-Key`.
+- [x] Duplicate Undo submission is prevented; an unchanged recoverable Undo retry reuses its reopen key.
+- [x] Successful Undo announces restoration and clears the prior Undo action.
+- [x] Completing another Todo, replacing/dismissing the notice, identity change, or logout clears the previous Undo context without a request.
+- [x] Successful complete and reopen each refetch every relevant already-loaded Today/Todos dataset in server order.
+- [x] A mutation success followed by refresh failure is not retried as a mutation; confirmed state and applicable Undo remain clear while dataset retry is available.
+- [x] Missing/deleted Todo and invalid-state responses show safe feedback, clear stale action state as appropriate, and refresh loaded Todo data without leaking cross-user existence.
+- [x] Idempotency conflict, network/server retry, unauthorized, in-flight, and success states behave safely for complete and Undo.
+- [x] Open quick-create/edit drafts are not silently submitted, overwritten, or merged by Todo actions; conflicting controls remain unambiguous.
+- [x] Existing identity, Today, Todos, category CRUD, quick-create, core edit, and identity-switch behavior remains correct.
+- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, unstable row sizing, inaccessible controls, or incoherent focus.
+- [x] Focused tests cover exact bodyless requests, independent key lifecycles, duplicate guards, transient Undo ownership, stale states, refresh failure, and success refresh.
+- [x] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [x] Live proxy complete/reopen evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
+- [x] No backend, completed-list/filter, delete/cancel, persistent reopen, SSE, Android, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
@@ -147,6 +147,18 @@ Report modified files, complete/reopen API boundaries, body/header evidence, ind
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-024 after verifying result commit `28dfcc4a338970d0241702f3d088c674b3530a70` and the Git Commit completion record.
+Closure Check: PASS
+
+Checked at: 2026-08-13 09:17 +08:00
+
+Result Commit: `28dfcc4a338970d0241702f3d088c674b3530a70`
+
+Completion Commit: `808e71f8d1a7096ed52c58fca00b4066e8826b06`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `808e71f8d1a7096ed52c58fca00b4066e8826b06` before these closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-024-pc-web-todo-complete-undo.md` with message `docs(task): close TASK-024`; then return control to Decision. This terminal Closure Commit ends TASK-024 and must not trigger another Closure Check.

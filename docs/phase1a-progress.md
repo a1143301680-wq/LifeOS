@@ -60,13 +60,13 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | Identity, Today, Todos, category CRUD, Todo quick-create, and core Todo edit closed through TASK-023 terminal closure `8046032`; TASK-024 complete with immediate Undo is planned |
+| PC Web | partial | Identity, Today, Todos, category CRUD, Todo quick-create/core edit, and complete with immediate Undo completed through TASK-024 result commit `28dfcc4`; Decision Closure Check passed and terminal closure commit is pending |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Deliver TASK-024 PC Web Todo complete with immediate Undo.
+1. Publish the exact-scope TASK-024 terminal Closure Commit, then return to Decision.
 2. Continue PC Web SSE refresh.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
