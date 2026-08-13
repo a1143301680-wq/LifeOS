@@ -1,6 +1,6 @@
 # TASK-024: PC Web Todo complete with immediate undo
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -196,7 +196,13 @@ TASK-024 remains `REVIEWING` until Git Commit succeeds. Git Commit may commit an
 
 ## Git Commit
 
-Pending.
+- Result Commit: `28dfcc4a338970d0241702f3d088c674b3530a70`
+- Commit Message: `feat(web): add todo complete undo`
+- Branch: main
+- Push Target: `origin/main`
+- Published by: Git Commit window
+- Published at: 2026-08-13
+- Completion Status: TASK-024 marked `COMPLETED` in both active task-status files after result commit publication.
 
 ## Closure
 

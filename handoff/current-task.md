@@ -6,7 +6,7 @@ Last updated: 2026-08-13
 
 - Task ID: TASK-024
 - Task Name: PC Web Todo complete with immediate undo
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -147,6 +147,6 @@ Report modified files, complete/reopen API boundaries, body/header evidence, ind
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the Code Review approved TASK-024 file set.
+Required next action: run Decision Closure Check for TASK-024 after verifying result commit `28dfcc4a338970d0241702f3d088c674b3530a70` and the Git Commit completion record.

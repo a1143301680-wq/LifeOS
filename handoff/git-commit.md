@@ -1,26 +1,40 @@
 # LifeOS Git Commit Result
 
-Last updated: 2026-08-11
+Last updated: 2026-08-13
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-024
 
-Branch: Pending
+Branch: main
 
-Commit Hash: Pending
+Commit Hash: `28dfcc4a338970d0241702f3d088c674b3530a70`
 
-Commit Message: Pending Code Review PASS
+Commit Message: `feat(web): add todo complete undo`
 
-Files Changed: Pending
+Files Changed:
 
-Tests: Pending
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-024-pc-web-todo-complete-undo.md`
+- `web/e2e/identity-todos.spec.ts`
+- `web/src/App.test.tsx`
+- `web/src/App.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
 
-Code Review Result: PENDING
+Tests:
 
-Push Target: Pending
+- `npm test -- --run`: PASS, 2 files, 83 tests
+- `npm run build`: PASS
+- `npm run test:e2e`: PASS, 2 Playwright tests
+- `npm audit --audit-level=high`: PASS, 0 vulnerabilities
+
+Code Review Result: PASS
+
+Push Target: `origin/main`
 
 ## Instructions
 
