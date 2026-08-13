@@ -1,48 +1,48 @@
 # LifeOS Current Task
 
-Last updated: 2026-08-11
+Last updated: 2026-08-13
 
 ## Metadata
 
-- Task ID: TASK-023
-- Task Name: PC Web Todo core edit vertical slice
-- Status: COMPLETED
+- Task ID: TASK-024
+- Task Name: PC Web Todo complete with immediate undo
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
-  - Todo update API published in `09cd984`
+  - Todo complete API published in `2c35f1d`
+  - Todo reopen API published in `c2d167f`
   - Todo list and Today APIs published in `dd0d6fa` and `2a698f3`
-  - TASK-022 terminal closure published in `275f4a2`
-  - Existing PC Web identity, Today, Todos, categories, and Todo quick-create surfaces under `web/`
+  - TASK-023 terminal closure published in `8046032`
+  - Existing PC Web identity, Today, Todos, quick-create, and core-edit surfaces under `web/`
 
 ## Background
 
-PC Web can now create and display pending Todos, but users cannot correct the core planning fields after creation. This slice adds an editor for the same high-frequency fields already used by quick create while keeping note/due-time editing, status actions, deletion, and SSE separate.
+PC Web can create and edit pending Todos but cannot finish the daily loop by marking work complete. This slice adds a compact completion action to visible pending Todos and a short-lived Undo action in the success notice, using the existing complete and reopen endpoints without adding a completed-items view or general status filtering.
 
 ## Goal
 
-An authenticated PC Web user can edit a visible pending Todo's title, active category, priority, and planned date from Today or Todos, then immediately see server-authoritative data in every already-loaded Todo view.
+An authenticated PC Web user can complete a visible pending Todo from Today or Todos, immediately see server-authoritative refreshed data, and undo that just-completed action while the success notice remains available.
 
 ## Scope
 
 ### In Scope
 
-- Add typed authenticated `PATCH /api/v1/todos/{id}` integration with a UUID `Idempotency-Key`.
-- Add a compact accessible edit command to Todo rows in Today and Todos.
-- Edit title, active category including Inbox, priority, and optional planned date.
-- Initialize the editor from the selected Todo and preserve `YYYY-MM-DD` planned dates without timestamp conversion.
-- Load or retry active categories when the editor opens and preserve server order.
-- Handle validation, stale/deleted category, missing/deleted Todo, idempotency conflict, unauthorized, in-flight, recoverable failure/retry, cancel, and success states.
-- Refresh every relevant already-loaded Today and Todos dataset after a successful update.
-- Preserve existing identity, Today, Todos, category CRUD, and Todo quick-create behavior.
+- Add typed authenticated bodyless integrations for `POST /api/v1/todos/{id}/complete` and `POST /api/v1/todos/{id}/reopen`, each with a UUID `Idempotency-Key`.
+- Add a compact accessible complete command to visible pending Todo rows in Today and Todos.
+- After successful completion, show an accessible success notice with an Undo command for that specific Todo.
+- Keep Undo intentionally transient: it is available only for the latest successful completion represented by the current notice.
+- Handle unauthorized, missing/deleted Todo, invalid state, idempotency conflict, in-flight, recoverable failure/retry, success, and refresh-failure states for both actions.
+- Refresh every relevant already-loaded Today and Todos dataset after successful complete or reopen, and after stale-state responses when appropriate.
+- Preserve existing identity, Today, Todos, category CRUD, Todo quick-create, and core-edit behavior.
 - Add focused component/API and Playwright coverage at desktop and narrow widths.
 - Attempt and record live Vite-proxy verification when services and safe disposable data are available.
 
 ### Out of Scope
 
-- Editing Todo `note` or `due_at`.
-- Completing, reopening, canceling, or deleting a Todo.
-- Todo detail route, modal history, filters, pagination controls, or bulk actions.
+- A completed-Todos list, status segmented control/filter, history view, or persistent reopen entry point.
+- Todo deletion, cancel status, bulk actions, swipe gestures, or keyboard shortcut schemes.
+- Editing title, category, priority, planned date, note, or due time as part of the action flow.
 - SSE refresh, sync cursor storage, offline cache, PWA, or Android work.
 - Backend API, authentication, database, migration, or seed-data changes.
 - Changes to stable requirements, architecture, MVP, API-contract, or data-model documents.
@@ -51,113 +51,102 @@ An authenticated PC Web user can edit a visible pending Todo's title, active cat
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 6, 7.2, 8.1, 9.1, 10.1, and 10.4
+- `docs/api-phase1a.md` sections 2, 7.2, 8.1, 9.1, 10.1, 10.5, and 10.6
 - `docs/mvp.md` Phase 1A PC Web scope
 - `web/src/App.tsx`
 - `web/src/App.test.tsx`
 - `web/src/api.ts`
 - `web/src/types.ts`
-- `web/src/calendar-date.ts`
 - `web/src/styles.css`
 - `web/e2e/identity-todos.spec.ts`
-- Backend Todo update schema/router/tests only as contract references
+- Backend Todo complete/reopen router and tests only as contract references
 
 ### Allowed Modify Files
 
 - Existing `web/` source, tests, styles, Playwright specs/config, package manifest, and lockfile when justified
 - `web/README.md` for concise updated run or verification instructions
 - `docs/phase1a-progress.md`
-- Active TASK-023 handoff, gate, Git record, and issue-log files
+- Active TASK-024 handoff, gate, Git record, and issue-log files
 
 ### Forbidden Modify Files
 
 - Any `backend/` implementation, tests, dependencies, settings, or migrations
 - Stable product, architecture, MVP, API-contract, or data-model documents
-- Todo note/due-time input, complete, reopen, cancel, delete, filter, pagination, or detail behavior
+- Completed-list/status-filter, Todo delete/cancel, persistent reopen, bulk-action, note/due-time, or unrelated edit behavior
 - SSE, sync recovery, offline/PWA, Reminder, Recurring Todo, or Android behavior
 - Raw identity tokens, `.env` secrets, generated output, dependency directories, logs, caches, or editor-local files
-- Completed TASK-005 through TASK-022 archives
+- Completed TASK-005 through TASK-023 archives
 
 ## Implementation Requirements
 
-- Reuse the existing identity bootstrap, bearer authorization, active-category state, plain calendar-date helpers, unauthorized clearing, notices, focus behavior, and server refresh functions. Never send `user_id` or expose the raw token.
-- Add a typed Todo-update payload and write envelope at the existing API boundary. The editor may send only `title`, `category_id`, `priority`, and `planned_date`.
-- Trim title, reject blank input, and enforce the backend maximum of 500 characters before submission. Priority must remain `high`, `medium`, or `low`.
-- Treat `planned_date` as a plain `YYYY-MM-DD`; clearing it sends `null`. Never convert it through a browser-local or UTC timestamp.
-- Category choices preserve server order. Editing to Inbox sends the active Inbox category UUID; do not reuse create's omitted-category default rule for PATCH. Do not offer deleted categories as selectable targets.
-- For a Todo whose historical category is deleted, missing, or unavailable, initialize the category choice to the active Inbox while preserving all other fields. Do not guess an Inbox ID before active categories load.
-- Do not send `note`, `due_at`, `status`, `completed_at`, `deleted_at`, `version`, `user_id`, timestamps, or other system fields. Omitting `note` and `due_at` must preserve their server values.
-- Generate one UUID `Idempotency-Key` per logical update attempt. An unchanged recoverable retry reuses that key; changing any submitted field after failure invalidates the prior attempt and generates a new key.
-- Prevent duplicate submission while a request is in flight. Cancel closes and discards the draft without a request; reopening starts a new draft and logical attempt.
-- Opening the editor when category state is `idle` or `error` must request categories again. A category-load failure keeps an explicit retry path and must not silently submit a guessed category.
-- If the selected category becomes unavailable, refresh categories, select active Inbox when available, preserve other draft fields, and allow a new attempt.
-- If the Todo becomes missing or deleted, close the stale editor, show safe feedback, and refresh already-loaded Todo datasets.
-- On success, close the editor, announce success accessibly, restore focus sensibly, and refetch every relevant Today/Todos dataset already loaded. Do not mutate or reorder list data locally as a substitute for server refresh.
-- A `401` clears approved identity storage and returns to setup. Expected validation and idempotency conflicts use concise safe feedback. Network/server failures preserve the unchanged draft and expose retry.
-- Keep row actions and the editor compact, stable, keyboard-accessible, and non-overlapping at desktop and narrow widths. Use the existing icon library and accessible labels.
-- Preserve all credible TASK-018 through TASK-022 tests and behavior. Avoid broad state-management, architecture, or design-system refactors.
-- If services and a dedicated disposable identity are available, update a disposable Todo through the Vite proxy and restore or delete the test data. Otherwise record the exact limitation and do not use real user data or claim authenticated live verification.
+- Reuse the existing identity bootstrap, bearer authorization, Todo row layout, notices, focus behavior, unauthorized clearing, and server refresh functions. Never send `user_id` or expose the raw token.
+- Add typed complete/reopen API functions returning the existing Todo write envelope. Both requests must use `POST`, bearer auth, a UUID `Idempotency-Key`, and no request body or JSON content header.
+- Add a familiar icon-based complete control with an accessible name to each visible pending Todo row. Keep edit and complete controls as distinct stable action targets.
+- Prevent duplicate submission while an action is in flight. Disable conflicting actions for the active Todo without resizing or reflowing the row.
+- A logical complete attempt owns one idempotency key. An unchanged recoverable retry for the same Todo reuses that key; abandoning that failure or starting a different Todo action generates a new key.
+- A successful complete response ends the complete attempt. Do not resend complete merely because a later list refresh fails.
+- After complete succeeds, retain only the returned Todo ID/title needed for the current Undo notice. The Undo request starts a separate logical reopen attempt with its own UUID key.
+- An unchanged recoverable Undo retry reuses its reopen key. Replacing/dismissing the notice, changing identity, logging out, successful Undo, or completing another Todo clears the prior Undo context.
+- On complete success, announce the completed title and expose a clear Undo command. On Undo success, announce that the Todo was restored and remove the Undo command.
+- Refetch every relevant Today/Todos dataset already loaded after each successful complete or reopen. Do not remove, insert, or reorder Todo rows locally as a substitute for server refresh.
+- If mutation succeeds but a refresh fails, preserve the confirmed action result and current Undo availability where applicable, expose normal dataset retry, and do not treat refresh failure as a mutation retry.
+- Map `400 invalid_state_transition`, `404 not_found`, and `410 deleted_resource` to safe stale-state feedback and refresh loaded Todo data. Do not expose cross-user existence details.
+- Map `409 idempotency_key_conflict` and network/server failures to concise recoverable feedback. A `401` clears approved identity storage and returns to setup.
+- Closing, replacing, or navigating away from a transient notice must not issue a request. Identity changes clear all action and Undo state.
+- Preserve quick-create and edit drafts. Completion must not silently submit, overwrite, or merge an open editor draft; conflicting controls should be disabled or otherwise made unambiguous.
+- Keep controls and notice actions keyboard-accessible, screen-reader clear, and non-overlapping at desktop and narrow widths. Use the existing icon library.
+- Preserve all credible TASK-018 through TASK-023 tests and behavior. Avoid broad state-management, architecture, or design-system refactors.
+- If services and a dedicated disposable identity are available, create a disposable Todo, complete it, reopen it, then clean it up through the Vite proxy. Otherwise record the exact limitation and do not use real user data or claim authenticated live verification.
 
 ## Acceptance Criteria
 
-- [x] Todo rows in Today and Todos expose a clear accessible edit command without making the whole row an ambiguous action target.
-- [x] Opening the editor initializes title, active category, priority, and planned date from the selected Todo and places focus sensibly.
-- [x] Cancel sends no request, discards the draft, and restores focus to the originating edit command.
-- [x] Title is trimmed, non-empty, and at most 500 characters; priority is constrained to high/medium/low.
-- [x] Category choices preserve server order; Inbox sends its active UUID, and deleted or unavailable categories are not selectable.
-- [x] Planned date is sent unchanged as `YYYY-MM-DD`, and clearing it sends `null` without timezone drift.
-- [x] PATCH sends only `title`, `category_id`, `priority`, and `planned_date` with bearer authorization and a valid UUID `Idempotency-Key`.
-- [x] PATCH never sends `user_id`, status, note, due time, version, timestamps, or other forbidden fields, preserving omitted note/due values.
-- [x] An unchanged recoverable retry reuses its idempotency key; changing any failed submitted field causes a new key.
-- [x] Duplicate in-flight submission is prevented; cancel/reopen starts a fresh logical attempt.
-- [x] Category loading retries when the editor opens from idle/error; load failure has an explicit retry and cannot submit a guessed category.
-- [x] A stale selected category refreshes categories, selects active Inbox when available, preserves other fields, and permits a new attempt.
-- [x] Missing/deleted Todo, validation, idempotency conflict, network/server retry, unauthorized, in-flight, cancel, and success states behave safely.
-- [x] Successful edit closes the draft and refetches every relevant already-loaded Today/Todos dataset in server order.
-- [x] Existing identity, Today, Todos, category CRUD, quick-create, and identity-switch behavior remains correct.
-- [x] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, inaccessible controls, or incoherent focus.
-- [x] Focused tests cover exact payloads, initialization, clear date, category semantics/retry, idempotent retry, stale Todo/category, success refresh, and major failure states.
-- [x] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
-- [x] Live proxy evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
-- [x] No backend, note/due-time, Todo status/delete, SSE, Android, or other out-of-scope feature is modified.
+- [ ] Pending Todo rows in Today and Todos expose distinct accessible edit and complete controls with stable layout.
+- [ ] Complete sends a bodyless authenticated `POST /api/v1/todos/{id}/complete` with a valid UUID `Idempotency-Key` and no `user_id`.
+- [ ] Duplicate complete submission is prevented while the request is in flight.
+- [ ] An unchanged recoverable complete retry reuses its key; abandoning it or acting on another Todo uses a new key.
+- [ ] Successful complete announces the Todo title and exposes Undo for exactly that latest completed Todo.
+- [ ] Undo sends a separate bodyless authenticated `POST /api/v1/todos/{id}/reopen` with its own UUID `Idempotency-Key`.
+- [ ] Duplicate Undo submission is prevented; an unchanged recoverable Undo retry reuses its reopen key.
+- [ ] Successful Undo announces restoration and clears the prior Undo action.
+- [ ] Completing another Todo, replacing/dismissing the notice, identity change, or logout clears the previous Undo context without a request.
+- [ ] Successful complete and reopen each refetch every relevant already-loaded Today/Todos dataset in server order.
+- [ ] A mutation success followed by refresh failure is not retried as a mutation; confirmed state and applicable Undo remain clear while dataset retry is available.
+- [ ] Missing/deleted Todo and invalid-state responses show safe feedback, clear stale action state as appropriate, and refresh loaded Todo data without leaking cross-user existence.
+- [ ] Idempotency conflict, network/server retry, unauthorized, in-flight, and success states behave safely for complete and Undo.
+- [ ] Open quick-create/edit drafts are not silently submitted, overwritten, or merged by Todo actions; conflicting controls remain unambiguous.
+- [ ] Existing identity, Today, Todos, category CRUD, quick-create, core edit, and identity-switch behavior remains correct.
+- [ ] Desktop and narrow viewport checks show no overlap, clipping, horizontal overflow, unstable row sizing, inaccessible controls, or incoherent focus.
+- [ ] Focused tests cover exact bodyless requests, independent key lifecycles, duplicate guards, transient Undo ownership, stale states, refresh failure, and success refresh.
+- [ ] Production build and high-severity dependency audit pass; generated artifacts and secrets are absent from the task diff.
+- [ ] Live proxy complete/reopen evidence and cleanup are recorded when safe disposable data are available; otherwise the exact limitation is reported without claiming live integration.
+- [ ] No backend, completed-list/filter, delete/cancel, persistent reopen, SSE, Android, or other out-of-scope feature is modified.
 
 ## Verification Plan
 
-- Run `npm test`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high` from `web/`.
-- Inspect PATCH payload and headers for exact allowed fields, Inbox UUID behavior, plain/cleared planned date, bearer authorization, UUID idempotency lifecycle, and forbidden-field absence.
-- Verify open/init, cancel/focus restoration, validation, unchanged retry, changed-draft invalidation, duplicate-submit prevention, category load retry, and stale category/Todo behavior.
-- Verify successful edit refreshes already-loaded Today and Todos datasets and preserves server ordering.
-- Exercise quick create, category CRUD, identity switching, Today/Todos navigation, and unauthorized clearing for regression.
-- Inspect desktop and narrow browser views, keyboard/focus behavior, row actions, editor controls, and horizontal overflow.
-- Attempt live update only with disposable identity/data and confirmed cleanup; record the exact result.
+- Run `npm test -- --run`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high` from `web/`.
+- Inspect complete/reopen method, path, headers, empty body, UUID key lifecycle, and forbidden-field absence.
+- Verify complete, retry, duplicate guard, success notice, transient Undo ownership, Undo retry, notice replacement/dismissal, identity clearing, and focus behavior.
+- Verify stale/missing/deleted/invalid-state, 409, 401, network/server, and refresh-failure behavior for both actions.
+- Verify successful actions refresh all already-loaded Today/Todos datasets and preserve server ordering.
+- Exercise quick create, core edit, category CRUD, identity switching, Today/Todos navigation, and unauthorized clearing for regression.
+- Inspect desktop and narrow browser views, keyboard/focus behavior, row action sizing, notice action alignment, and horizontal overflow.
+- Attempt live complete/reopen only with disposable identity/data and confirmed cleanup; record the exact result.
 - Inspect exact changed/ignored files, run `git diff --check`, and independently check new files for whitespace, artifacts, and secrets.
 
 ## Risks
 
-- PATCH Inbox semantics differ from create semantics: omitting `category_id` preserves the old category, while editing to Inbox must send the active Inbox UUID.
-- A stale category or Todo can leave the editor pointed at data that can no longer be mutated.
-- Incorrect idempotency-attempt boundaries can repeat or conflict with updates after ambiguous failures.
-- Local list mutation can diverge from backend ordering and Today section membership.
-- Row action additions can become cramped or inaccessible on narrow screens.
+- Retrying a successful mutation because its subsequent refresh failed can produce confusing invalid-state errors.
+- Reusing one key across complete and reopen violates idempotency ownership and can cause conflicts.
+- A stale Undo notice can reopen the wrong or no-longer-completed Todo if ownership is not explicit.
+- Completing a Todo removes it from pending views, so server refresh and visible success feedback are both essential.
+- Additional row and notice actions can become cramped or inaccessible at narrow widths.
 
 ## Coding Output Requirements
 
-Report modified files, Todo-update API/payload, category and date semantics, idempotency lifecycle, editor/focus behavior, refresh strategy, visible states, responsive/accessibility checks, acceptance results, unit/build/e2e/audit results, live proxy status and cleanup, diff/artifact/secret checks, unresolved issues, and task-outside findings.
+Report modified files, complete/reopen API boundaries, body/header evidence, independent idempotency lifecycles, transient Undo ownership, draft interaction, refresh strategy, visible states, responsive/accessibility checks, acceptance results, unit/build/e2e/audit results, live proxy status and cleanup, diff/artifact/secret checks, unresolved issues, and task-outside findings.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-08-11 23:16 +08:00
-
-Result Commit: `af3dcd327246e1d56c730646e745488a8965844c`
-
-Completion Commit: `5db6fdf34d062c21a0c5305a541f665489aaf62f`
-
-Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `5db6fdf34d062c21a0c5305a541f665489aaf62f` before these closure-document edits.
-
-Working Tree Before Closure Docs: clean; no staged or untracked files.
-
-Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-023-pc-web-todo-core-edit.md` with message `docs(task): close TASK-023`; then return control to Decision. This terminal Closure Commit ends TASK-023 and must not trigger another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for TASK-024 from the approved publication and workflow-state files. Do not start Coding before Git Snapshot completion.
