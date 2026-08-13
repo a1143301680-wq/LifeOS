@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
+  CircleCheck,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -12,12 +13,15 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  RotateCcw,
   ShieldCheck,
   Trash2,
+  X,
 } from "lucide-react";
 
 import {
   ApiError,
+  completeTodo,
   createTodo,
   createTodoCategory,
   deleteTodoCategory,
@@ -25,6 +29,7 @@ import {
   getPendingTodos,
   getTodayTodos,
   getTodoCategories,
+  reopenTodo,
   updateTodo,
   updateTodoCategory,
 } from "./api";
@@ -52,6 +57,11 @@ type CategoryNotice = {
   message: string;
 };
 type TodoNotice = CategoryNotice;
+type TodoActionTarget = Pick<Todo, "id" | "title">;
+type FailedTodoActionAttempt = {
+  todoId: string;
+  idempotencyKey: string;
+};
 
 const categoryColors = [
   { name: "Slate", value: "#64748b" },
@@ -87,12 +97,16 @@ function TodoRow({
   todo,
   timezone,
   onEdit,
+  onComplete,
   actionsDisabled,
+  completePending,
 }: {
   todo: Todo;
   timezone: string;
   onEdit: (todo: Todo, trigger: HTMLButtonElement) => void;
+  onComplete: (todo: Todo) => void;
   actionsDisabled: boolean;
+  completePending: boolean;
 }) {
   return (
     <li className="todo-row">
@@ -116,7 +130,10 @@ function TodoRow({
           ) : null}
         </div>
       </div>
-      <button className="icon-button todo-edit-button" type="button" onClick={(event) => onEdit(todo, event.currentTarget)} disabled={actionsDisabled} title={`Edit ${todo.title}`} aria-label={`Edit ${todo.title}`}><Pencil aria-hidden="true" /></button>
+      <div className="todo-row-actions">
+        <button className="icon-button todo-complete-button" type="button" onClick={() => onComplete(todo)} disabled={actionsDisabled} title={`Complete ${todo.title}`} aria-label={completePending ? `Completing ${todo.title}` : `Complete ${todo.title}`}><CircleCheck aria-hidden="true" /></button>
+        <button className="icon-button todo-edit-button" type="button" onClick={(event) => onEdit(todo, event.currentTarget)} disabled={actionsDisabled} title={`Edit ${todo.title}`} aria-label={`Edit ${todo.title}`}><Pencil aria-hidden="true" /></button>
+      </div>
     </li>
   );
 }
@@ -125,12 +142,16 @@ function TodayContent({
   data,
   timezone,
   onEdit,
+  onComplete,
   actionsDisabled,
+  completingTodoId,
 }: {
   data: TodayData;
   timezone: string;
   onEdit: (todo: Todo, trigger: HTMLButtonElement) => void;
+  onComplete: (todo: Todo) => void;
   actionsDisabled: boolean;
+  completingTodoId: string | null;
 }) {
   const itemCount = todaySections.reduce((total, section) => total + data.sections[section.key].length, 0);
 
@@ -163,7 +184,7 @@ function TodayContent({
                 </div>
                 {items.length > 0 ? (
                   <ul className="todo-list" aria-label={`${section.label} todos`}>
-                    {items.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={timezone} onEdit={onEdit} actionsDisabled={actionsDisabled} />)}
+                    {items.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={timezone} onEdit={onEdit} onComplete={onComplete} actionsDisabled={actionsDisabled} completePending={completingTodoId === todo.id} />)}
                   </ul>
                 ) : (
                   <p className="section-empty">No items</p>
@@ -263,6 +284,9 @@ export default function App() {
   const restoreQuickCreateFocus = useRef(false);
   const todoCreateInFlight = useRef(false);
   const todoEditInFlight = useRef(false);
+  const todoCompleteInFlight = useRef(false);
+  const todoReopenInFlight = useRef(false);
+  const undoButtonRef = useRef<HTMLButtonElement | null>(null);
   const todoEditTrigger = useRef<HTMLButtonElement | null>(null);
   const restoreTodoEditFocus = useRef(false);
   const [initialToken] = useState(readIdentityToken);
@@ -313,6 +337,14 @@ export default function App() {
   const [todoEditMessage, setTodoEditMessage] = useState<string | null>(null);
   const [failedTodoEditAttempt, setFailedTodoEditAttempt] = useState<FailedEditAttempt | null>(null);
   const [todoEditFocusRequest, setTodoEditFocusRequest] = useState(0);
+  const [completeTarget, setCompleteTarget] = useState<TodoActionTarget | null>(null);
+  const [completeStatus, setCompleteStatus] = useState<CreateStatus>("idle");
+  const [failedCompleteAttempt, setFailedCompleteAttempt] = useState<FailedTodoActionAttempt | null>(null);
+  const [undoContext, setUndoContext] = useState<TodoActionTarget | null>(null);
+  const [reopenStatus, setReopenStatus] = useState<CreateStatus>("idle");
+  const [failedReopenAttempt, setFailedReopenAttempt] = useState<FailedTodoActionAttempt | null>(null);
+  const [undoFocusRequest, setUndoFocusRequest] = useState(0);
+  const [todoActionFocusRequest, setTodoActionFocusRequest] = useState(0);
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -363,6 +395,12 @@ export default function App() {
     setTodoEditStatus("idle");
     setTodoEditMessage(null);
     setFailedTodoEditAttempt(null);
+    setCompleteTarget(null);
+    setCompleteStatus("idle");
+    setFailedCompleteAttempt(null);
+    setUndoContext(null);
+    setReopenStatus("idle");
+    setFailedReopenAttempt(null);
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
@@ -467,6 +505,16 @@ export default function App() {
   }, [todoEditFocusRequest]);
 
   useEffect(() => {
+    if (undoFocusRequest > 0) undoButtonRef.current?.focus();
+  }, [undoFocusRequest]);
+
+  useEffect(() => {
+    if (todoActionFocusRequest > 0) {
+      document.querySelector<HTMLButtonElement>(".todo-complete-button:not(:disabled)")?.focus();
+    }
+  }, [todoActionFocusRequest]);
+
+  useEffect(() => {
     if (!todoEditTarget || todoEditCategoryReady || categoryStatus !== "ready") return;
     const selected = categories.find((category) => category.id === todoEditTarget.category_id);
     const fallbackInbox = categories.find((category) => category.is_inbox);
@@ -496,16 +544,19 @@ export default function App() {
   }
 
   function openTodos() {
+    dismissTodoNotice();
     setView("todos");
     if (activeToken && todoStatus === "idle") void loadTodos(activeToken);
   }
 
   function openCategories() {
+    dismissTodoNotice();
     setView("categories");
     if (activeToken && (categoryStatus === "idle" || categoryStatus === "error")) void loadCategories(activeToken);
   }
 
   function openQuickCreate(origin: QuickCreateOrigin, trigger: HTMLButtonElement) {
+    dismissTodoNotice();
     quickCreateTrigger.current = trigger;
     setQuickCreateOrigin(origin);
     setTodoTitle("");
@@ -532,6 +583,7 @@ export default function App() {
   }
 
   function openTodoEditor(todo: Todo, trigger: HTMLButtonElement) {
+    dismissTodoNotice();
     todoEditTrigger.current = trigger;
     setTodoEditTarget(todo);
     setTodoEditTitle(todo.title);
@@ -586,6 +638,124 @@ export default function App() {
     if (todayStatus !== "idle" && selectedDate) refreshes.push(loadToday(token, selectedDate));
     if (todoStatus !== "idle") refreshes.push(loadTodos(token));
     await Promise.all(refreshes);
+  }
+
+  function dismissTodoNotice() {
+    setTodoNotice(null);
+    setCompleteTarget(null);
+    setCompleteStatus("idle");
+    setFailedCompleteAttempt(null);
+    setUndoContext(null);
+    setReopenStatus("idle");
+    setFailedReopenAttempt(null);
+  }
+
+  async function submitTodoComplete(todo: TodoActionTarget) {
+    if (!activeToken || completeStatus === "submitting" || reopenStatus === "submitting" || todoCompleteInFlight.current) return;
+    const idempotencyKey = failedCompleteAttempt?.todoId === todo.id
+      ? failedCompleteAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setUndoContext(null);
+    setFailedReopenAttempt(null);
+    setCompleteTarget(todo);
+    setCompleteStatus("submitting");
+    setTodoNotice(null);
+    todoCompleteInFlight.current = true;
+    try {
+      const completed = await completeTodo(activeToken, todo.id, idempotencyKey);
+      const completedTodo = { id: completed.id, title: completed.title };
+      setCompleteTarget(null);
+      setCompleteStatus("idle");
+      setFailedCompleteAttempt(null);
+      setUndoContext(completedTodo);
+      setReopenStatus("idle");
+      setTodoNotice({ kind: "success", message: `Completed "${completed.title}".` });
+      await refreshLoadedTodoViews(activeToken);
+      setUndoFocusRequest((request) => request + 1);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && (error.status === 400 || error.status === 404 || error.status === 410)) {
+        setCompleteTarget(null);
+        setCompleteStatus("idle");
+        setFailedCompleteAttempt(null);
+        setTodoNotice({ kind: "error", message: "That todo can no longer be completed. Loaded lists have been refreshed." });
+        await refreshLoadedTodoViews(activeToken);
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedCompleteAttempt(null);
+        setCompleteStatus("error");
+        setTodoNotice({ kind: "error", message: "This completion conflicts with an earlier attempt. Retry with a new request." });
+        return;
+      }
+      setFailedCompleteAttempt({ todoId: todo.id, idempotencyKey });
+      setCompleteStatus("error");
+      setTodoNotice({ kind: "error", message: "Could not complete todo. Try again." });
+    } finally {
+      todoCompleteInFlight.current = false;
+    }
+  }
+
+  async function submitTodoReopen() {
+    if (!activeToken || !undoContext || reopenStatus === "submitting" || todoReopenInFlight.current) return;
+    const target = undoContext;
+    const idempotencyKey = failedReopenAttempt?.todoId === target.id
+      ? failedReopenAttempt.idempotencyKey
+      : crypto.randomUUID();
+
+    setReopenStatus("submitting");
+    todoReopenInFlight.current = true;
+    try {
+      const reopened = await reopenTodo(activeToken, target.id, idempotencyKey);
+      setUndoContext(null);
+      setReopenStatus("idle");
+      setFailedReopenAttempt(null);
+      setTodoNotice({ kind: "success", message: `Restored "${reopened.title}".` });
+      await refreshLoadedTodoViews(activeToken);
+      setTodoActionFocusRequest((request) => request + 1);
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && (error.status === 400 || error.status === 404 || error.status === 410)) {
+        setUndoContext(null);
+        setReopenStatus("idle");
+        setFailedReopenAttempt(null);
+        setTodoNotice({ kind: "error", message: "That todo can no longer be restored. Loaded lists have been refreshed." });
+        await refreshLoadedTodoViews(activeToken);
+        return;
+      }
+      if (error instanceof ApiError && error.status === 409) {
+        setFailedReopenAttempt(null);
+        setReopenStatus("error");
+        setTodoNotice({ kind: "error", message: "This Undo conflicts with an earlier attempt. Retry with a new request." });
+        return;
+      }
+      setFailedReopenAttempt({ todoId: target.id, idempotencyKey });
+      setReopenStatus("error");
+      setTodoNotice({ kind: "error", message: "Could not undo completion. Try again." });
+    } finally {
+      todoReopenInFlight.current = false;
+    }
+  }
+
+  function todoNoticeContent() {
+    if (!todoNotice) return null;
+    return (
+      <div className={`todo-notice todo-notice-${todoNotice.kind}`}>
+        <span role={todoNotice.kind === "success" ? "status" : "alert"}>{todoNotice.message}</span>
+        <div className="todo-notice-actions">
+          {undoContext ? <button ref={undoButtonRef} className="text-button" type="button" onClick={() => void submitTodoReopen()} disabled={reopenStatus === "submitting"}><RotateCcw aria-hidden="true" />{reopenStatus === "submitting" ? "Undoing..." : reopenStatus === "error" ? "Retry undo" : "Undo completion"}</button> : null}
+          {completeTarget && completeStatus === "error" ? <button className="text-button" type="button" onClick={() => void submitTodoComplete(completeTarget)}><RefreshCw aria-hidden="true" />Retry complete</button> : null}
+          <button className="icon-button" type="button" onClick={dismissTodoNotice} disabled={reopenStatus === "submitting"} title="Dismiss notice" aria-label="Dismiss notice"><X aria-hidden="true" /></button>
+        </div>
+      </div>
+    );
   }
 
   async function submitTodoEdit(event: FormEvent<HTMLFormElement>) {
@@ -1082,6 +1252,8 @@ export default function App() {
 
   if (identity) {
     const todoInteractionActive = quickCreateOrigin !== null || todoEditTarget !== null;
+    const todoActionSubmitting = completeStatus === "submitting" || reopenStatus === "submitting";
+    const todoRowActionsDisabled = todoInteractionActive || todoActionSubmitting;
     const currentStatus = view === "today"
       ? todayStatus
       : view === "todos"
@@ -1092,13 +1264,13 @@ export default function App() {
         <header className="app-header">
           <a className="wordmark" href="#main-content" aria-label="LifeOS home">LifeOS</a>
           <nav className="view-switch" aria-label="Workspace views">
-            <button aria-current={view === "today" ? "page" : undefined} onClick={() => setView("today")} disabled={todoInteractionActive}>Today</button>
-            <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={todoInteractionActive}>Todos</button>
-            <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive}>Categories</button>
+            <button aria-current={view === "today" ? "page" : undefined} onClick={() => { dismissTodoNotice(); setView("today"); }} disabled={todoInteractionActive || todoActionSubmitting}>Today</button>
+            <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={todoInteractionActive || todoActionSubmitting}>Todos</button>
+            <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive || todoActionSubmitting}>Categories</button>
           </nav>
           <div className="identity-control">
             <span className="identity-dot" aria-hidden="true" /><span>{identity.display_name}</span>
-            <button className="icon-button" onClick={() => returnToSetup()} title="Switch identity" aria-label="Switch identity"><LogOut aria-hidden="true" /></button>
+            <button className="icon-button" onClick={() => returnToSetup()} disabled={todoActionSubmitting} title="Switch identity" aria-label="Switch identity"><LogOut aria-hidden="true" /></button>
           </div>
         </header>
 
@@ -1112,16 +1284,16 @@ export default function App() {
                   <p className="date-label">{selectedDate ? calendarDateLabel(selectedDate) : ""}</p>
                 </div>
                 <div className="today-actions">
-                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("today", event.currentTarget)} disabled={todoInteractionActive}><Plus aria-hidden="true" />Add todo</button>
+                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("today", event.currentTarget)} disabled={todoInteractionActive || todoActionSubmitting}><Plus aria-hidden="true" />Add todo</button>
                   <div className="date-controls">
-                  <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, -1))} title="Previous date" aria-label="Previous date"><ChevronLeft aria-hidden="true" /></button>
-                  <label className="date-input"><span>Selected date</span><input type="date" value={selectedDate} onChange={(event) => selectTodayDate(event.target.value)} /></label>
-                  <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, 1))} title="Next date" aria-label="Next date"><ChevronRight aria-hidden="true" /></button>
-                  <button className="secondary-button compact" aria-label="Return to today" onClick={() => selectTodayDate(todayDate)} disabled={selectedDate === todayDate}>Today</button>
+                  <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, -1))} disabled={todoActionSubmitting} title="Previous date" aria-label="Previous date"><ChevronLeft aria-hidden="true" /></button>
+                  <label className="date-input"><span>Selected date</span><input type="date" value={selectedDate} onChange={(event) => selectTodayDate(event.target.value)} disabled={todoActionSubmitting} /></label>
+                  <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, 1))} disabled={todoActionSubmitting} title="Next date" aria-label="Next date"><ChevronRight aria-hidden="true" /></button>
+                  <button className="secondary-button compact" aria-label="Return to today" onClick={() => selectTodayDate(todayDate)} disabled={selectedDate === todayDate || todoActionSubmitting}>Today</button>
                   </div>
                 </div>
               </div>
-              {todoNotice ? <p className={`todo-notice todo-notice-${todoNotice.kind}`} role={todoNotice.kind === "success" ? "status" : "alert"}>{todoNotice.message}</p> : null}
+              {todoNoticeContent()}
               {quickCreateOrigin === "today" ? quickCreateForm() : null}
               {todoEditTarget ? todoEditForm() : null}
 
@@ -1129,18 +1301,18 @@ export default function App() {
               {todayStatus === "error" ? (
                 <div className="list-status error-state" role="alert"><div><strong>Could not load Today</strong><p>Your identity is still connected.</p></div><button className="secondary-button" onClick={() => activeToken && void loadToday(activeToken, selectedDate)}><RefreshCw aria-hidden="true" /> Retry</button></div>
               ) : null}
-              {todayStatus === "ready" && todayData ? <TodayContent data={todayData} timezone={identity.timezone} onEdit={openTodoEditor} actionsDisabled={todoInteractionActive} /> : null}
+              {todayStatus === "ready" && todayData ? <TodayContent data={todayData} timezone={identity.timezone} onEdit={openTodoEditor} onComplete={(todo) => void submitTodoComplete(todo)} actionsDisabled={todoRowActionsDisabled} completingTodoId={completeStatus === "submitting" ? completeTarget?.id ?? null : null} /> : null}
             </>
           ) : view === "todos" ? (
             <>
               <div className="section-heading">
                 <div><p className="eyebrow">Pending</p><h1>Todos</h1></div>
                 <div className="section-actions">
-                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("todos", event.currentTarget)} disabled={todoInteractionActive}><Plus aria-hidden="true" />Add todo</button>
+                  <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("todos", event.currentTarget)} disabled={todoInteractionActive || todoActionSubmitting}><Plus aria-hidden="true" />Add todo</button>
                   <button className="icon-button bordered" onClick={() => activeToken && void loadTodos(activeToken)} disabled={todoStatus === "loading"} title="Refresh todos" aria-label="Refresh todos"><RefreshCw className={todoStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
                 </div>
               </div>
-              {todoNotice ? <p className={`todo-notice todo-notice-${todoNotice.kind}`} role={todoNotice.kind === "success" ? "status" : "alert"}>{todoNotice.message}</p> : null}
+              {todoNoticeContent()}
               {quickCreateOrigin === "todos" ? quickCreateForm() : null}
               {todoEditTarget ? todoEditForm() : null}
               {todoStatus === "loading" ? <div className="list-status" role="status">Loading your todos...</div> : null}
@@ -1148,7 +1320,7 @@ export default function App() {
                 <div className="list-status error-state" role="alert"><div><strong>Could not load todos</strong><p>Your identity is still connected.</p></div><button className="secondary-button" onClick={() => activeToken && void loadTodos(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div>
               ) : null}
               {todoStatus === "ready" && todos.length === 0 ? <div className="empty-state"><Inbox aria-hidden="true" /><h2>Nothing pending</h2><p>Your open todos will appear here.</p></div> : null}
-              {todoStatus === "ready" && todos.length > 0 ? <ul className="todo-list" aria-label="Pending todos">{todos.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={identity.timezone} onEdit={openTodoEditor} actionsDisabled={todoInteractionActive} />)}</ul> : null}
+              {todoStatus === "ready" && todos.length > 0 ? <ul className="todo-list" aria-label="Pending todos">{todos.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={identity.timezone} onEdit={openTodoEditor} onComplete={(todo) => void submitTodoComplete(todo)} actionsDisabled={todoRowActionsDisabled} completePending={completeStatus === "submitting" && completeTarget?.id === todo.id} />)}</ul> : null}
             </>
           ) : (
             <>

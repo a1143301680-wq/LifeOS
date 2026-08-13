@@ -6,7 +6,7 @@ Last updated: 2026-08-13
 
 - Task ID: TASK-024
 - Task Name: PC Web Todo complete with immediate undo
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -147,6 +147,6 @@ Report modified files, complete/reopen API boundaries, body/header evidence, ind
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for TASK-024 from the approved publication and workflow-state files. Do not start Coding before Git Snapshot completion.
+Required next action: commit and push the Code Review approved TASK-024 file set.

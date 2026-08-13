@@ -271,6 +271,435 @@ test("switches between Today and the existing pending Todo list", async () => {
   expect(requests.filter((url) => url === "/api/v1/todos")).toHaveLength(1);
 });
 
+test("completes a Todo with a bodyless idempotent request and exposes transient Undo", async () => {
+  storedIdentity();
+  let todosGets = 0;
+  let todayGets = 0;
+  let completeRequest: { url: string; headers: Headers; body: BodyInit | null | undefined } | null = null;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) { todayGets += 1; return jsonResponse(todayResponseFor()); }
+    if (init?.method === "POST" && url.endsWith(`/todos/${todo.id}/complete`)) {
+      completeRequest = { url, headers: new Headers(init.headers), body: init.body };
+      return jsonResponse({ data: { ...todo, status: "completed", completed_at: meResponse.server_time }, sync: { cursor: 40 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") {
+      todosGets += 1;
+      return jsonResponse(todosGets === 1 ? populatedTodosResponse : todosResponse);
+    }
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+
+  expect(await screen.findByText('Completed "Prepare weekly review".')).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Undo completion" })).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Undo completion" })).toHaveFocus());
+  expect(todosGets).toBe(2);
+  expect(todayGets).toBe(2);
+  expect(completeRequest).not.toBeNull();
+  expect(completeRequest!.url).toBe(`/api/v1/todos/${todo.id}/complete`);
+  expect(completeRequest!.headers.get("Authorization")).toBe("Bearer stored-token");
+  expect(completeRequest!.headers.get("Idempotency-Key")).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  expect(completeRequest!.headers.get("Content-Type")).toBeNull();
+  expect(completeRequest!.body).toBeUndefined();
+});
+
+test("undoes the latest completion with a separate bodyless idempotency key", async () => {
+  storedIdentity();
+  const actionRequests: Array<{ url: string; headers: Headers; body: BodyInit | null | undefined }> = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && (url.endsWith("/complete") || url.endsWith("/reopen"))) {
+      actionRequests.push({ url, headers: new Headers(init.headers), body: init.body });
+      const reopened = url.endsWith("/reopen");
+      return jsonResponse({ data: { ...todo, status: reopened ? "pending" : "completed", completed_at: reopened ? null : meResponse.server_time }, sync: { cursor: reopened ? 42 : 41 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+
+  expect(await screen.findByText('Restored "Prepare weekly review".')).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Undo completion" })).not.toBeInTheDocument();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Complete Prepare weekly review" })).toHaveFocus());
+  expect(actionRequests).toHaveLength(2);
+  expect(actionRequests[1].url).toBe(`/api/v1/todos/${todo.id}/reopen`);
+  expect(actionRequests[1].headers.get("Authorization")).toBe("Bearer stored-token");
+  expect(actionRequests[1].headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(actionRequests[1].headers.get("Idempotency-Key")).not.toBe(actionRequests[0].headers.get("Idempotency-Key"));
+  expect(actionRequests[1].headers.get("Content-Type")).toBeNull();
+  expect(actionRequests[1].body).toBeUndefined();
+});
+
+test("reuses independent complete and Undo keys only for unchanged recoverable retries", async () => {
+  storedIdentity();
+  const completeKeys: string[] = [];
+  const reopenKeys: string[] = [];
+  let completeAttempts = 0;
+  let reopenAttempts = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      completeKeys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      completeAttempts += 1;
+      if (completeAttempts === 1) return jsonResponse({ error: { code: "internal_error" } }, 500);
+      return jsonResponse({ data: { ...todo, status: "completed", completed_at: meResponse.server_time }, sync: { cursor: 43 }, server_time: meResponse.server_time });
+    }
+    if (init?.method === "POST" && url.endsWith("/reopen")) {
+      reopenKeys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      reopenAttempts += 1;
+      if (reopenAttempts === 1) return jsonResponse({ error: { code: "internal_error" } }, 500);
+      return jsonResponse({ data: todo, sync: { cursor: 44 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  expect(await screen.findByText("Could not complete todo. Try again.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Retry complete" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+  expect(await screen.findByText("Could not undo completion. Try again.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Retry undo" }));
+
+  expect(await screen.findByText('Restored "Prepare weekly review".')).toBeInTheDocument();
+  expect(completeKeys).toHaveLength(2);
+  expect(completeKeys[1]).toBe(completeKeys[0]);
+  expect(reopenKeys).toHaveLength(2);
+  expect(reopenKeys[1]).toBe(reopenKeys[0]);
+  expect(reopenKeys[0]).not.toBe(completeKeys[0]);
+});
+
+test("prevents duplicate complete and Undo requests while each action is pending", async () => {
+  storedIdentity();
+  let completeCount = 0;
+  let reopenCount = 0;
+  let resolveComplete!: (response: Response) => void;
+  let resolveReopen!: (response: Response) => void;
+  const pendingComplete = new Promise<Response>((resolve) => { resolveComplete = resolve; });
+  const pendingReopen = new Promise<Response>((resolve) => { resolveReopen = resolve; });
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) { completeCount += 1; return pendingComplete; }
+    if (init?.method === "POST" && url.endsWith("/reopen")) { reopenCount += 1; return pendingReopen; }
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  const completeButton = await screen.findByRole("button", { name: "Complete Prepare weekly review" });
+  await userEvent.click(completeButton);
+  expect(screen.getByRole("button", { name: "Completing Prepare weekly review" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Add todo" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Switch identity" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Completing Prepare weekly review" }));
+  expect(completeCount).toBe(1);
+  resolveComplete(jsonResponse({ data: { ...todo, status: "completed", completed_at: meResponse.server_time }, sync: { cursor: 45 }, server_time: meResponse.server_time }));
+
+  const undoButton = await screen.findByRole("button", { name: "Undo completion" });
+  await userEvent.click(undoButton);
+  expect(screen.getByRole("button", { name: "Undoing..." })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Undoing..." }));
+  expect(reopenCount).toBe(1);
+  resolveReopen(jsonResponse({ data: todo, sync: { cursor: 46 }, server_time: meResponse.server_time }));
+  expect(await screen.findByText('Restored "Prepare weekly review".')).toBeInTheDocument();
+});
+
+test("abandons a failed complete key when completing a different Todo", async () => {
+  storedIdentity();
+  const secondTodo = todoWith("d46be12d-16d7-4fd1-8965-0f1fe7224597", "Different task");
+  const keys: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      keys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      return jsonResponse({ error: { code: "internal_error" } }, 500);
+    }
+    if (url === "/api/v1/todos") return jsonResponse({ ...todosResponse, items: [todo, secondTodo] });
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  expect(await screen.findByText("Could not complete todo. Try again.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Complete Different task" }));
+  await waitFor(() => expect(keys).toHaveLength(2));
+
+  expect(keys[1]).not.toBe(keys[0]);
+  expect(screen.getByRole("button", { name: "Retry complete" })).toBeInTheDocument();
+});
+
+test("keeps confirmed completion and Undo when the server-authoritative refresh fails", async () => {
+  storedIdentity();
+  let todosGets = 0;
+  let completeCount = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      completeCount += 1;
+      return jsonResponse({ data: { ...todo, status: "completed", completed_at: meResponse.server_time }, sync: { cursor: 47 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") {
+      todosGets += 1;
+      return todosGets === 1 ? jsonResponse(populatedTodosResponse) : jsonResponse({ error: { code: "internal_error" } }, 500);
+    }
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+
+  expect(await screen.findByText('Completed "Prepare weekly review".')).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Undo completion" })).toBeInTheDocument();
+  expect(screen.getByText("Could not load todos")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Retry complete" })).not.toBeInTheDocument();
+  expect(completeCount).toBe(1);
+});
+
+test("keeps confirmed Undo when its server-authoritative refresh fails", async () => {
+  storedIdentity();
+  let todosGets = 0;
+  let reopenCount = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) return jsonResponse({ data: { ...todo, status: "completed" }, sync: { cursor: 56 }, server_time: meResponse.server_time });
+    if (init?.method === "POST" && url.endsWith("/reopen")) {
+      reopenCount += 1;
+      return jsonResponse({ data: todo, sync: { cursor: 57 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") {
+      todosGets += 1;
+      return todosGets < 3 ? jsonResponse(populatedTodosResponse) : jsonResponse({ error: { code: "internal_error" } }, 500);
+    }
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+
+  expect(await screen.findByText('Restored "Prepare weekly review".')).toBeInTheDocument();
+  expect(screen.getByText("Could not load todos")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /retry undo/i })).not.toBeInTheDocument();
+  expect(reopenCount).toBe(1);
+});
+
+test.each([
+  [400, "invalid_state_transition"],
+  [404, "not_found"],
+  [410, "deleted_resource"],
+])("maps stale complete %i safely and refreshes loaded Todo data", async (status, code) => {
+  storedIdentity();
+  let todosGets = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) return jsonResponse({ error: { code } }, status);
+    if (url === "/api/v1/todos") { todosGets += 1; return jsonResponse(populatedTodosResponse); }
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+
+  expect(await screen.findByText("That todo can no longer be completed. Loaded lists have been refreshed.")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Retry complete" })).not.toBeInTheDocument();
+  expect(todosGets).toBe(2);
+});
+
+test("maps a stale Undo safely, clears its ownership, and refreshes loaded data", async () => {
+  storedIdentity();
+  let todosGets = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) return jsonResponse({ data: { ...todo, status: "completed" }, sync: { cursor: 48 }, server_time: meResponse.server_time });
+    if (init?.method === "POST" && url.endsWith("/reopen")) return jsonResponse({ error: { code: "deleted_resource" } }, 410);
+    if (url === "/api/v1/todos") { todosGets += 1; return jsonResponse(populatedTodosResponse); }
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+
+  expect(await screen.findByText("That todo can no longer be restored. Loaded lists have been refreshed.")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /undo/i })).not.toBeInTheDocument();
+  expect(todosGets).toBe(3);
+});
+
+test("replaces transient Undo ownership when another Todo is completed", async () => {
+  storedIdentity();
+  const secondTodo = todoWith("d36be12d-16d7-4fd1-8965-0f1fe7224596", "Second task");
+  const completedIds: string[] = [];
+  const reopenedIds: string[] = [];
+  const completeKeys: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      const id = url.split("/").at(-2)!;
+      completedIds.push(id);
+      completeKeys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      const source = id === todo.id ? todo : secondTodo;
+      return jsonResponse({ data: { ...source, status: "completed" }, sync: { cursor: 49 }, server_time: meResponse.server_time });
+    }
+    if (init?.method === "POST" && url.endsWith("/reopen")) {
+      const id = url.split("/").at(-2)!;
+      reopenedIds.push(id);
+      return jsonResponse({ data: secondTodo, sync: { cursor: 50 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") return jsonResponse({ ...todosResponse, items: [todo, secondTodo] });
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  await userEvent.click(screen.getByRole("button", { name: "Complete Second task" }));
+  expect(await screen.findByText('Completed "Second task".')).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Undo completion" }));
+
+  expect(completedIds).toEqual([todo.id, secondTodo.id]);
+  expect(completeKeys[1]).not.toBe(completeKeys[0]);
+  expect(reopenedIds).toEqual([secondTodo.id]);
+});
+
+test("dismisses or navigates away from transient Undo without a reopen request", async () => {
+  storedIdentity();
+  let reopenCount = 0;
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(populatedTodayResponse);
+    if (init?.method === "POST" && url.endsWith("/complete")) return jsonResponse({ data: { ...todo, status: "completed" }, sync: { cursor: 51 }, server_time: meResponse.server_time });
+    if (init?.method === "POST" && url.endsWith("/reopen")) { reopenCount += 1; return jsonResponse({ data: todo, sync: { cursor: 52 }, server_time: meResponse.server_time }); }
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Overdue first")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Dismiss notice" }));
+  expect(screen.queryByRole("button", { name: "Undo completion" })).not.toBeInTheDocument();
+  expect(reopenCount).toBe(0);
+
+  await userEvent.click(screen.getByRole("button", { name: "Complete Prepare weekly review" }));
+  await screen.findByRole("button", { name: "Undo completion" });
+  await userEvent.click(screen.getByRole("button", { name: "Today" }));
+  expect(screen.queryByRole("button", { name: "Undo completion" })).not.toBeInTheDocument();
+  expect(reopenCount).toBe(0);
+});
+
+test("uses new idempotency keys after complete and Undo conflicts", async () => {
+  storedIdentity();
+  const completeKeys: string[] = [];
+  const reopenKeys: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      completeKeys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      return completeKeys.length === 1
+        ? jsonResponse({ error: { code: "idempotency_key_conflict" } }, 409)
+        : jsonResponse({ data: { ...todo, status: "completed" }, sync: { cursor: 53 }, server_time: meResponse.server_time });
+    }
+    if (init?.method === "POST" && url.endsWith("/reopen")) {
+      reopenKeys.push(new Headers(init.headers).get("Idempotency-Key")!);
+      return reopenKeys.length === 1
+        ? jsonResponse({ error: { code: "idempotency_key_conflict" } }, 409)
+        : jsonResponse({ data: todo, sync: { cursor: 54 }, server_time: meResponse.server_time });
+    }
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  expect(await screen.findByText("This completion conflicts with an earlier attempt. Retry with a new request.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Retry complete" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+  expect(await screen.findByText("This Undo conflicts with an earlier attempt. Retry with a new request.")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Retry undo" }));
+
+  expect(await screen.findByText('Restored "Prepare weekly review".')).toBeInTheDocument();
+  expect(completeKeys[1]).not.toBe(completeKeys[0]);
+  expect(reopenKeys[1]).not.toBe(reopenKeys[0]);
+});
+
+test.each(["complete", "reopen"])("clears identity when Todo %s authorization expires", async (action) => {
+  storedIdentity();
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    const url = String(input);
+    if (url.endsWith("/me")) return jsonResponse(meResponse);
+    if (url.includes("/todos/today")) return jsonResponse(todayResponseFor());
+    if (init?.method === "POST" && url.endsWith("/complete")) {
+      return action === "complete"
+        ? jsonResponse({ error: { code: "unauthorized" } }, 401)
+        : jsonResponse({ data: { ...todo, status: "completed" }, sync: { cursor: 55 }, server_time: meResponse.server_time });
+    }
+    if (init?.method === "POST" && url.endsWith("/reopen")) return jsonResponse({ error: { code: "unauthorized" } }, 401);
+    if (url === "/api/v1/todos") return jsonResponse(populatedTodosResponse);
+    return jsonResponse(categoriesResponse);
+  });
+
+  render(<App />);
+  expect(await screen.findByText("Nothing scheduled")).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Todos" }));
+  await userEvent.click(await screen.findByRole("button", { name: "Complete Prepare weekly review" }));
+  if (action === "reopen") await userEvent.click(await screen.findByRole("button", { name: "Undo completion" }));
+
+  expect(await screen.findByText("Your identity expired. Enter the token again.")).toBeInTheDocument();
+  expect(screen.getByLabelText("Identity token")).toBeInTheDocument();
+  expect(localStorage.getItem("lifeos.identityToken")).toBeNull();
+});
+
 test("opens and cancels a populated Todo editor with restored row focus", async () => {
   storedIdentity();
   const patchRequests: string[] = [];
@@ -298,6 +727,7 @@ test("opens and cancels a populated Todo editor with restored row focus", async 
   expect(screen.getByLabelText("Category")).toHaveValue(categoriesResponse.items[0].id);
   expect(screen.getByLabelText("Priority")).toHaveValue("high");
   expect(screen.getByLabelText("Planned date")).toHaveValue("2026-07-23");
+  expect(screen.getByRole("button", { name: "Complete Prepare weekly review" })).toBeDisabled();
 
   await userEvent.click(screen.getByRole("button", { name: "Cancel todo edit" }));
   expect(screen.queryByRole("heading", { name: "Edit todo" })).not.toBeInTheDocument();

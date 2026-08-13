@@ -73,10 +73,40 @@ for (const viewport of [
     let deleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
     let todoCreateRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     let todoEditRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
+    let todoCompleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
+    let todoReopenRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
     await page.route("**/api/v1/todos**", async (route) => {
       const request = route.request();
+      if (request.method() === "POST" && request.url().endsWith("/complete")) {
+        todoCompleteRequest = {
+          body: request.postData(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        await route.fulfill({
+          json: {
+            data: { ...todos.items[0], status: "completed", completed_at: "2026-07-23T14:06:00+08:00" },
+            sync: { cursor: 17 },
+            server_time: "2026-07-23T14:06:00+08:00",
+          },
+        });
+        return;
+      }
+      if (request.method() === "POST" && request.url().endsWith("/reopen")) {
+        todoReopenRequest = {
+          body: request.postData(),
+          idempotencyKey: request.headers()["idempotency-key"],
+        };
+        await route.fulfill({
+          json: {
+            data: todos.items[0],
+            sync: { cursor: 18 },
+            server_time: "2026-07-23T14:07:00+08:00",
+          },
+        });
+        return;
+      }
       if (request.method() === "POST") {
         todoCreateRequest = {
           body: request.postDataJSON(),
@@ -234,6 +264,24 @@ for (const viewport of [
     expect(todoEditRequest!.idempotencyKey).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+    await page.getByRole("button", { name: "Complete Prepare weekly review without losing the important details" }).click();
+    await expect(page.getByText('Completed "Prepare weekly review without losing the important details".')).toBeVisible();
+    await expect(page.getByRole("button", { name: "Undo completion" })).toBeFocused();
+    expect(todoCompleteRequest).not.toBeNull();
+    expect(todoCompleteRequest!.body).toBeNull();
+    expect(todoCompleteRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+    await page.getByRole("button", { name: "Undo completion" }).click();
+    await expect(page.getByText('Restored "Prepare weekly review without losing the important details".')).toBeVisible();
+    expect(todoReopenRequest).not.toBeNull();
+    expect(todoReopenRequest!.body).toBeNull();
+    expect(todoReopenRequest!.idempotencyKey).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(todoReopenRequest!.idempotencyKey).not.toBe(todoCompleteRequest!.idempotencyKey);
     expect(await hasHorizontalOverflow(page)).toBe(false);
     await page.getByRole("button", { name: "Add todo" }).click();
     await expect(page.getByLabel("Planned date")).toHaveValue("");

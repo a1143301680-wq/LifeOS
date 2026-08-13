@@ -238,7 +238,7 @@ h1, h2, p { margin-top: 0; }
 .todo-row {
   min-height: 102px;
   display: grid;
-  grid-template-columns: 4px minmax(0, 1fr) 38px;
+  grid-template-columns: 4px minmax(0, 1fr) 84px;
   gap: 20px;
   padding: 23px 18px 23px 0;
   border-bottom: 1px solid var(--line);
@@ -251,6 +251,9 @@ h1, h2, p { margin-top: 0; }
 .priority-medium { background: var(--yellow); }
 .priority-low { background: var(--green); }
 .todo-content { min-width: 0; }
+.todo-row-actions { align-self: center; display: grid; grid-template-columns: repeat(2, 38px); gap: 8px; }
+.todo-complete-button { border: 1px solid transparent; color: var(--green); }
+.todo-complete-button:hover { border-color: var(--line); }
 .todo-edit-button { align-self: center; border: 1px solid transparent; }
 .todo-edit-button:hover { border-color: var(--line); }
 .todo-title-line { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -347,7 +350,10 @@ h1, h2, p { margin-top: 0; }
 .quick-create-actions { grid-column: 1 / -1; display: flex; gap: 9px; }
 .quick-create-actions .primary-button, .quick-create-actions .secondary-button { min-width: 128px; margin-top: 0; }
 .quick-create-form .create-message { grid-column: 1 / -1; margin-top: 0; }
-.todo-notice { min-height: 24px; margin: -12px 0 18px; font-size: 13px; line-height: 1.5; }
+.todo-notice { min-height: 38px; margin: -12px 0 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; line-height: 1.5; }
+.todo-notice-actions { display: flex; align-items: center; gap: 8px; }
+.todo-notice-actions .text-button { min-height: 38px; display: inline-flex; align-items: center; gap: 7px; }
+.todo-notice-actions .text-button svg { width: 16px; height: 16px; }
 .todo-notice-success { color: var(--green); }
 .todo-notice-error { color: #9a3529; }
 
@@ -572,7 +578,8 @@ h1, h2, p { margin-top: 0; }
   .today-summary > div { min-height: 80px; padding: 16px 12px; }
   .today-summary strong { font-size: 22px; }
   .today-section + .today-section { margin-top: 34px; }
-  .todo-row { grid-template-columns: 4px minmax(0, 1fr) 38px; gap: 12px; padding-right: 0; }
+  .todo-row { grid-template-columns: 4px minmax(0, 1fr) 84px; gap: 10px; padding-right: 0; }
+  .todo-notice { align-items: flex-start; flex-direction: column; gap: 8px; }
   .todo-title-line { align-items: flex-start; flex-direction: column; gap: 5px; }
   .todo-meta { gap: 8px 14px; }
   .error-state { align-items: flex-start; flex-direction: column; padding: 28px 0; }

@@ -110,6 +110,31 @@ export async function updateTodo(
   return response.data;
 }
 
+async function runTodoAction(
+  token: string,
+  todoId: string,
+  action: "complete" | "reopen",
+  idempotencyKey: string,
+) {
+  const response = await authenticatedRequest<WriteEnvelope<Todo>>(
+    `/todos/${encodeURIComponent(todoId)}/${action}`,
+    token,
+    {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
+    },
+  );
+  return response.data;
+}
+
+export function completeTodo(token: string, todoId: string, idempotencyKey: string) {
+  return runTodoAction(token, todoId, "complete", idempotencyKey);
+}
+
+export function reopenTodo(token: string, todoId: string, idempotencyKey: string) {
+  return runTodoAction(token, todoId, "reopen", idempotencyKey);
+}
+
 export async function getTodoCategories(token: string) {
   const response = await authenticatedRequest<ListEnvelope<TodoCategory>>("/todo-categories", token);
   return response.items;
