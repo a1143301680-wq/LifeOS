@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-08-13
+Last updated: 2026-08-29
 
 ## Gate Status
 
@@ -10,35 +10,51 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-08-13 08:34 +08:00
+Reviewed at: 2026-08-29 13:13 +08:00
 
-Reviewed task: TASK-024 PC Web Todo complete with immediate undo
+Reviewed task: TASK-025 PC Web sync recovery and authenticated SSE refresh
 
 ## Required Review
 
-- [x] Goal, scope, exclusions, dependencies, and allowed files form one closeable slice.
-- [x] Bodyless complete/reopen contracts and separate idempotency lifecycles are unambiguous.
-- [x] Transient Undo ownership, refresh-failure semantics, stale-state handling, and draft interaction are testable.
-- [x] Focus, accessibility, responsive behavior, error states, and safe live-write cleanup are explicit.
-- [x] Branch, HEAD, worktree, staged changes, whitespace, dependencies, and Git Snapshot readiness are persisted.
+- [x] Revised scope and dependencies form one closeable sync-consumption slice.
+- [x] Cursor/cache schema, pagination, atomic snapshot/tombstone application, identity isolation, and recovery are contract-aligned.
+- [x] Bearer SSE, coalescing, race catch-up, projection refresh, and failure semantics are testable.
+- [x] Identity ownership, cleanup, offline lifecycle, UI preservation, and accessibility are explicit.
+- [x] Branch, HEAD, worktree, staged changes, whitespace, dependencies, and Snapshot readiness are persisted.
 
 ## Issues
 
 No blocking issues.
 
+The prior direct-refetch contract conflict is resolved. Revised TASK-025 now follows `sync.available -> /sync/changes -> snapshot/tombstone cache apply -> cursor advance -> affected loaded projection refresh` without requiring a stable API-contract edit.
+
 ## Review Evidence
 
-- Reviewed task: TASK-024 PC Web Todo complete with immediate undo
-- Reviewed at: 2026-08-13 08:34 +08:00
+- Reviewed task: TASK-025 PC Web sync recovery and authenticated SSE refresh
+- Reviewed at: 2026-08-29 13:13 +08:00
 - Branch: `main`
-- HEAD: `804603264d41e9c2ead9fd57ead9336572eead1b`
+- HEAD: `64ef5ed4cd62e2cc2d26760d0b74b3bcf27c052b`
+- Tracking baseline: `origin/main` is also `64ef5ed4cd62e2cc2d26760d0b74b3bcf27c052b`.
 - Dependency evidence:
-  - Todo complete API commit `2c35f1d` is an ancestor of HEAD.
-  - Todo reopen API commit `c2d167f` is an ancestor of HEAD.
+  - Sync changes pull API commit `f6f9091` is an ancestor of HEAD.
+  - SSE wake-up API commit `b4a2c1e` is an ancestor of HEAD.
   - Todo list API commit `dd0d6fa` is an ancestor of HEAD.
   - Today API commit `2a698f3` is an ancestor of HEAD.
-  - TASK-023 terminal closure commit `8046032` is HEAD and `origin/main`.
-  - Existing PC Web identity, Today, Todos, quick-create, and core-edit surfaces are present under `web/`.
+  - Todo category API commit `83ac3eb` is an ancestor of HEAD.
+  - TASK-024 terminal closure commit `64ef5ed` is HEAD and `origin/main`.
+- Stable contract evidence:
+  - `docs/api-phase1a.md` defines global monotonically increasing cursors, current-user filtering, valid cursor gaps, cursor-ascending items, terminal high-water `next_cursor`, and `has_more` pagination.
+  - The same contract requires `sync.available` to drive `/sync/changes`, snapshot/tombstone cache application, and local cursor advancement; revised TASK-025 implements that model.
+  - Backend pull code captures a global high-water per request, returns an intermediate page's last item cursor while `has_more` is true, returns the high-water on the terminal or empty-user page, and rejects future cursors.
+  - Backend tests cover user isolation, global cursor gaps, empty-user pages, zero high-water, limit changes, pagination, future-cursor validation, and later rows beyond a captured high-water.
+  - Production writers currently emit `todo.created`, `todo.updated`, `todo.completed`, `todo.reopened`, `todo.deleted`, `category.created`, `category.updated`, and `category.deleted`; revised snapshot/tombstone rules cover all of them.
+  - Category changes may have nullable entity versions; TASK-025 uses each entry's last applied cursor as the replay/ordering guard and stores entity version only when present.
+  - Backend SSE code and tests confirm bearer auth, named `sync.available` events, `latest_cursor`, `server_time`, keepalive comments, per-user subscriptions, burst coalescing, and disconnect cleanup.
+- Frontend feasibility evidence:
+  - `web/src/storage.ts` already owns identity storage and provides a narrow place to add a separate identity-ID-scoped versioned sync-state key without using the token as identity.
+  - `web/src/api.ts` already centralizes bearer-authenticated requests and can add typed `/sync/changes` access without sending `user_id`.
+  - Existing `App.tsx` exposes distinct loaded/idle states and server-authoritative Today, Todos, and Categories loaders, so affected loaded-only projection refresh is locatable.
+  - Existing quick-create/edit drafts, notices, transient Undo, selected date, navigation, and focus state are explicit and can be protected by generation guards and background refresh behavior.
 - Worktree Summary:
   - ` M docs/phase1a-progress.md`
   - ` M handoff/code-review-gate.md`
@@ -47,7 +63,7 @@ No blocking issues.
   - ` M handoff/git-snapshot.md`
   - ` M handoff/project-state.md`
   - ` M handoff/task-review-gate.md`
-  - `?? tasks/TASK-024-pc-web-todo-complete-undo.md`
+  - `?? tasks/TASK-025-pc-web-authenticated-sse-refresh.md`
 - Changed Files:
   - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
@@ -56,34 +72,33 @@ No blocking issues.
   - `handoff/git-snapshot.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-024-pc-web-todo-complete-undo.md`
-- Staged Changes: None
+  - `tasks/TASK-025-pc-web-authenticated-sse-refresh.md`
+- Staged Changes: None.
+- Publication-scope check: all eight commitable changes are TASK-025 Decision publication, revision, or active workflow/gate reset/readiness files. No business implementation, backend change, stable contract edit, completed task archive edit, dependency change, generated output, or secret is included.
 - `git diff --check`: exit 0; only LF-to-CRLF working-copy warnings were reported.
 - `git diff --cached --check`: exit 0.
 - Independent new-file whitespace check:
-  - `tasks/TASK-024-pc-web-todo-complete-undo.md`: no trailing whitespace; final line is not blank.
-  - `git diff --no-index --check NUL tasks/TASK-024-pc-web-todo-complete-undo.md` emitted no whitespace diagnostics; exit 1 is the expected no-index difference status.
-- Issue-log search: no unresolved TASK-024 blocker found. Matches were historical workflow/status entries unrelated to the active complete/undo task.
-- Local service state:
-  - `postgresql-x64-18` is `Stopped`.
-  - `127.0.0.1:8000` is not listening.
-  - `127.0.0.1:5173` is not listening.
-  - Coding must start required services and use disposable data plus cleanup before claiming authenticated live complete/reopen success, or record the exact environment limitation.
-- Ignored artifacts observed: `web/dist/`, `web/node_modules/`, `web/test-results/`, backend `.pytest_cache/`, and `web/*.tsbuildinfo` are ignored and not part of the commitable changed-file set.
-- Secret/artifact check: task diff contains no raw identity token, `.env` secret, generated output, dependency directory, log, cache, or editor-local file. The only token reference is the documented `localStorage` key name.
-- Git Snapshot readiness: READY. The current eight commitable changes are TASK-024 publication and active workflow-state files only; no staged files, business implementation changes, backend changes, stable product/API/architecture/data-model changes, completed-list/status-filter, Todo delete/cancel, persistent reopen, unrelated edit behavior, SSE/sync/offline/PWA/Android work, secrets, dependency directories, build output, logs, or caches are included.
+  - `tasks/TASK-025-pc-web-authenticated-sse-refresh.md` has 72 lines after persisting this review, no trailing whitespace, and no blank final line.
+  - `git diff --no-index --check NUL tasks/TASK-025-pc-web-authenticated-sse-refresh.md` emitted no whitespace diagnostics; exit 1 is the expected no-index difference status.
+- Issue-log search: no unresolved TASK-025 blocker was found. The only `Status: open` match is the issue-entry template.
+- Local service state: `postgresql-x64-18` is stopped; ports `127.0.0.1:8000`, `127.0.0.1:5173`, and `127.0.0.1:4173` are not listening. Coding must either establish safe disposable live verification and cleanup or report this exact environment limitation; it does not block task start.
+- Ignored artifacts observed include backend caches, `web/dist/`, and `web/node_modules/`; they are ignored and absent from the commitable changed-file set.
+- Secret/artifact scan: no raw bearer token, bootstrap token, API key, password, private key, generated output, dependency directory, report, log, or cache is present in the eight publication files.
+- Git Snapshot readiness: READY. The exact eight-file publication/readiness set is understood, unstaged, aligned with TASK-025, and contains no business implementation or unrelated user changes.
 
 ## Task Review Notes
 
-- TASK-024 is a single closeable PC Web frontend slice: add visible pending-Todo complete controls, call complete/reopen action endpoints, expose one transient Undo notice for the latest completion, and refresh already-loaded Today/Todos datasets from the server.
-- Backend references confirm `POST /api/v1/todos/{id}/complete` and `POST /api/v1/todos/{id}/reopen` require bearer auth and UUID `Idempotency-Key`, reject any request body, return replay for the same key/request, return `409 idempotency_key_conflict` for the same key with a different request fingerprint, and reject new-key repeats after state transition as `400 invalid_state_transition`.
-- Complete/reopen lifecycles are separate enough to implement safely: complete owns its own key until success/failure resolution; Undo starts a new reopen attempt with its own key; refresh failure after a successful mutation must not retry the mutation.
-- Transient Undo ownership is explicit: only the latest successful completion represented by the current notice can be undone; replacing/dismissing the notice, identity changes, logout, successful Undo, or completing another Todo clears the old Undo context without issuing a request.
-- Existing edit and quick-create draft interaction is specified: complete/undo controls must not silently submit, overwrite, or merge open drafts; conflicting controls must be disabled or otherwise unambiguous.
-- Stale-state behavior is testable: `404 not_found`, `410 deleted_resource`, and `400 invalid_state_transition` map to safe feedback and loaded Todo data refresh without leaking cross-user existence.
-- Verification is executable with existing frontend scripts: `npm test -- --run`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high`.
-- Scope excludes backend, stable product/API/architecture/data-model docs, completed-list/status-filter, Todo delete/cancel, persistent reopen, bulk action, note/due-time, unrelated edit behavior, SSE/sync/offline/PWA/Android work, raw tokens, `.env` secrets, generated output, dependency directories, logs, caches, editor files, and completed TASK-005 through TASK-023 archives.
+- The task is one closeable vertical slice because durable sync recovery and authenticated SSE are inseparable under the stable client contract: initial pull establishes state, SSE wakes the same pull/apply engine, and projection refresh exposes applied changes.
+- Cursor/cache persistence is implementable as one versioned per-identity serialized value keyed by validated `identity.id`; validating and applying into a candidate copy before one storage write keeps cursor and cache atomic per accepted page.
+- Pagination rules are unambiguous: start from stored cursor, accept global gaps, validate strictly increasing returned item cursors and envelope fields, persist `next_cursor` only with the matching applied cache, and continue while `has_more` is true.
+- Snapshot/tombstone rules prevent stale resurrection: entries retain last applied cursor, snapshots replace only older entries, tombstones retain deletion metadata, and replay/older changes are ignored.
+- Missing, malformed, incomplete, or unsupported-version state resets only the current identity to cursor 0 and an empty cache; no token-derived key or cross-identity state sharing is allowed.
+- Pull/SSE concurrency is specified with one active pull and greatest-target trailing work. Initial catch-up followed by first-open catch-up closes the pull-to-subscribe race; reconnect uses the same compensation path.
+- Authenticated stream ownership, synchronous abort, obsolete-generation isolation, pull/stream 401, bounded reconnect, offline pause/online resume, and timer/listener cleanup have explicit acceptance coverage.
+- Applied change types map deterministically to loaded projections. Projection failures are all-settled and do not roll back committed sync state; untouched views stay idle.
+- Deterministic tests are feasible through narrow sync-engine/storage/SSE transport modules with controlled pages, events, timers, aborts, and generations, while component and Playwright checks cover UI preservation and responsive/accessibility behavior.
+- No remaining requirement conflicts with `docs/api-phase1a.md`; backend, stable docs, offline/PWA, Android, and unrelated CRUD remain excluded.
 
 ## Instructions
 
-On PASS, update both `handoff/current-task.md` and `tasks/TASK-024-pc-web-todo-complete-undo.md` to `Status: READY`. On REJECT, keep or set both to `Status: PLANNED`. Persist all evidence required by `docs/workflow.md`; do not start Coding.
+PASS authorizes the Git Snapshot window to establish the TASK-025 baseline from the exact eight-file publication/readiness set. Do not start Coding until Git Snapshot completes and synchronizes both task files to `IN_PROGRESS`.

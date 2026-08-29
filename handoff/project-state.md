@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-08-13
+Last updated: 2026-08-25
 
 ## Current Phase
 
@@ -78,7 +78,9 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-023 Decision Closure Check passed on 2026-08-11.
 - TASK-023 terminal Closure Commit `8046032` was published and the task workflow ended.
 - TASK-024 PC Web Todo complete with immediate Undo completed in result commit `28dfcc4`; Code Review: PASS; frontend tests/build/e2e/audit passed.
-- TASK-024 Decision Closure Check passed on 2026-08-13; only the terminal closure-document commit remains before the workflow ends.
+- TASK-024 Decision Closure Check passed on 2026-08-13.
+- TASK-024 terminal Closure Commit `64ef5ed` was published and the task workflow ended.
+- TASK-025 was rejected once for conflicting with the stable sync contract, then revised to include cursor/cache pull-and-apply before authenticated SSE projection refresh; re-review is next.
 
 ## Recently Completed
 
@@ -127,7 +129,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Publish the exact-scope TASK-024 terminal Closure Commit described in `handoff/current-task.md`; after remote parity is verified, return control to Decision to select the next PC Web slice.
+Re-run Task Review for revised TASK-025 PC Web sync recovery and authenticated SSE refresh. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

@@ -1,25 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-08-11
+Last updated: 2026-08-25
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-024
+Task ID: TASK-025
 
-Branch: main
+Branch: Pending
 
-Base Commit: `804603264d41e9c2ead9fd57ead9336572eead1b`
+Base Commit: Pending
 
-Working Tree: 8 approved TASK-024 pre-Coding publication and active workflow-state documents committed separately; no business code
+Working Tree: Pending
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: `680a951de0f670da0573b60268c52e039f1d61d6`
+Snapshot Commit: Pending
 
-Reason: approved TASK-024 readiness documents required a durable pre-Coding baseline
+Reason: Pending Task Review PASS
 
 ## Instructions
 
-Run only after Task Review PASS. Record a clean existing baseline or commit only approved TASK-024 publication/readiness files, then synchronize both active task files to `IN_PROGRESS` and route to Coding.
+Run after Task Review PASS. Record a clean baseline or commit only approved TASK-025 publication/readiness files, then synchronize both task files to `IN_PROGRESS` and route to Coding.

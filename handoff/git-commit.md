@@ -1,41 +1,27 @@
 # LifeOS Git Commit Result
 
-Last updated: 2026-08-13
+Last updated: 2026-08-25
 
 ## Commit Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-024
+Task ID: TASK-025
 
-Branch: main
+Branch: Pending
 
-Commit Hash: `28dfcc4a338970d0241702f3d088c674b3530a70`
+Commit Hash: Pending
 
-Commit Message: `feat(web): add todo complete undo`
+Commit Message: Pending Code Review PASS
 
-Files Changed:
+Files Changed: Pending
 
-- `handoff/current-task.md`
-- `handoff/git-snapshot.md`
-- `tasks/TASK-024-pc-web-todo-complete-undo.md`
-- `web/e2e/identity-todos.spec.ts`
-- `web/src/App.test.tsx`
-- `web/src/App.tsx`
-- `web/src/api.ts`
-- `web/src/styles.css`
+Tests: Pending
 
-Tests:
+Code Review Result: PENDING
 
-- `npm test -- --run`: PASS, 2 files, 83 tests
-- `npm run build`: PASS
-- `npm run test:e2e`: PASS, 2 Playwright tests
-- `npm audit --audit-level=high`: PASS, 0 vulnerabilities
-
-Code Review Result: PASS
-
-Push Target: `origin/main`
+Push Target: Pending
 
 ## Instructions
 
-Run the result commit only after Code Review PASS and stage only the exact reviewed scope. Terminal Closure Commit is a separate mode requiring Decision Closure Check PASS and an explicit approved documentation scope.
+Run result commit only after Code Review PASS and stage exact reviewed scope. Terminal Closure Commit separately requires Decision Closure Check PASS and explicit approved docs.
