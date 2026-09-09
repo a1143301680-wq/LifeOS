@@ -1,6 +1,15 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+vi.mock("./sync-session", () => ({
+  SyncSession: class {
+    start() {}
+    stop() {}
+    retry() {}
+    wake() {}
+  },
+}));
+
 import App from "./App";
 
 const meResponse = {

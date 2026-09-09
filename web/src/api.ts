@@ -5,12 +5,17 @@ import type {
   TodoCreatePayload,
   TodoUpdatePayload,
   TodoCategory,
+  SyncChangesEnvelope,
   TodayData,
   UserIdentity,
   WriteEnvelope,
 } from "./types";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/$/, "");
+
+export function apiUrl(path: string) {
+  return `${API_BASE}${path}`;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -25,7 +30,7 @@ export class ApiError extends Error {
 async function authenticatedRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetch(apiUrl(path), {
       ...init,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -33,7 +38,8 @@ async function authenticatedRequest<T>(path: string, token: string, init?: Reque
         ...init?.headers,
       },
     });
-  } catch {
+  } catch (error) {
+    if (init?.signal?.aborted) throw init.signal.reason;
     throw new ApiError(0);
   }
 
@@ -73,6 +79,16 @@ export async function getTodayTodos(token: string, date: string) {
   return response.data;
 }
 
+export function getSyncChanges(
+  token: string,
+  cursor: number,
+  limit: number,
+  signal?: AbortSignal,
+) {
+  const query = new URLSearchParams({ cursor: String(cursor), limit: String(limit) });
+  return authenticatedRequest<SyncChangesEnvelope>(`/sync/changes?${query}`, token, { signal });
+}
+
 export async function createTodo(
   token: string,
   idempotencyKey: string,
@@ -86,7 +102,7 @@ export async function createTodo(
     },
     body: JSON.stringify(payload),
   });
-  return response.data;
+  return response;
 }
 
 export async function updateTodo(
@@ -107,7 +123,7 @@ export async function updateTodo(
       body: JSON.stringify(payload),
     },
   );
-  return response.data;
+  return response;
 }
 
 async function runTodoAction(
@@ -124,7 +140,7 @@ async function runTodoAction(
       headers: { "Idempotency-Key": idempotencyKey },
     },
   );
-  return response.data;
+  return response;
 }
 
 export function completeTodo(token: string, todoId: string, idempotencyKey: string) {
@@ -157,7 +173,7 @@ export async function createTodoCategory(
       body: JSON.stringify(payload),
     },
   );
-  return response.data;
+  return response;
 }
 
 export async function updateTodoCategory(
@@ -178,7 +194,7 @@ export async function updateTodoCategory(
       body: JSON.stringify(payload),
     },
   );
-  return response.data;
+  return response;
 }
 
 export async function deleteTodoCategory(
@@ -198,5 +214,5 @@ export async function deleteTodoCategory(
       },
     },
   );
-  return response.data;
+  return response;
 }

@@ -75,6 +75,8 @@ for (const viewport of [
     let todoEditRequest: { body: unknown; idempotencyKey: string | undefined } | null = null;
     let todoCompleteRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
     let todoReopenRequest: { body: string | null; idempotencyKey: string | undefined } | null = null;
+    const syncRequests: Array<{ url: string; authorization: string | undefined }> = [];
+    const streamRequests: Array<{ url: string; authorization: string | undefined }> = [];
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
     await page.route("**/api/v1/todos**", async (route) => {
@@ -213,6 +215,27 @@ for (const viewport of [
         },
       });
     });
+    await page.route("**/api/v1/sync/changes**", async (route) => {
+      const request = route.request();
+      syncRequests.push({ url: request.url(), authorization: request.headers().authorization });
+      await route.fulfill({
+        json: {
+          items: [],
+          next_cursor: 20,
+          has_more: false,
+          server_time: "2026-07-23T14:00:00+08:00",
+        },
+      });
+    });
+    await page.route("**/api/v1/sync/events", async (route) => {
+      const request = route.request();
+      streamRequests.push({ url: request.url(), authorization: request.headers().authorization });
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        body: ": keepalive\n\n",
+      });
+    });
 
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Connect your identity" })).toBeVisible();
@@ -230,6 +253,14 @@ for (const viewport of [
     await expect(page.getByRole("heading", { name: "Overdue", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Recent Inbox", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Switch identity" })).toBeVisible();
+    await expect.poll(() => syncRequests.length).toBeGreaterThanOrEqual(2);
+    await expect.poll(() => streamRequests.length).toBeGreaterThanOrEqual(1);
+    await expect(page.locator(".sync-indicator")).toContainText(/Live|Reconnecting/);
+    expect(syncRequests[0].authorization).toBe("Bearer browser-test-token");
+    expect(streamRequests[0].authorization).toBe("Bearer browser-test-token");
+    expect(syncRequests[0].url).not.toContain("browser-test-token");
+    expect(streamRequests[0].url).not.toContain("browser-test-token");
+    expect(syncRequests[0].url).not.toContain("user_id");
 
     const selectedTodayDate = await page.getByLabel("Selected date").inputValue();
     const todayAddButton = page.getByRole("button", { name: "Add todo" });

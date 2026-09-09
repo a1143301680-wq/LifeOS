@@ -63,6 +63,37 @@ export type WriteEnvelope<T> = DataEnvelope<T> & {
   };
 };
 
+type SyncChangeBase = {
+  cursor: number;
+  entity_type: "todo" | "todo_category";
+  entity_id: string;
+  entity_version: number | null;
+};
+
+export type SyncSnapshotChange = SyncChangeBase & {
+  change_type:
+    | "todo.created"
+    | "todo.updated"
+    | "todo.completed"
+    | "todo.reopened"
+    | "category.created"
+    | "category.updated";
+  snapshot: Record<string, unknown>;
+};
+
+export type SyncTombstoneChange = SyncChangeBase & {
+  change_type: "todo.deleted" | "category.deleted";
+  deleted: true;
+  deleted_at: string;
+};
+
+export type SyncChangesEnvelope = {
+  items: Array<SyncSnapshotChange | SyncTombstoneChange>;
+  next_cursor: number;
+  has_more: boolean;
+  server_time: string;
+};
+
 export type ListEnvelope<T> = {
   items: T[];
   next_cursor: string | null;

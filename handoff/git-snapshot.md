@@ -4,21 +4,21 @@ Last updated: 2026-08-25
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-025
 
-Branch: Pending
+Branch: main
 
-Base Commit: Pending
+Base Commit: `64ef5ed4cd62e2cc2d26760d0b74b3bcf27c052b`
 
-Working Tree: Pending
+Working Tree: 8 approved TASK-025 pre-Coding publication and active workflow-state documents committed separately; no business code
 
-Snapshot Commit Created: Pending
+Snapshot Commit Created: Yes
 
-Snapshot Commit: Pending
+Snapshot Commit: `8b755f6217907adb9ceae5e53f1ca3a625c8cd34`
 
-Reason: Pending Task Review PASS
+Reason: approved TASK-025 readiness documents required a durable pre-Coding baseline
 
 ## Instructions
 

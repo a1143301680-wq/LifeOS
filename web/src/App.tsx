@@ -27,6 +27,7 @@ import {
   deleteTodoCategory,
   getCurrentUser,
   getPendingTodos,
+  getSyncChanges,
   getTodayTodos,
   getTodoCategories,
   reopenTodo,
@@ -35,6 +36,9 @@ import {
 } from "./api";
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
+import { SyncSession, type SyncSessionStatus } from "./sync-session";
+import { loadSyncState, persistSyncState } from "./sync-state";
+import type { SyncEffects } from "./sync-engine";
 import type { Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
@@ -77,6 +81,14 @@ const todaySections: Array<{ key: TodaySectionName; label: string; description: 
   { key: "planned", label: "Planned", description: "Planned for this date" },
   { key: "inbox_recent", label: "Recent Inbox", description: "Unscheduled Inbox items" },
 ];
+
+const syncStatusLabels: Record<SyncSessionStatus, string> = {
+  initial: "Syncing",
+  live: "Live",
+  reconnecting: "Reconnecting",
+  offline: "Offline",
+  error: "Sync error",
+};
 
 function plannedDateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number);
@@ -289,6 +301,14 @@ export default function App() {
   const undoButtonRef = useRef<HTMLButtonElement | null>(null);
   const todoEditTrigger = useRef<HTMLButtonElement | null>(null);
   const restoreTodoEditFocus = useRef(false);
+  const syncSessionRef = useRef<SyncSession | null>(null);
+  const syncGenerationRef = useRef(0);
+  const projectionStateRef = useRef({
+    selectedDate: "",
+    todayStatus: "idle" as LoadStatus,
+    todoStatus: "idle" as LoadStatus,
+    categoryStatus: "idle" as LoadStatus,
+  });
   const [initialToken] = useState(readIdentityToken);
   const [activeToken, setActiveToken] = useState<string | null>(initialToken);
   const [identity, setIdentity] = useState<UserIdentity | null>(null);
@@ -347,6 +367,9 @@ export default function App() {
   const [todoActionFocusRequest, setTodoActionFocusRequest] = useState(0);
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncSessionStatus | null>(null);
+
+  projectionStateRef.current = { selectedDate, todayStatus, todoStatus, categoryStatus };
 
   const returnToSetup = useCallback((nextMessage: string | null = null) => {
     clearIdentity();
@@ -401,17 +424,21 @@ export default function App() {
     setUndoContext(null);
     setReopenStatus("idle");
     setFailedReopenAttempt(null);
+    setSyncStatus(null);
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
   }, []);
 
-  const loadToday = useCallback(async (token: string, date: string) => {
+  const loadToday = useCallback(async (token: string, date: string, shouldApply: () => boolean = () => true) => {
     setTodayStatus("loading");
     try {
-      setTodayData(await getTodayTodos(token, date));
+      const loadedToday = await getTodayTodos(token, date);
+      if (!shouldApply()) return;
+      setTodayData(loadedToday);
       setTodayStatus("ready");
     } catch (error) {
+      if (!shouldApply()) return;
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
         return;
@@ -420,12 +447,15 @@ export default function App() {
     }
   }, [returnToSetup]);
 
-  const loadTodos = useCallback(async (token: string) => {
+  const loadTodos = useCallback(async (token: string, shouldApply: () => boolean = () => true) => {
     setTodoStatus("loading");
     try {
-      setTodos(await getPendingTodos(token));
+      const loadedTodos = await getPendingTodos(token);
+      if (!shouldApply()) return;
+      setTodos(loadedTodos);
       setTodoStatus("ready");
     } catch (error) {
+      if (!shouldApply()) return;
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
         return;
@@ -434,14 +464,16 @@ export default function App() {
     }
   }, [returnToSetup]);
 
-  const loadCategories = useCallback(async (token: string) => {
+  const loadCategories = useCallback(async (token: string, shouldApply: () => boolean = () => true) => {
     setCategoryStatus("loading");
     try {
       const loadedCategories = await getTodoCategories(token);
+      if (!shouldApply()) return null;
       setCategories(loadedCategories);
       setCategoryStatus("ready");
       return loadedCategories;
     } catch (error) {
+      if (!shouldApply()) return null;
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
         return null;
@@ -450,6 +482,25 @@ export default function App() {
       return null;
     }
   }, [returnToSetup]);
+
+  const refreshSyncProjections = useCallback(async (
+    token: string,
+    effects: SyncEffects,
+    shouldApply: () => boolean,
+  ) => {
+    const loaded = projectionStateRef.current;
+    const refreshes: Promise<unknown>[] = [];
+    if ((effects.todo || effects.todo_category) && loaded.todayStatus !== "idle" && loaded.selectedDate) {
+      refreshes.push(loadToday(token, loaded.selectedDate, shouldApply));
+    }
+    if ((effects.todo || effects.todo_category) && loaded.todoStatus !== "idle") {
+      refreshes.push(loadTodos(token, shouldApply));
+    }
+    if (effects.todo_category && loaded.categoryStatus !== "idle") {
+      refreshes.push(loadCategories(token, shouldApply));
+    }
+    await Promise.allSettled(refreshes);
+  }, [loadCategories, loadToday, loadTodos]);
 
   const validateIdentity = useCallback(async (token: string, fromStoredToken: boolean) => {
     setIdentityStatus("checking");
@@ -483,6 +534,34 @@ export default function App() {
   useEffect(() => {
     if (initialToken) void validateIdentity(initialToken, true);
   }, [initialToken, validateIdentity]);
+
+  useEffect(() => {
+    if (!activeToken || !identity || identityStatus !== "ready") return;
+    const generation = syncGenerationRef.current + 1;
+    syncGenerationRef.current = generation;
+    const isCurrent = () => syncGenerationRef.current === generation;
+    const session = new SyncSession({
+      token: activeToken,
+      initialState: loadSyncState(identity.id),
+      pullPage: (cursor, signal) => getSyncChanges(activeToken, cursor, 500, signal),
+      persist: persistSyncState,
+      refresh: (effects) => refreshSyncProjections(activeToken, effects, isCurrent),
+      onStatus: (status) => {
+        if (isCurrent()) setSyncStatus(status);
+      },
+      onUnauthorized: () => {
+        if (isCurrent()) returnToSetup("Your identity expired. Enter the token again.");
+      },
+    });
+    syncSessionRef.current = session;
+    session.start();
+
+    return () => {
+      if (isCurrent()) syncGenerationRef.current += 1;
+      session.stop();
+      if (syncSessionRef.current === session) syncSessionRef.current = null;
+    };
+  }, [activeToken, identity, identityStatus, refreshSyncProjections, returnToSetup]);
 
   useEffect(() => {
     if (quickCreateOrigin === null && restoreQuickCreateFocus.current) {
@@ -663,7 +742,8 @@ export default function App() {
     setTodoNotice(null);
     todoCompleteInFlight.current = true;
     try {
-      const completed = await completeTodo(activeToken, todo.id, idempotencyKey);
+      const completedResponse = await completeTodo(activeToken, todo.id, idempotencyKey);
+      const completed = completedResponse.data;
       const completedTodo = { id: completed.id, title: completed.title };
       setCompleteTarget(null);
       setCompleteStatus("idle");
@@ -672,6 +752,7 @@ export default function App() {
       setReopenStatus("idle");
       setTodoNotice({ kind: "success", message: `Completed "${completed.title}".` });
       await refreshLoadedTodoViews(activeToken);
+      syncSessionRef.current?.wake(completedResponse.sync.cursor, false, false);
       setUndoFocusRequest((request) => request + 1);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -710,12 +791,14 @@ export default function App() {
     setReopenStatus("submitting");
     todoReopenInFlight.current = true;
     try {
-      const reopened = await reopenTodo(activeToken, target.id, idempotencyKey);
+      const reopenedResponse = await reopenTodo(activeToken, target.id, idempotencyKey);
+      const reopened = reopenedResponse.data;
       setUndoContext(null);
       setReopenStatus("idle");
       setFailedReopenAttempt(null);
       setTodoNotice({ kind: "success", message: `Restored "${reopened.title}".` });
       await refreshLoadedTodoViews(activeToken);
+      syncSessionRef.current?.wake(reopenedResponse.sync.cursor, false, false);
       setTodoActionFocusRequest((request) => request + 1);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -792,10 +875,11 @@ export default function App() {
     setTodoEditMessage(null);
     todoEditInFlight.current = true;
     try {
-      await updateTodo(activeToken, targetId, idempotencyKey, payload);
+      const updatedResponse = await updateTodo(activeToken, targetId, idempotencyKey, payload);
       resetTodoEditor(false);
       setTodoNotice({ kind: "success", message: "Todo updated." });
       await refreshLoadedTodoViews(activeToken);
+      syncSessionRef.current?.wake(updatedResponse.sync.cursor, false, false);
       setTodoEditFocusRequest((request) => request + 1);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -930,7 +1014,7 @@ export default function App() {
     setTodoCreateMessage(null);
     todoCreateInFlight.current = true;
     try {
-      await createTodo(activeToken, idempotencyKey, payload);
+      const createdResponse = await createTodo(activeToken, idempotencyKey, payload);
       restoreQuickCreateFocus.current = true;
       setQuickCreateOrigin(null);
       setTodoTitle("");
@@ -945,6 +1029,7 @@ export default function App() {
       if (todayStatus !== "idle" && selectedDate) refreshes.push(loadToday(activeToken, selectedDate));
       if (todoStatus !== "idle") refreshes.push(loadTodos(activeToken));
       await Promise.all(refreshes);
+      syncSessionRef.current?.wake(createdResponse.sync.cursor, false, false);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
@@ -1091,10 +1176,11 @@ export default function App() {
     setEditMessage(null);
     editInFlight.current = true;
     try {
-      await updateTodoCategory(activeToken, editTarget.id, idempotencyKey, payload);
+      const updatedResponse = await updateTodoCategory(activeToken, editTarget.id, idempotencyKey, payload);
       cancelCategoryEditor();
       setCategoryNotice({ kind: "success", message: "Category updated." });
       await loadCategories(activeToken);
+      syncSessionRef.current?.wake(updatedResponse.sync.cursor);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
@@ -1140,10 +1226,11 @@ export default function App() {
     setDeleteMessage(null);
     deleteInFlight.current = true;
     try {
-      await deleteTodoCategory(activeToken, categoryId, idempotencyKey);
+      const deletedResponse = await deleteTodoCategory(activeToken, categoryId, idempotencyKey);
       cancelCategoryDelete();
       setCategoryNotice({ kind: "success", message: "Category deleted." });
       await loadCategories(activeToken);
+      syncSessionRef.current?.wake(deletedResponse.sync.cursor);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
@@ -1202,13 +1289,14 @@ export default function App() {
     setCreateStatus("submitting");
     setCreateMessage(null);
     try {
-      await createTodoCategory(activeToken, idempotencyKey, payload);
+      const createdResponse = await createTodoCategory(activeToken, idempotencyKey, payload);
       setCategoryName("");
       setSelectedCategoryColor("");
       setFailedCreateAttempt(null);
       setCreateStatus("success");
       setCreateMessage("Category created.");
       await loadCategories(activeToken);
+      syncSessionRef.current?.wake(createdResponse.sync.cursor);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
@@ -1269,7 +1357,18 @@ export default function App() {
             <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive || todoActionSubmitting}>Categories</button>
           </nav>
           <div className="identity-control">
-            <span className="identity-dot" aria-hidden="true" /><span>{identity.display_name}</span>
+            {syncStatus ? (
+              <div className={`sync-indicator sync-indicator-${syncStatus}`} role="status" aria-live="polite" aria-atomic="true">
+                <span className="sync-dot" aria-hidden="true" />
+                <span>{syncStatusLabels[syncStatus]}</span>
+                {syncStatus === "error" ? (
+                  <button className="icon-button sync-retry" type="button" onClick={() => syncSessionRef.current?.retry()} title="Retry sync" aria-label="Retry sync">
+                    <RefreshCw aria-hidden="true" />
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            <span className="identity-dot" aria-hidden="true" /><span className="identity-name">{identity.display_name}</span>
             <button className="icon-button" onClick={() => returnToSetup()} disabled={todoActionSubmitting} title="Switch identity" aria-label="Switch identity"><LogOut aria-hidden="true" /></button>
           </div>
         </header>
