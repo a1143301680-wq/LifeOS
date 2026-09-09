@@ -164,6 +164,25 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: Add a page-level validation rule rejecting any item cursor `<= currentCursor`, plus regression coverage proving no persistence/advance/mutation. Preserve valid global gaps and empty high-water pages.
 - Verification: Verified by Code Review on 2026-09-09. `validatePage()` rejects every returned item with `cursor <= currentCursor` before candidate state construction. Engine and coordinator regressions confirm no mutation, persistence, projection refresh, or cursor advancement. Focused tests passed 10/10; the full Web suite passed 107/107; build and 2 Playwright tests passed.
 
+### ISSUE-20260909-002: Coding rework admission has no transition owner
+
+- Status: open
+- Severity: P1
+- Found by: Decision window
+- Found at: 2026-09-09 10:12 +08:00
+- Related task: TASK-026 Workflow Code Review rework admission ownership
+- Files:
+  - `D:\LifeOS\docs\workflow.md:104`
+  - `D:\LifeOS\docs\workflow.md:324`
+  - `D:\LifeOS\handoff\coding-window-prompt.md:34`
+  - `D:\LifeOS\handoff\coding-window-prompt.md:66`
+- Description: The workflow assigns `CHANGES_REQUESTED -> IN_PROGRESS` to Coding, but the Coding gate forbids modifying task files unless both records are already `IN_PROGRESS`. No role can legally perform the transition.
+- Expected: Coding has an explicit, narrowly gated rework-admission path from synchronized `CHANGES_REQUESTED`, validates the matching review/baseline evidence, synchronizes both records to `IN_PROGRESS`, and then fixes only blocking findings.
+- Actual: Coding must wait for an unspecified role to pre-move both records, creating a closed-loop deadlock.
+- Fix owner/window: TASK-026 Coding window after Task Review PASS and Git Snapshot.
+- Fix notes: Preserve the initial Coding gate; add a distinct rework gate, dual-file transition ownership, mismatch/partial-failure handling, retained review evidence, and no second Snapshot.
+- Verification: Pending TASK-026 Code Review.
+
 ## Entry Template
 
 ```text

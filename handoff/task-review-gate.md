@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-08-29
+Last updated: 2026-09-09
 
 ## Gate Status
 
@@ -10,95 +10,96 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-08-29 13:13 +08:00
+Reviewed at: 2026-09-09 10:21 +08:00
 
-Reviewed task: TASK-025 PC Web sync recovery and authenticated SSE refresh
+Reviewed task: TASK-026 Workflow Code Review rework admission ownership
 
 ## Required Review
 
-- [x] Revised scope and dependencies form one closeable sync-consumption slice.
-- [x] Cursor/cache schema, pagination, atomic snapshot/tombstone application, identity isolation, and recovery are contract-aligned.
-- [x] Bearer SSE, coalescing, race catch-up, projection refresh, and failure semantics are testable.
-- [x] Identity ownership, cleanup, offline lifecycle, UI preservation, and accessibility are explicit.
-- [x] Branch, HEAD, worktree, staged changes, whitespace, dependencies, and Snapshot readiness are persisted.
+- [x] The deadlock and transition owner are explicit.
+- [x] Initial and rework Coding admission paths cannot be confused.
+- [x] Matching task, status, review, issue, Snapshot, branch, and HEAD evidence is verifiable.
+- [x] Dual-file synchronization and partial-failure behavior are safe.
+- [x] Review evidence is preserved and no second Snapshot is introduced.
+- [x] Scope is documentation-only, closeable, and independently testable.
+- [x] Branch, HEAD, worktree, staged changes, whitespace, and Snapshot readiness are persisted.
 
 ## Issues
 
 No blocking issues.
 
-The prior direct-refetch contract conflict is resolved. Revised TASK-025 now follows `sync.available -> /sync/changes -> snapshot/tombstone cache apply -> cursor advance -> affected loaded projection refresh` without requiring a stable API-contract edit.
+`ISSUE-20260909-002` accurately records the current deadlock and remains open for TASK-026 Coding and independent Code Review verification.
 
 ## Review Evidence
 
-- Reviewed task: TASK-025 PC Web sync recovery and authenticated SSE refresh
-- Reviewed at: 2026-08-29 13:13 +08:00
+- Reviewed task: TASK-026 Workflow Code Review rework admission ownership
+- Reviewed at: 2026-09-09 10:21 +08:00
 - Branch: `main`
-- HEAD: `64ef5ed4cd62e2cc2d26760d0b74b3bcf27c052b`
-- Tracking baseline: `origin/main` is also `64ef5ed4cd62e2cc2d26760d0b74b3bcf27c052b`.
+- HEAD: `b2d019793924c071c004bf50a8fe0026f0f48949`
+- Tracking baseline: `origin/main` is also `b2d019793924c071c004bf50a8fe0026f0f48949`.
 - Dependency evidence:
-  - Sync changes pull API commit `f6f9091` is an ancestor of HEAD.
-  - SSE wake-up API commit `b4a2c1e` is an ancestor of HEAD.
-  - Todo list API commit `dd0d6fa` is an ancestor of HEAD.
-  - Today API commit `2a698f3` is an ancestor of HEAD.
-  - Todo category API commit `83ac3eb` is an ancestor of HEAD.
-  - TASK-024 terminal closure commit `64ef5ed` is HEAD and `origin/main`.
-- Stable contract evidence:
-  - `docs/api-phase1a.md` defines global monotonically increasing cursors, current-user filtering, valid cursor gaps, cursor-ascending items, terminal high-water `next_cursor`, and `has_more` pagination.
-  - The same contract requires `sync.available` to drive `/sync/changes`, snapshot/tombstone cache application, and local cursor advancement; revised TASK-025 implements that model.
-  - Backend pull code captures a global high-water per request, returns an intermediate page's last item cursor while `has_more` is true, returns the high-water on the terminal or empty-user page, and rejects future cursors.
-  - Backend tests cover user isolation, global cursor gaps, empty-user pages, zero high-water, limit changes, pagination, future-cursor validation, and later rows beyond a captured high-water.
-  - Production writers currently emit `todo.created`, `todo.updated`, `todo.completed`, `todo.reopened`, `todo.deleted`, `category.created`, `category.updated`, and `category.deleted`; revised snapshot/tombstone rules cover all of them.
-  - Category changes may have nullable entity versions; TASK-025 uses each entry's last applied cursor as the replay/ordering guard and stores entity version only when present.
-  - Backend SSE code and tests confirm bearer auth, named `sync.available` events, `latest_cursor`, `server_time`, keepalive comments, per-user subscriptions, burst coalescing, and disconnect cleanup.
-- Frontend feasibility evidence:
-  - `web/src/storage.ts` already owns identity storage and provides a narrow place to add a separate identity-ID-scoped versioned sync-state key without using the token as identity.
-  - `web/src/api.ts` already centralizes bearer-authenticated requests and can add typed `/sync/changes` access without sending `user_id`.
-  - Existing `App.tsx` exposes distinct loaded/idle states and server-authoritative Today, Todos, and Categories loaders, so affected loaded-only projection refresh is locatable.
-  - Existing quick-create/edit drafts, notices, transient Undo, selected date, navigation, and focus state are explicit and can be protected by generation guards and background refresh behavior.
+  - Workflow health hardening commit `3ae0d50` is an ancestor of HEAD.
+  - TASK-025 terminal Closure Commit `b2d0197` is HEAD and `origin/main`.
+- Current defect evidence:
+  - `docs/workflow.md` assigns `CHANGES_REQUESTED -> IN_PROGRESS` to Coding.
+  - The current Coding gate accepts only pre-existing synchronized `IN_PROGRESS` task records and its rework section waits for an unspecified role to perform that transition.
+  - Code Review currently owns `REVIEWING -> CHANGES_REQUESTED`, synchronizes both task records, persists actionable findings, and leaves the next admission owner unspecified.
+  - `ISSUE-20260909-002` records the same deadlock, affected files, expected owner, scope, and pending verification.
+- Reviewed admission matrix:
+  - Initial Coding: both active task records identify the same task and are already `IN_PROGRESS`; matching Task Review PASS, Git Snapshot COMPLETE, snapshot branch, and HEAD are mandatory.
+  - Rework Coding: both active task records identify the same task and are `CHANGES_REQUESTED`; matching Task Review PASS, Git Snapshot COMPLETE, Code Review `CHANGES_REQUESTED / CHANGES_REQUESTED`, actionable blocking findings, snapshot branch, and exact Snapshot Commit HEAD are mandatory.
+  - Rework transition owner: Coding alone performs `CHANGES_REQUESTED -> IN_PROGRESS`, synchronizes both task records, and routes to Coding before any implementation edit.
+  - Invalid or partial state: mismatched task/status/gate/baseline evidence or failure to synchronize both records blocks implementation and routes to Decision with observed evidence.
+  - Rework execution: only blocking findings may be fixed unless Decision expands scope; Coding returns both records to `REVIEWING` after verification.
+- Evidence-preservation check:
+  - Rework admission must not reset or erase `handoff/code-review-gate.md` or remove actionable issue evidence before independent re-review.
+  - Ordinary rework must not repeat Task Review or create a second Git Snapshot.
+  - Code Review remains owner of `REVIEWING -> CHANGES_REQUESTED` and routes directly to Coding without pre-moving status to `IN_PROGRESS`.
+- Implementation closure check:
+  - `docs/workflow.md`, `handoff/coding-window-prompt.md`, and `handoff/code-review-window-prompt.md` are the exact three rule surfaces that currently disagree and are all in the allowed implementation scope.
+  - The acceptance criteria require a transition matrix and stale-wording searches across those files, making owner, gates, invalid entries, evidence preservation, and return-to-review independently verifiable.
+  - `handoff/task-review-window-prompt.md` and `handoff/git-snapshot-window-prompt.md` remain read-only boundary references, preventing a second Task Review or Snapshot from being introduced.
 - Worktree Summary:
   - ` M docs/phase1a-progress.md`
   - ` M handoff/code-review-gate.md`
   - ` M handoff/current-task.md`
   - ` M handoff/git-commit.md`
   - ` M handoff/git-snapshot.md`
+  - ` M handoff/issue-log.md`
   - ` M handoff/project-state.md`
   - ` M handoff/task-review-gate.md`
-  - `?? tasks/TASK-025-pc-web-authenticated-sse-refresh.md`
+  - `?? tasks/TASK-026-workflow-rework-admission.md`
 - Changed Files:
   - `docs/phase1a-progress.md`
   - `handoff/code-review-gate.md`
   - `handoff/current-task.md`
   - `handoff/git-commit.md`
   - `handoff/git-snapshot.md`
+  - `handoff/issue-log.md`
   - `handoff/project-state.md`
   - `handoff/task-review-gate.md`
-  - `tasks/TASK-025-pc-web-authenticated-sse-refresh.md`
+  - `tasks/TASK-026-workflow-rework-admission.md`
 - Staged Changes: None.
-- Publication-scope check: all eight commitable changes are TASK-025 Decision publication, revision, or active workflow/gate reset/readiness files. No business implementation, backend change, stable contract edit, completed task archive edit, dependency change, generated output, or secret is included.
+- Publication-scope check: all nine commitable changes are TASK-025 terminal-closure publication, TASK-026 Decision publication, active gate resets, the new workflow issue, or this readiness result. No workflow implementation edit, business code, test, dependency, stable product/API/architecture/data-model document, or completed task archive is modified.
 - `git diff --check`: exit 0; only LF-to-CRLF working-copy warnings were reported.
 - `git diff --cached --check`: exit 0.
 - Independent new-file whitespace check:
-  - `tasks/TASK-025-pc-web-authenticated-sse-refresh.md` has 72 lines after persisting this review, no trailing whitespace, and no blank final line.
-  - `git diff --no-index --check NUL tasks/TASK-025-pc-web-authenticated-sse-refresh.md` emitted no whitespace diagnostics; exit 1 is the expected no-index difference status.
-- Issue-log search: no unresolved TASK-025 blocker was found. The only `Status: open` match is the issue-entry template.
-- Local service state: `postgresql-x64-18` is stopped; ports `127.0.0.1:8000`, `127.0.0.1:5173`, and `127.0.0.1:4173` are not listening. Coding must either establish safe disposable live verification and cleanup or report this exact environment limitation; it does not block task start.
-- Ignored artifacts observed include backend caches, `web/dist/`, and `web/node_modules/`; they are ignored and absent from the commitable changed-file set.
-- Secret/artifact scan: no raw bearer token, bootstrap token, API key, password, private key, generated output, dependency directory, report, log, or cache is present in the eight publication files.
-- Git Snapshot readiness: READY. The exact eight-file publication/readiness set is understood, unstaged, aligned with TASK-025, and contains no business implementation or unrelated user changes.
+  - `tasks/TASK-026-workflow-rework-admission.md` has no trailing whitespace and its final line is not blank.
+  - `git diff --no-index --check NUL tasks/TASK-026-workflow-rework-admission.md` emitted no whitespace diagnostics; exit 1 is the expected no-index difference status.
+- Artifact/secret check: the nine-file publication/readiness set contains no generated output, dependency directory, cache, log, raw token, credential, API key, password, or private key. Existing ignored backend caches and Web dependency/build artifacts are outside the commitable set.
+- Git Snapshot readiness: READY. The exact nine-file publication/readiness set is understood, unstaged, traceable to aligned `main`/`origin/main`, and contains no implementation or unrelated user change.
 
 ## Task Review Notes
 
-- The task is one closeable vertical slice because durable sync recovery and authenticated SSE are inseparable under the stable client contract: initial pull establishes state, SSE wakes the same pull/apply engine, and projection refresh exposes applied changes.
-- Cursor/cache persistence is implementable as one versioned per-identity serialized value keyed by validated `identity.id`; validating and applying into a candidate copy before one storage write keeps cursor and cache atomic per accepted page.
-- Pagination rules are unambiguous: start from stored cursor, accept global gaps, validate strictly increasing returned item cursors and envelope fields, persist `next_cursor` only with the matching applied cache, and continue while `has_more` is true.
-- Snapshot/tombstone rules prevent stale resurrection: entries retain last applied cursor, snapshots replace only older entries, tombstones retain deletion metadata, and replay/older changes are ignored.
-- Missing, malformed, incomplete, or unsupported-version state resets only the current identity to cursor 0 and an empty cache; no token-derived key or cross-identity state sharing is allowed.
-- Pull/SSE concurrency is specified with one active pull and greatest-target trailing work. Initial catch-up followed by first-open catch-up closes the pull-to-subscribe race; reconnect uses the same compensation path.
-- Authenticated stream ownership, synchronous abort, obsolete-generation isolation, pull/stream 401, bounded reconnect, offline pause/online resume, and timer/listener cleanup have explicit acceptance coverage.
-- Applied change types map deterministically to loaded projections. Projection failures are all-settled and do not roll back committed sync state; untouched views stay idle.
-- Deterministic tests are feasible through narrow sync-engine/storage/SSE transport modules with controlled pages, events, timers, aborts, and generations, while component and Playwright checks cover UI preservation and responsive/accessibility behavior.
-- No remaining requirement conflicts with `docs/api-phase1a.md`; backend, stable docs, offline/PWA, Android, and unrelated CRUD remain excluded.
+- TASK-026 is a single closeable documentation/workflow slice: assign and gate rework admission, align the workflow plus two role prompts, and verify the resulting transition matrix.
+- Coding is the sole explicit owner of `CHANGES_REQUESTED -> IN_PROGRESS`; Decision is involved only when evidence or synchronization is inconsistent, not as the normal transition owner.
+- Initial and rework admission are mutually exclusive by status and evidence. The alternative rework path cannot admit `PLANNED`, `READY`, `REVIEWING`, `COMPLETED`, `CANCELLED`, or unapproved `BLOCKED` tasks.
+- Matching across both active task records and all relevant gates prevents stale PASS, stale Snapshot, or another task's Code Review findings from authorizing edits.
+- Exact Snapshot Commit HEAD comparison preserves the original baseline and makes a second Snapshot both unnecessary and forbidden.
+- Requiring synchronized `IN_PROGRESS` records before implementation edits closes the partial-transition hazard; failed or mismatched synchronization stops work and requires Decision repair.
+- Preserving Code Review gate and issue evidence until re-review maintains independent review provenance while allowing Coding to address only persisted blockers.
+- The task's Forbidden Modify Files apply to TASK-026 Coding implementation; Task Review's required update to this gate is separately authorized by the repository workflow and the user request.
 
 ## Instructions
 
-PASS authorizes the Git Snapshot window to establish the TASK-025 baseline from the exact eight-file publication/readiness set. Do not start Coding until Git Snapshot completes and synchronizes both task files to `IN_PROGRESS`.
+PASS authorizes Git Snapshot to establish the TASK-026 baseline from the exact nine-file publication/readiness set. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.

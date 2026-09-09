@@ -60,14 +60,14 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Platform | Status | Evidence / Notes |
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
-| PC Web | partial | Core workflows closed through TASK-024 terminal closure `64ef5ed`; TASK-025 sync recovery plus authenticated SSE refresh completed in result commit `bff4b1c`, Decision Closure Check PASS, terminal closure pending |
+| PC Web | partial | Core workflows including sync recovery and authenticated SSE refresh are closed through TASK-025 terminal closure `b2d0197` |
 | Android | pending | No Kotlin project exists yet |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Publish the exact-scope TASK-025 terminal Closure Commit, then return to Decision.
-2. Re-audit remaining PC Web Phase 1A gaps after terminal closure.
+1. Resolve TASK-026 workflow rework-admission ownership before the next business Coding task.
+2. Re-audit remaining PC Web Phase 1A gaps.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
 

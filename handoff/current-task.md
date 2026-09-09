@@ -4,167 +4,138 @@ Last updated: 2026-09-09
 
 ## Metadata
 
-- Task ID: TASK-025
-- Task Name: PC Web sync recovery and authenticated SSE refresh
-- Status: COMPLETED
+- Task ID: TASK-026
+- Task Name: Workflow Code Review rework admission ownership
+- Status: READY
 - Priority: P1
-- Parent Task: Phase 1A PC Web
+- Parent Task: LifeOS multi-window workflow
 - Dependencies:
-  - Sync changes pull API published in `f6f9091`
-  - SSE wake-up API published in `b4a2c1e`
-  - Todo/category APIs and sync payloads published through TASK-024
-  - TASK-024 terminal closure published in `64ef5ed`
-  - Existing PC Web identity and server-authoritative projection refresh behavior under `web/`
+  - Workflow health hardening published in `3ae0d50`
+  - TASK-025 terminal Closure Commit published in `b2d0197`
 
-## Decision Revision
+## Background
 
-Task Review rejected the initial direct-refetch SSE model on 2026-08-25 because it conflicted with `docs/api-phase1a.md`. Decision accepts the rejection and preserves the stable contract: every `sync.available` wake-up must drive `GET /api/v1/sync/changes?cursor=<local_cursor>`, apply snapshots/tombstones to local cache, advance the cursor, and then refresh loaded projections when changes were applied.
+The correction flow assigns `CHANGES_REQUESTED -> IN_PROGRESS` to Coding, but the Coding gate currently permits file changes only when both active task records are already `IN_PROGRESS`. No role owns the required transition, so a valid Code Review rejection can deadlock before Coding is allowed to resume.
+
+Decision chooses Coding as the owner of a narrowly gated rework-admission transition. The initial Coding path remains unchanged. A Coding window may enter from `CHANGES_REQUESTED` only after independently validating the matching Code Review rejection and existing task baseline; it then synchronizes both task records to `IN_PROGRESS` before modifying implementation files.
 
 ## Goal
 
-PC Web maintains an identity-scoped durable sync cursor/cache, catches up through paginated sync changes, and uses authenticated SSE wake-ups to repeat that recovery flow before safely refreshing already-loaded Today, Todos, and Categories projections.
+Remove the Code Review rework deadlock by making one role explicitly own `CHANGES_REQUESTED -> IN_PROGRESS`, while preserving dual-file status synchronization, exact-scope fixes, existing review evidence, and the prohibition on a second Git Snapshot.
 
 ## Scope
 
 ### In Scope
 
-- Add typed authenticated `GET /api/v1/sync/changes` pagination with `cursor` and `limit`.
-- Add a versioned, identity-ID-scoped local sync state containing cursor plus normalized Todo and Todo Category cache entries.
-- Validate and apply snapshot/tombstone changes in cursor order, retaining each entry's last applied cursor so replay or older changes cannot overwrite newer state.
-- Persist cache and cursor atomically after each fully validated/applied page; recover safely from missing, malformed, unsupported-version, or incomplete stored state.
-- Run an initial catch-up after identity validation and before relying on SSE.
-- Connect to authenticated `GET /api/v1/sync/events` with a maintained fetch-based SSE client/parser supporting bearer headers.
-- On valid `sync.available`, pull/apply all pages until `has_more` is false, then refresh affected already-loaded projections.
-- Serialize/coalesce concurrent initial, SSE, reconnect, manual trigger, and local-write wake-ups without losing a trailing target cursor.
-- Close the initial-pull-to-stream race by running a catch-up after the first successful stream open; avoid projection refetch when no new changes were applied.
-- Handle identity lifecycle, abort, stale generations, 401, malformed changes/events, offline/online, bounded reconnect, and per-dataset refresh failures.
-- Preserve drafts, notices, Undo, selected date, navigation, focus, manual refresh, and existing behavior.
-- Add compact accessible sync states and focused unit/component/Playwright coverage.
-- Attempt live Vite-proxy pull/SSE/disposable-write verification when safe services and identity/data are available.
+- Define separate Coding admission paths for initial work and Code Review rework.
+- Assign the guarded `CHANGES_REQUESTED -> IN_PROGRESS` transition to Coding.
+- Define complete rework preconditions using both active task records, Task Review PASS, completed Git Snapshot, matching Code Review CHANGES_REQUESTED evidence, branch/HEAD baseline, and actionable blocking findings.
+- Require both active task records to be synchronized to `IN_PROGRESS` before implementation changes resume.
+- Define failure behavior for mismatched or partially updated state.
+- Preserve Code Review findings and gate status until independent re-review.
+- Clarify that rework does not repeat Task Review or Git Snapshot and must address only blocking findings unless Decision expands scope.
+- Align the main workflow, Coding prompt, and Code Review prompt.
+- Add compact textual verification covering every affected transition and role owner.
 
 ### Out of Scope
 
-- Rendering Today/Todos/Categories directly from the sync cache, offline-first reads, optimistic cache writes, or pending-operation replay.
-- Background/service-worker sync, PWA, push notifications, or Android.
-- Native `EventSource`, token query parameters/cookies, hand-written SSE framing, or auth/API contract changes.
-- Backend implementation, migrations, broker changes, cross-process fanout, or sync retention/reset APIs.
-- New CRUD, completed lists/filters, deletion UI, note/due-time editing, or bulk actions.
-- Stable requirements, architecture, MVP, API-contract, or data-model changes.
+- Business code, tests, dependencies, product requirements, architecture, API contracts, or data models.
+- Changing ownership of initial `READY -> IN_PROGRESS`, `IN_PROGRESS -> REVIEWING`, or `REVIEWING -> CHANGES_REQUESTED` transitions.
+- Letting Coding self-approve Task Review, Code Review, Git commits, or scope expansion.
+- Creating a second Git Snapshot for ordinary Code Review rework.
+- Redesigning unrelated BLOCKED, cancellation, closure, or Git publication flows.
+- Rewriting completed task archives.
 
-## Related Files
+## Relevant Files
 
 ### Expected Read Files
 
-- `docs/api-phase1a.md` sections 2, 7.2, 8.1, 9.1, 12, and 13
-- `docs/mvp.md` Phase 1A PC Web scope
-- `web/src/App.tsx`, `web/src/App.test.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/storage.ts`, `web/src/styles.css`
-- `web/e2e/identity-todos.spec.ts`, `web/package.json`, `web/package-lock.json`
-- Backend sync route/service/tests and current Todo/category sync payload producers only as contract references
+- `docs/workflow.md`
+- `handoff/coding-window-prompt.md`
+- `handoff/code-review-window-prompt.md`
+- `handoff/task-review-window-prompt.md` only to verify ownership boundaries
+- `handoff/git-snapshot-window-prompt.md` only to verify no second snapshot is introduced
+- `handoff/issue-log.md` entry `ISSUE-20260909-002`
 
 ### Allowed Modify Files
 
-- Existing `web/` source, tests, styles, Playwright config/specs, package manifest, and lockfile when justified
-- Narrow new `web/src/` sync state/engine and SSE transport modules with tests
-- `web/README.md` for concise sync storage/run/verification notes
-- `docs/phase1a-progress.md`
-- Active TASK-025 handoff, gate, Git record, and issue-log files
+- `docs/workflow.md`
+- `handoff/coding-window-prompt.md`
+- `handoff/code-review-window-prompt.md`
+- `handoff/current-task.md`
+- `handoff/issue-log.md`
+- `tasks/TASK-026-workflow-rework-admission.md`
 
 ### Forbidden Modify Files
 
-- Any `backend/` implementation, tests, dependencies, settings, or migrations
-- Stable product, architecture, MVP, API-contract, or data-model documents
-- Completed TASK-005 through TASK-024 archives
-- Raw token storage outside `localStorage.lifeos.identityToken`, token URL/cookie/log/DOM/snapshot leakage, or `user_id` requests
-- Ad hoc SSE framing/parsing when a maintained dependency satisfies the contract
-- Offline/PWA, Android, new CRUD, Reminder, Recurring Todo, generated output, dependencies directory, logs, caches, or editor-local files
+- `backend/**`
+- `web/**`
+- Android or other client code
+- `docs/requirements.md`
+- `docs/architecture.md`
+- `docs/mvp.md`
+- `docs/api-phase1a.md`
+- `docs/data-model-phase1.md`
+- completed `tasks/TASK-001` through `tasks/TASK-025` archives
+- `handoff/task-review-gate.md`
+- `handoff/code-review-gate.md`
+- `handoff/git-snapshot.md`
+- `handoff/git-commit.md`
 
 ## Implementation Requirements
 
-- Use a per-user key derived from validated `identity.id`, never the token, for one versioned serialized sync state. Store cursor and cache together so they cannot diverge across reloads.
-- Cache only contract payloads needed for recovery: normalized `todo` and `todo_category` entries keyed by entity ID, each with last applied change cursor, entity version when present, snapshot or tombstone metadata.
-- A valid snapshot replaces an older entry. A tombstone removes the active snapshot while retaining enough last-cursor/tombstone metadata to reject older replay. Unknown entity/change types must not be silently accepted.
-- Validate page envelope, monotonically increasing item cursors, entity identifiers/types, snapshot/tombstone shape, `next_cursor`, and `has_more` before committing the page. If validation/application fails, do not advance or partially persist that page.
-- Apply only changes with cursor greater than the entry's last applied cursor. Replays are harmless. Global cursor gaps and pages with no current-user items are valid.
-- Call `/sync/changes` with the stored cursor and an approved limit up to 500; loop while `has_more` is true and adopt the server `next_cursor` after each valid page.
-- Missing/corrupt/unsupported stored state resets that identity to cursor 0 and empty cache, then performs full catch-up. Never mix cache/cursor between identities.
-- Initial catch-up begins after identity validation. A pull 401 clears identity and stops sync; recoverable pull failure preserves the last committed state and exposes retry/reconnect status.
-- Treat applied sync cache changes as the trigger to refetch affected projections already loaded. Todo changes affect Today/Todos; category changes affect Categories and loaded Todo projections. Do not load untouched views.
-- Projection refresh is server-authoritative and all-settled; one failure must not prevent other affected loaded projections. Cache/cursor success is not rolled back by projection failure.
-- Use token only in Authorization headers for both pull and stream. Never expose token or send `user_id`.
-- Do not use native `EventSource`. Use a maintained fetch-based SSE client/parser in a small typed abortable transport boundary.
-- Maintain one stream per current identity generation. Abort on logout/replacement/401/unmount and ignore obsolete callbacks.
-- Accept only named `sync.available` events with valid type, non-negative integer `latest_cursor`, and valid `server_time`; ignore keepalive/unknown/malformed events safely.
-- Wake-ups request sync through at least the advertised cursor, but the pull loop remains authoritative and always continues until `has_more` is false. Ignore wake-ups already covered by local cursor.
-- Serialize pulls. Concurrent wake-ups retain the greatest requested cursor and produce at most one active pull plus one trailing pull decision.
-- After initial catch-up, open SSE. On first successful open run another catch-up to close the subscription race; refetch projections only if new changes were actually applied. Reconnect does the same catch-up.
-- Stream 401 clears identity without retry. Other HTTP/content-type/transport failures reconnect with bounded backoff; pause churn offline and resume online; clean timers/listeners.
-- Show compact accessible states covering initial sync, live, reconnecting/offline, and recoverable sync error/retry without per-event toast noise or focus theft.
-- Sync activity must preserve drafts, notices, Undo, selected date, navigation, and focus. Manual/mutation refresh remains correct and stale generations cannot update current identity state.
-- Preserve TASK-018 through TASK-024 behavior and avoid broad architecture/design refactors.
-- If safe services/data exist, verify initial pull, authenticated SSE, a disposable same-user write, subsequent pull/apply, projection refresh, and cleanup. Otherwise record exact limits without a live claim.
+1. Keep the initial Coding gate unchanged: both active task records must already be `IN_PROGRESS`, Task Review must be PASS, Git Snapshot must be COMPLETE, and branch/HEAD must satisfy the snapshot baseline.
+2. Add an alternative rework-admission gate that is valid only when both active task records identify the same task and both are `CHANGES_REQUESTED`.
+3. Rework admission must additionally require Task Review PASS, Git Snapshot COMPLETE for the same task, Code Review Gate `Result: CHANGES_REQUESTED` and `Target Status: CHANGES_REQUESTED` for the same task, at least one actionable blocking finding persisted for that task, the snapshot branch, and `HEAD` still equal to the recorded Snapshot Commit.
+4. Coding owns the transition only after all rework preconditions pass. It must update both active task records to `IN_PROGRESS` and route to Coding before touching implementation files.
+5. If both status records cannot be synchronized, Coding must not modify implementation files or claim admission. It must report BLOCKED with the observed partial/mismatched state for Decision repair; it must not silently overwrite unrelated content.
+6. Rework admission must not reset or erase `handoff/code-review-gate.md`, remove issue evidence, repeat Task Review, or create another Git Snapshot.
+7. After admission, Coding fixes only the Code Review blocking findings unless Decision explicitly expands scope, then runs required verification and returns both task records to `REVIEWING`.
+8. Code Review remains owner of `REVIEWING -> CHANGES_REQUESTED` and must route the next role to Coding without pre-moving the task to `IN_PROGRESS`.
+9. Direct Coding entry from `PLANNED`, `READY`, `REVIEWING`, `COMPLETED`, `CANCELLED`, or an unapproved `BLOCKED` state remains forbidden.
+10. `docs/workflow.md`, `handoff/coding-window-prompt.md`, and `handoff/code-review-window-prompt.md` must use the same transition owner and gate semantics.
 
 ## Acceptance Criteria
 
-- [ ] Identity validation loads one versioned per-identity sync state; corrupt/unsupported state resets only that identity to cursor 0/empty cache.
-- [ ] Initial sync calls authenticated `/sync/changes` from local cursor and follows pages until `has_more` is false.
-- [ ] Page/envelope/change validation is atomic: invalid pages neither partially update cache nor advance cursor.
-- [ ] Snapshot and tombstone changes for Todo/Todo Category update normalized cache correctly; replay/older changes cannot overwrite newer entries.
-- [ ] Global cursor gaps, empty-user pages, nullable entity versions, and server high-water `next_cursor` are handled correctly.
-- [ ] Cursor and cache persist atomically after each accepted page and remain isolated across identity switching/reload.
-- [ ] Applied Todo/category changes refetch only affected already-loaded projections; untouched views remain unloaded.
-- [ ] Projection refresh attempts all affected loaded datasets; failure does not roll back applied cache/cursor and retains normal retry UI.
-- [ ] Exactly one bearer-authenticated SSE stream opens after initial catch-up with no token in URL/visible state.
-- [ ] A maintained fetch SSE client/parser is used; native `EventSource` and hand-written framing are absent.
-- [ ] Valid wake-ups trigger pull/apply through the advertised cursor; already-covered, keepalive, unknown, malformed, or invalid events do not pull/refresh or crash.
-- [ ] Concurrent wake-ups/pulls are serialized and coalesced without losing the greatest target cursor or creating unbounded requests.
-- [ ] First stream open and later reconnect each perform race-closing catch-up; projections refetch only when changes were applied.
-- [ ] Logout, identity replacement, pull/stream 401, and unmount abort work; obsolete generations cannot mutate current state.
-- [ ] Recoverable pull/stream failures use bounded retry, preserve committed sync state, pause offline, and resume online with cleanup.
-- [ ] Sync states are compact/accessibly announced and do not create per-event toast noise or steal focus.
-- [ ] Drafts, notices, Undo, selected date, navigation, focus, manual refresh, and mutation refresh remain correct.
-- [ ] Existing PC Web behavior and tests through TASK-024 remain green at desktop and narrow widths without overflow.
-- [ ] Focused tests cover storage validation/isolation, pagination, atomic apply, snapshots/tombstones, cursor edges, auth, stream lifecycle, coalescing, race catch-up, 401, offline/online, and UI preservation.
-- [ ] Build/audit/diff/dependency/artifact/secret checks pass, and live pull/SSE/write/cleanup is evidenced when safe or precisely limited without a live claim.
-- [ ] No backend, stable contract, offline/PWA, Android, new CRUD, or other out-of-scope change is modified.
+- [ ] The correction-flow diagram explicitly names Coding as owner of `CHANGES_REQUESTED -> IN_PROGRESS`.
+- [ ] Initial Coding still requires synchronized `IN_PROGRESS`, Task Review PASS, Git Snapshot COMPLETE, and matching branch/HEAD.
+- [ ] Rework Coding can start from synchronized `CHANGES_REQUESTED` without intervention from an unspecified role.
+- [ ] Rework admission verifies matching task IDs and statuses across both active task records and all relevant gates.
+- [ ] A matching Code Review CHANGES_REQUESTED result and actionable blocking findings are mandatory.
+- [ ] Coding synchronizes both task records to `IN_PROGRESS` before implementation edits.
+- [ ] Partial or mismatched transition state blocks implementation and is routed to Decision for repair.
+- [ ] Code Review evidence remains intact until re-review; Coding cannot self-approve or clear the gate.
+- [ ] Rework does not repeat Task Review or create a second Git Snapshot.
+- [ ] Rework scope is limited to blocking findings unless Decision explicitly expands it.
+- [ ] Coding returns both task records to `REVIEWING` after fixes and verification.
+- [ ] Code Review prompt routes CHANGES_REQUESTED directly to Coding under the guarded admission rules.
+- [ ] All other invalid status entries remain blocked.
+- [ ] Workflow and role prompts agree, and searches find no remaining rule requiring an unidentified role to pre-move rework to `IN_PROGRESS`.
+- [ ] No business, product-contract, dependency, or completed-task archive file is modified.
+- [ ] `git diff --check` and independent new-file whitespace checks pass.
 
 ## Verification Plan
 
-- Run `npm test -- --run`, `npm run build`, `npm run test:e2e`, and `npm audit --audit-level=high` from `web/`.
-- Inspect sync state key/schema, identity isolation, corruption reset, atomic page persistence, snapshots/tombstones, replay, cursor gaps/high-water, and pagination.
-- Inspect pull/stream URL/header auth and absence of token leakage, native EventSource, hand-written framing, or `user_id`.
-- Verify initial catch-up, stream race catch-up, event target handling, serialization/coalescing, 401, abort/generation guards, backoff, offline/online, and cleanup.
-- Verify affected loaded-only all-settled projection refresh and preservation of drafts/notices/Undo/date/navigation/focus/manual/mutation refresh.
-- Inspect desktop/narrow sync states and overflow.
-- Attempt live pull/SSE/disposable write/application/cleanup only with safe identity/data; record exact result.
-- Inspect exact diff, dependency changes, `git diff --check`, new-file whitespace, artifacts, and secrets.
+- Compare the state diagram, ownership rules, Coding gate, Coding state updates, and Code Review CHANGES_REQUESTED instructions.
+- Exercise a textual transition matrix for initial `IN_PROGRESS`, valid `CHANGES_REQUESTED`, mismatched task/status, missing gate evidence, partial synchronization, and post-fix `REVIEWING` paths.
+- Search for stale wording such as requiring rework to be pre-moved by an unnamed role.
+- Confirm no second Task Review or Git Snapshot is required for ordinary rework.
+- Confirm the diff contains only Allowed Modify Files and no completed task archive changes.
+- Run `git diff --check`, `git diff --cached --check`, and independent whitespace checks for untracked files.
 
 ## Risks
 
-- Persisting cursor without the matching cache can permanently skip recovery changes.
-- Accepting a malformed page before full validation can partially corrupt local state.
-- The initial pull-to-subscribe window can miss a write without post-open catch-up.
-- Stale callbacks or reconnect loops can cross identity boundaries.
-- Generic cache changes can cause request storms or disrupt transient UI without coalescing and projection isolation.
-- Backend SSE fanout remains process-local; this task does not imply cross-process delivery guarantees.
+- An overly broad alternative gate could let Coding bypass initial Task Review or Git Snapshot.
+- Clearing Code Review evidence during admission could make re-review unverifiable.
+- Updating only one task record would leave routing ambiguous.
+- Repeating Git Snapshot after implementation changes could accidentally publish unreviewed code.
 
 ## Coding Output Requirements
 
-Report modified files, sync schema/storage key, pull pagination/validation/application, snapshot/tombstone/cache/cursor evidence, identity isolation, SSE dependency/transport/auth, ownership/abort, coalescing/race catch-up, projection refresh, UI preservation/states, responsive/accessibility checks, acceptance results, tests/build/e2e/audit, live status/cleanup, diff/artifact/secret checks, unresolved issues, and task-outside findings.
+Report modified files, final transition ownership, initial/rework gate matrix, dual-status synchronization behavior, mismatch/partial-failure behavior, evidence preservation, no-second-snapshot rule, stale-rule searches, exact-scope checks, whitespace results, unresolved issues, and next role.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-09-09 09:43 +08:00
-
-Result Commit: `bff4b1ccd64fcb003d2391691e51f72c32894ece`
-
-Completion Commit: `8a14e064d2a97d3fb1a6308df3a93893637a32ef`
-
-Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `8a14e064d2a97d3fb1a6308df3a93893637a32ef` before these closure-document edits.
-
-Working Tree Before Closure Docs: clean; no staged or untracked files.
-
-Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-025-pc-web-authenticated-sse-refresh.md` with message `docs(task): close TASK-025`; then return control to Decision. This terminal Closure Commit ends TASK-025 and must not trigger another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for the exact Task Review-approved TASK-026 publication/readiness file set. Do not start Coding until Git Snapshot completes.

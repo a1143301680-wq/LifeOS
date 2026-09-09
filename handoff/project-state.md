@@ -81,7 +81,9 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-024 Decision Closure Check passed on 2026-08-13.
 - TASK-024 terminal Closure Commit `64ef5ed` was published and the task workflow ended.
 - TASK-025 PC Web sync recovery and authenticated SSE refresh completed in result commit `bff4b1c`; Code Review: PASS; frontend tests/build/e2e/audit passed.
-- TASK-025 Decision Closure Check passed on 2026-09-09; terminal Closure Commit is pending.
+- TASK-025 Decision Closure Check passed on 2026-09-09.
+- TASK-025 terminal Closure Commit `b2d0197` was published and the task workflow ended.
+- TASK-026 was published to resolve the Code Review rework-admission ownership deadlock before the next business task.
 
 ## Recently Completed
 
@@ -130,7 +132,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Publish the exact-scope TASK-025 terminal Closure Commit described in `handoff/current-task.md`; after remote parity is verified, return control to Decision to re-audit remaining PC Web Phase 1A gaps.
+Run Task Review for TASK-026 workflow Code Review rework-admission ownership. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
