@@ -225,4 +225,44 @@ Snapshot Commit: `8b755f6217907adb9ceae5e53f1ca3a625c8cd34`
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-09-09 09:43 +08:00
+
+Result Commit: `bff4b1ccd64fcb003d2391691e51f72c32894ece`
+
+Completion Commit: `8a14e064d2a97d3fb1a6308df3a93893637a32ef`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `8a14e064d2a97d3fb1a6308df3a93893637a32ef` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+### Independent Verification
+
+- `npm test -- --run` from `web/`: PASS, 9 files and 107 tests.
+- `npm run build` from `web/`: PASS, TypeScript and Vite production build.
+- `npm run test:e2e` from `web/`: PASS, 2 Playwright tests at desktop and narrow widths.
+- `npm audit --audit-level=high` from `web/`: PASS by exit code; 2 moderate Vitest toolchain advisories remain non-blocking.
+- `npm ls eventsource-parser --depth=0` from `web/`: PASS, `eventsource-parser@3.1.1`.
+- Code Review: PASS with no remaining blocking findings.
+- All 21 acceptance criteria were confirmed from implementation, Code Review evidence, and the independent verification above.
+
+### Issue Disposition
+
+- `ISSUE-20260909-001` is `verified`; stale sync-page item cursors are rejected before mutation, persistence, projection refresh, or cursor advancement, with engine and coordinator regression coverage.
+- No unresolved TASK-025 P0, P1, or P2 issue is recorded in `handoff/issue-log.md`.
+- Live pull/SSE/disposable-write verification remains unperformed because no running local services, project `.env`, or safe disposable identity token was available. This is non-blocking under the approved task; no live integration claim is made.
+- Backend SSE fanout remains process-local as an accepted out-of-scope limitation.
+
+### Remaining Follow-ups
+
+- Re-audit remaining PC Web Phase 1A gaps after the terminal Closure Commit.
+- Android Phase 1A delivery and PC/Android end-to-end sync acceptance remain future work.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-025-pc-web-authenticated-sse-refresh.md`.
+- Recommended commit message: `docs(task): close TASK-025`.
+- After push and remote-parity verification, return to Decision without another Closure Check.

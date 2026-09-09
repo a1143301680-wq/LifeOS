@@ -153,6 +153,18 @@ Report modified files, sync schema/storage key, pull pagination/validation/appli
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-025 after verifying result commit `bff4b1ccd64fcb003d2391691e51f72c32894ece` and the Git Commit completion record.
+Closure Check: PASS
+
+Checked at: 2026-09-09 09:43 +08:00
+
+Result Commit: `bff4b1ccd64fcb003d2391691e51f72c32894ece`
+
+Completion Commit: `8a14e064d2a97d3fb1a6308df3a93893637a32ef`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `8a14e064d2a97d3fb1a6308df3a93893637a32ef` before these closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-025-pc-web-authenticated-sse-refresh.md` with message `docs(task): close TASK-025`; then return control to Decision. This terminal Closure Commit ends TASK-025 and must not trigger another Closure Check.
