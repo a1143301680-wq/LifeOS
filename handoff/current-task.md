@@ -6,7 +6,7 @@ Last updated: 2026-09-09
 
 - Task ID: TASK-025
 - Task Name: PC Web sync recovery and authenticated SSE refresh
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A PC Web
 - Dependencies:
@@ -153,6 +153,6 @@ Report modified files, sync schema/storage key, pull pagination/validation/appli
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the exact Code Review-approved TASK-025 result with the recommended commit message, then update both task-status files to `COMPLETED` only after commit/push succeeds.
+Required next action: run Decision Closure Check for TASK-025 after verifying result commit `bff4b1ccd64fcb003d2391691e51f72c32894ece` and the Git Commit completion record.

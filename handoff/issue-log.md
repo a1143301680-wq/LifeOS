@@ -146,6 +146,24 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: Update `handoff/current-task.md` as part of the next workflow state transition.
 - Verification: Verified by review window on 2026-07-11.
 
+### ISSUE-20260909-001: TASK-025 sync page accepts stale item cursors
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-09-09 09:09 +08:00
+- Related task: TASK-025 PC Web sync recovery and authenticated SSE refresh
+- Files:
+  - `D:\LifeOS\web\src\sync-engine.ts:121`
+  - `D:\LifeOS\web\src\sync-engine.ts:128`
+  - `D:\LifeOS\web\src\sync-engine.test.ts:113`
+- Description: `validatePage()` checks that returned page items are strictly ordered relative to each other, but it does not reject returned changes whose `cursor` is less than or equal to the current local cursor used for the pull. It can then accept `next_cursor` and advance durable sync state.
+- Expected: A `/sync/changes?cursor=<local_cursor>` page must contain only changes with `cursor > local_cursor`; malformed stale-item pages must throw before persistence, cache mutation, or cursor advancement.
+- Actual: A page with stale items can be accepted if `next_cursor` is not backwards. Existing tests cover duplicate item cursors and backwards `next_cursor`, but not stale item cursors relative to `current.cursor`.
+- Fix owner/window: Coding window.
+- Fix notes: Add a page-level validation rule rejecting any item cursor `<= currentCursor`, plus regression coverage proving no persistence/advance/mutation. Preserve valid global gaps and empty high-water pages.
+- Verification: Verified by Code Review on 2026-09-09. `validatePage()` rejects every returned item with `cursor <= currentCursor` before candidate state construction. Engine and coordinator regressions confirm no mutation, persistence, projection refresh, or cursor advancement. Focused tests passed 10/10; the full Web suite passed 107/107; build and 2 Playwright tests passed.
+
 ## Entry Template
 
 ```text

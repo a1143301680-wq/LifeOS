@@ -1,6 +1,6 @@
 # TASK-025: PC Web sync recovery and authenticated SSE refresh
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -215,7 +215,13 @@ Snapshot Commit: `8b755f6217907adb9ceae5e53f1ca3a625c8cd34`
 
 ## Git Commit
 
-Authorized by Code Review PASS. Recommended commit message: `feat(sync): add PC Web sync recovery and authenticated SSE`.
+- Result Commit: `bff4b1ccd64fcb003d2391691e51f72c32894ece`
+- Commit Message: `feat(sync): add PC Web sync recovery and authenticated SSE`
+- Branch: main
+- Push Target: `origin/main`
+- Published by: Git Commit window
+- Published at: 2026-09-09
+- Completion Status: TASK-025 marked `COMPLETED` in both active task-status files after result commit publication.
 
 ## Closure
 
