@@ -166,7 +166,7 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 
 ### ISSUE-20260909-002: Coding rework admission has no transition owner
 
-- Status: open
+- Status: verified
 - Severity: P1
 - Found by: Decision window
 - Found at: 2026-09-09 10:12 +08:00
@@ -181,7 +181,7 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Actual: Coding must wait for an unspecified role to pre-move both records, creating a closed-loop deadlock.
 - Fix owner/window: TASK-026 Coding window after Task Review PASS and Git Snapshot.
 - Fix notes: Preserve the initial Coding gate; add a distinct rework gate, dual-file transition ownership, mismatch/partial-failure handling, retained review evidence, and no second Snapshot.
-- Verification: Pending TASK-026 Code Review.
+- Verification: Verified by Code Review on 2026-09-10. Workflow, Coding prompt, and Code Review prompt consistently assign guarded rework admission to Coding. An independent 16-case transition matrix passed; stale-rule, exact-scope, boundary-prompt, staged-state, and whitespace checks also passed.
 
 ## Entry Template
 

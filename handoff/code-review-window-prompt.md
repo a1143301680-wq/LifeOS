@@ -61,6 +61,9 @@ On CHANGES_REQUESTED:
 - Update `handoff/code-review-gate.md` to `Result: CHANGES_REQUESTED` and `Target Status: CHANGES_REQUESTED`.
 - Update both `handoff/current-task.md` and active `tasks/TASK-xxx.md` to `Status: CHANGES_REQUESTED`.
 - Record actionable findings in `handoff/issue-log.md`.
+- Route the current task directly to Coding for guarded rework admission.
+- Leave both task records at `CHANGES_REQUESTED`; do not pre-move them to `IN_PROGRESS` because Coding owns that transition after validating the matching review and snapshot evidence.
+- Preserve the rejection evidence for independent re-review. Ordinary rework does not repeat Task Review or create a second Git Snapshot.
 
 If either task-status file cannot be updated for CHANGES_REQUESTED, do not claim the transition completed.
 

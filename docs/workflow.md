@@ -1,6 +1,6 @@
 # LifeOS Multi-Window Workflow
 
-Version: 2026-07-11
+Version: 2026-09-09
 
 LifeOS uses separate AI windows for Decision, Task Review, Git Snapshot, Coding, Code Review, and Git Commit. Chat history is not shared between windows, so every stage must write durable state to project files.
 
@@ -101,13 +101,25 @@ Correction flow:
 
 ```text
 REVIEWING
-  -> Code Review CHANGES_REQUESTED
+  -> Code Review owns rejection
 CHANGES_REQUESTED
-  -> Coding resumes
+  -> Coding owns guarded rework admission
 IN_PROGRESS
   -> Coding complete
 REVIEWING
 ```
+
+Coding admission matrix:
+
+| Path | Required evidence | Owner and result |
+| --- | --- | --- |
+| Initial Coding | Both active task records identify the same task and are `IN_PROGRESS`; matching Task Review PASS and Git Snapshot COMPLETE; current branch and HEAD match the recorded snapshot baseline. | Git Snapshot already admitted the task; Coding may implement. |
+| Code Review rework | Both active task records identify the same task and are `CHANGES_REQUESTED`; matching Task Review PASS, Git Snapshot COMPLETE, Code Review `CHANGES_REQUESTED / CHANGES_REQUESTED`, and at least one actionable blocking finding; current branch equals the snapshot branch and HEAD equals the recorded Snapshot Commit. | Coding owns `CHANGES_REQUESTED -> IN_PROGRESS`, synchronizes both task records, verifies the result, routes to Coding, and only then edits implementation files. |
+| Mismatched task/status or missing/stale gate evidence | Any required task ID, status, gate, finding, branch, or HEAD check fails. | Coding does not modify task or implementation files and reports BLOCKED to Decision with observed evidence. |
+| Partial rework transition | Coding cannot update and verify both active task records as `IN_PROGRESS`. | Admission fails; Coding does not edit implementation files or claim admission and reports the partial state to Decision for repair. |
+| Rework complete | Blocking findings are fixed within approved scope and verification passes. | Coding synchronizes both records to `REVIEWING` and routes to Code Review. |
+
+Direct Coding admission from `PLANNED`, `READY`, `REVIEWING`, `COMPLETED`, `CANCELLED`, or an unapproved `BLOCKED` state is forbidden. Ordinary Code Review rework does not repeat Task Review or create a second Git Snapshot.
 
 Blocked flow:
 
@@ -271,6 +283,23 @@ After Git Snapshot completes, update:
 
 Coding implements only the Task Review-approved task.
 
+Initial Coding admission requires:
+
+- Both active task records identify the same task and are already `IN_PROGRESS`.
+- `handoff/task-review-gate.md` records PASS for that task.
+- `handoff/git-snapshot.md` records COMPLETE for that task.
+- The current branch and HEAD match the recorded snapshot baseline.
+
+Code Review rework admission is a separate Coding-owned path. It requires:
+
+- Both active task records identify the same task and are `CHANGES_REQUESTED`.
+- The matching Task Review remains PASS and the matching Git Snapshot remains COMPLETE.
+- `handoff/code-review-gate.md` identifies the same task with `Result: CHANGES_REQUESTED` and `Target Status: CHANGES_REQUESTED`.
+- At least one actionable blocking finding for that task is persisted in the Code Review gate or `handoff/issue-log.md`.
+- The current branch equals the recorded snapshot branch and HEAD still equals the recorded Snapshot Commit.
+
+After all rework checks pass, Coding updates both active task records to `IN_PROGRESS`, routes the task to Coding, and verifies both writes before modifying implementation files. If the records are mismatched or cannot both be synchronized, Coding must not edit implementation files or claim admission; it reports BLOCKED with the observed state for Decision repair. Coding must preserve the Code Review gate and issue evidence, must not repeat Task Review or Git Snapshot, and fixes only the persisted blocking findings unless Decision explicitly expands scope.
+
 Rules:
 
 - modify only in-scope files unless blocked and Decision approves scope change
@@ -280,7 +309,7 @@ Rules:
 - inspect git diff before reporting completion
 - set both active task-status files to `REVIEWING` when complete
 
-If blocked, set both active task-status files to `BLOCKED` and write a Blocked Report in `handoff/current-task.md` and the task archive.
+If work blocks after successful admission, set both active task-status files to `BLOCKED` and write a Blocked Report in `handoff/current-task.md` and the task archive. Admission failures follow the no-edit and Decision-repair behavior above instead.
 
 Coding completion must include:
 
@@ -322,6 +351,7 @@ Valid results:
 `Target Status: COMPLETED` means the intended status after Git Commit publishes the reviewed result. Code Review PASS authorizes Git Commit; it does not update either task-status file to `COMPLETED`.
 
 If Code Review requests changes, Coding resumes from `CHANGES_REQUESTED -> IN_PROGRESS`.
+Code Review owns `REVIEWING -> CHANGES_REQUESTED`: it synchronizes both task records, preserves actionable findings, and routes directly to Coding. It does not pre-move the task to `IN_PROGRESS`; Coding owns that guarded admission transition.
 Code Review PASS does not itself change task status to `COMPLETED`; Git Commit does that after publishing. Code Review CHANGES_REQUESTED must update both task-status files to `CHANGES_REQUESTED`.
 
 ## 4.6 Git Commit
@@ -438,8 +468,12 @@ Decision must record the outcome before work resumes.
 ## 5.3 Code Review Requests Changes
 
 ```text
-Code Review CHANGES_REQUESTED
-  -> Coding fixes listed blocking issues
+Code Review owns REVIEWING -> CHANGES_REQUESTED
+  -> routes directly to Coding with actionable findings
+Coding validates rework admission and owns CHANGES_REQUESTED -> IN_PROGRESS
+  -> fixes only listed blocking issues
+  -> does not repeat Task Review or Git Snapshot
+Coding returns both task records to REVIEWING
   -> Code Review runs again
 ```
 
