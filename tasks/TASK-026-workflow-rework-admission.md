@@ -1,6 +1,6 @@
 # TASK-026: Workflow Code Review rework admission ownership
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -113,7 +113,13 @@ Remove the `CHANGES_REQUESTED -> IN_PROGRESS` deadlock by making Coding own a na
 
 ## Git Commit
 
-Authorized by Code Review PASS. Recommended commit message: `docs(workflow): fix Code Review rework admission`.
+- Result Commit: `2b813497aa9a0742c3943082e309c9447f554a6a`
+- Commit Message: `docs(workflow): fix Code Review rework admission`
+- Branch: main
+- Push Target: `origin/main`
+- Published by: Git Commit window
+- Published at: 2026-09-10
+- Completion Status: TASK-026 marked `COMPLETED` in both active task-status files after result commit publication.
 
 ## Closure
 

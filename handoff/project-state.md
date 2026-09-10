@@ -84,6 +84,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-025 Decision Closure Check passed on 2026-09-09.
 - TASK-025 terminal Closure Commit `b2d0197` was published and the task workflow ended.
 - TASK-026 was published to resolve the Code Review rework-admission ownership deadlock before the next business task.
+- TASK-026 guarded Code Review rework admission completed in result commit `2b81349`; Code Review: PASS; textual transition matrix passed 16/16 checks.
 
 ## Recently Completed
 
@@ -132,7 +133,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-026 workflow Code Review rework-admission ownership. Live routing is maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-026 workflow Code Review rework-admission ownership. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

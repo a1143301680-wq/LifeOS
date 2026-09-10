@@ -6,7 +6,7 @@ Last updated: 2026-09-10
 
 - Task ID: TASK-026
 - Task Name: Workflow Code Review rework admission ownership
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: LifeOS multi-window workflow
 - Dependencies:
@@ -136,6 +136,6 @@ Report modified files, final transition ownership, initial/rework gate matrix, d
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the exact Code Review-approved TASK-026 workflow change with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.
+Required next action: run Decision Closure Check for TASK-026 after verifying result commit `2b813497aa9a0742c3943082e309c9447f554a6a` and the Git Commit completion record.
