@@ -1,10 +1,10 @@
 # LifeOS Project State
 
-Last updated: 2026-09-09
+Last updated: 2026-09-10
 
 ## Current Phase
 
-Phase 1A client delivery: backend complete; PC Web, Android, and end-to-end sync acceptance remain.
+Phase 1A client delivery: backend and PC Web complete; Android and end-to-end sync acceptance remain.
 
 ## Source Of Truth
 
@@ -85,7 +85,10 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-025 terminal Closure Commit `b2d0197` was published and the task workflow ended.
 - TASK-026 was published to resolve the Code Review rework-admission ownership deadlock before the next business task.
 - TASK-026 guarded Code Review rework admission completed in result commit `2b81349`; Code Review: PASS; textual transition matrix passed 16/16 checks.
-- TASK-026 Decision Closure Check passed on 2026-09-10; terminal Closure Commit is pending.
+- TASK-026 Decision Closure Check passed on 2026-09-10.
+- TASK-026 terminal Closure Commit `0856e28` was published and the task workflow ended.
+- Phase 1A re-audit on 2026-09-10 marked backend and PC Web complete; Android and cross-client acceptance remain.
+- TASK-027 Android toolchain and runnable Compose foundation was published with package, SDK-level, build, and local API-address decisions in `docs/adr/0001-android-foundation.md`.
 
 ## Recently Completed
 
@@ -134,7 +137,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Publish the exact-scope TASK-026 terminal Closure Commit described in `handoff/current-task.md`; after remote parity is verified, return control to Decision to re-audit remaining PC Web Phase 1A gaps.
+Run Task Review for TASK-027 Android toolchain and runnable Compose foundation. Live routing is maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

@@ -4,150 +4,173 @@ Last updated: 2026-09-10
 
 ## Metadata
 
-- Task ID: TASK-026
-- Task Name: Workflow Code Review rework admission ownership
-- Status: COMPLETED
+- Task ID: TASK-027
+- Task Name: Android toolchain and runnable Compose foundation
+- Status: READY
 - Priority: P1
-- Parent Task: LifeOS multi-window workflow
+- Parent Task: Phase 1A Android client
 - Dependencies:
-  - Workflow health hardening published in `3ae0d50`
-  - TASK-025 terminal Closure Commit published in `b2d0197`
+  - TASK-026 terminal Closure Commit published in `0856e28`
+  - Phase 1A backend and stable API contract complete
+  - PC Web Phase 1A client scope complete through TASK-025
+  - Local JDK 21.0.10 available at `D:\tool\Java\Java21`
 
-## Background
+## Decision
 
-The correction flow assigns `CHANGES_REQUESTED -> IN_PROGRESS` to Coding, but the Coding gate currently permits file changes only when both active task records are already `IN_PROGRESS`. No role owns the required transition, so a valid Code Review rejection can deadlock before Coding is allowed to resume.
+Create the first Android vertical slice as a reproducible development toolchain plus a buildable, installable, nonblank Jetpack Compose application. Do not add identity or Todo behavior yet. The next task will build identity validation on this verified foundation.
 
-Decision chooses Coding as the owner of a narrowly gated rework-admission transition. The initial Coding path remains unchanged. A Coding window may enter from `CHANGES_REQUESTED` only after independently validating the matching Code Review rejection and existing task baseline; it then synchronizes both task records to `IN_PROGRESS` before modifying implementation files.
+Long-lived Android baseline decisions are recorded in `docs/adr/0001-android-foundation.md`:
+
+- namespace/application ID: `com.bpn0416.lifeos`
+- Kotlin + Jetpack Compose, Gradle Kotlin DSL
+- `minSdk 26`, `compileSdk 36`, `targetSdk 36`
+- Java source/toolchain level 17; Gradle may run on the installed JDK 21
+- committed Gradle Wrapper with pinned plugin/dependency versions
+- emulator debug API default: `http://10.0.2.2:8000/api/v1/`
+- physical-device debug API: non-committed override to the PC LAN address
+- cleartext HTTP permitted only for debug builds; release builds reject cleartext base URLs
+
+## Environment Baseline
+
+Checked by Decision on 2026-09-10:
+
+- JDK/Javac: 21.0.10, available and selected by `JAVA_HOME`
+- System Gradle: not on PATH; Gradle 8.14.3 distributions are cached, but TASK-027 must commit and use its own Wrapper
+- Android Studio: not found in system or user-level common installation locations
+- Android SDK: not found; `ANDROID_HOME` and `ANDROID_SDK_ROOT` are unset
+- `adb`, `emulator`, `sdkmanager`, `avdmanager`: not on PATH
+- Android AVD: unavailable because the SDK/emulator is absent
+- Physical Android/ADB device: none detected; debugging authorization cannot be verified without `adb`
+- Host capacity: 15.4 GB RAM; approximately 239.7 GB free on C and 113.3 GB free on D
+- Windows hypervisor: detected and running; individual optional-feature state requires elevation and remains to be proven by an actual emulator launch
+
+The missing Android toolchain is an explicit part of this bootstrap task, not an unknown prerequisite. Coding may install the selected stable Android Studio/SDK components, but must not change unrelated system software or claim emulator/device success without direct evidence.
 
 ## Goal
 
-Remove the Code Review rework deadlock by making one role explicitly own `CHANGES_REQUESTED -> IN_PROGRESS`, while preserving dual-file status synchronization, exact-scope fixes, existing review evidence, and the prohibition on a second Git Snapshot.
+Produce a reproducible `android/` project that builds from the repository with its Gradle Wrapper, installs and launches on an available API 36 emulator, renders a compact LifeOS foundation screen without crashing or overflow, and documents the exact local setup and API-base override path for later Android tasks.
 
 ## Scope
 
 ### In Scope
 
-- Define separate Coding admission paths for initial work and Code Review rework.
-- Assign the guarded `CHANGES_REQUESTED -> IN_PROGRESS` transition to Coding.
-- Define complete rework preconditions using both active task records, Task Review PASS, completed Git Snapshot, matching Code Review CHANGES_REQUESTED evidence, branch/HEAD baseline, and actionable blocking findings.
-- Require both active task records to be synchronized to `IN_PROGRESS` before implementation changes resume.
-- Define failure behavior for mismatched or partially updated state.
-- Preserve Code Review findings and gate status until independent re-review.
-- Clarify that rework does not repeat Task Review or Git Snapshot and must address only blocking findings unless Decision expands scope.
-- Align the main workflow, Coding prompt, and Code Review prompt.
-- Add compact textual verification covering every affected transition and role owner.
+- Install or locate a stable Android development toolchain compatible with API 36 and the pinned project build.
+- Install Android SDK Platform 36, compatible Build Tools, Platform Tools, Emulator, and one API 36 x86_64 phone system image.
+- Create and validate one reusable LifeOS API 36 phone AVD when Windows virtualization permits.
+- Add a single-module `android/` Kotlin/Jetpack Compose application using Gradle Kotlin DSL.
+- Commit Gradle Wrapper scripts/JAR/properties and pin every plugin/dependency version.
+- Configure namespace and application ID `com.bpn0416.lifeos`.
+- Configure `minSdk 26`, `compileSdk 36`, `targetSdk 36`, and Java/Kotlin JVM target 17.
+- Add a small real LifeOS app shell using Material 3 that renders on normal and narrow phone dimensions.
+- Add a typed, validated debug API-base build configuration with emulator default and non-committed LAN override.
+- Restrict cleartext HTTP to debug; release configuration must reject or exclude cleartext endpoints.
+- Add Android-specific ignore rules and setup/build/run documentation.
+- Add focused unit/UI smoke coverage and verify build, lint, install, launch, and nonblank rendering where the environment permits.
 
 ### Out of Scope
 
-- Business code, tests, dependencies, product requirements, architecture, API contracts, or data models.
-- Changing ownership of initial `READY -> IN_PROGRESS`, `IN_PROGRESS -> REVIEWING`, or `REVIEWING -> CHANGES_REQUESTED` transitions.
-- Letting Coding self-approve Task Review, Code Review, Git commits, or scope expansion.
-- Creating a second Git Snapshot for ordinary Code Review rework.
-- Redesigning unrelated BLOCKED, cancellation, closure, or Git publication flows.
-- Rewriting completed task archives.
+- Identity token entry, `/me`, authentication, secure token persistence, logout, or user switching.
+- Retrofit/Ktor API implementation, Todo/category calls, Room cache, sync cursor, SSE, WorkManager, or offline queue.
+- Today, Todo, category, reminder, widget, or notification product behavior.
+- Backend or PC Web modifications.
+- Stable requirements, MVP, architecture, API-contract, or data-model changes beyond the Decision-owned audit/ADR publication files.
+- Release signing, Play Console publication, developer registration, CI/CD, analytics, or crash reporting.
+- Supporting multiple app modules, flavors other than standard debug/release, tablets, Wear, TV, Automotive, or XR.
 
 ## Relevant Files
 
 ### Expected Read Files
 
-- `docs/workflow.md`
-- `handoff/coding-window-prompt.md`
-- `handoff/code-review-window-prompt.md`
-- `handoff/task-review-window-prompt.md` only to verify ownership boundaries
-- `handoff/git-snapshot-window-prompt.md` only to verify no second snapshot is introduced
-- `handoff/issue-log.md` entry `ISSUE-20260909-002`
+- `docs/adr/0001-android-foundation.md`
+- `docs/architecture.md` Android and offline sections
+- `docs/mvp.md` Phase 1A Android scope
+- `.gitignore`
+- repository root layout and existing build conventions
+- Android official compatibility documentation routed by the ADR
 
 ### Allowed Modify Files
 
-- `docs/workflow.md`
-- `handoff/coding-window-prompt.md`
-- `handoff/code-review-window-prompt.md`
+- `android/**`
+- `.gitignore`
 - `handoff/current-task.md`
-- `handoff/issue-log.md`
-- `tasks/TASK-026-workflow-rework-admission.md`
+- `tasks/TASK-027-android-compose-foundation.md`
 
 ### Forbidden Modify Files
 
 - `backend/**`
 - `web/**`
-- Android or other client code
 - `docs/requirements.md`
 - `docs/architecture.md`
 - `docs/mvp.md`
 - `docs/api-phase1a.md`
 - `docs/data-model-phase1.md`
-- completed `tasks/TASK-001` through `tasks/TASK-025` archives
-- `handoff/task-review-gate.md`
-- `handoff/code-review-gate.md`
-- `handoff/git-snapshot.md`
-- `handoff/git-commit.md`
+- `docs/phase1a-progress.md`
+- `docs/phase1a-completion-audit.md`
+- `docs/adr/0001-android-foundation.md`
+- `handoff/project-state.md`
+- completed task archives through TASK-026
+- workflow prompts and gate result files
 
 ## Implementation Requirements
 
-1. Keep the initial Coding gate unchanged: both active task records must already be `IN_PROGRESS`, Task Review must be PASS, Git Snapshot must be COMPLETE, and branch/HEAD must satisfy the snapshot baseline.
-2. Add an alternative rework-admission gate that is valid only when both active task records identify the same task and both are `CHANGES_REQUESTED`.
-3. Rework admission must additionally require Task Review PASS, Git Snapshot COMPLETE for the same task, Code Review Gate `Result: CHANGES_REQUESTED` and `Target Status: CHANGES_REQUESTED` for the same task, at least one actionable blocking finding persisted for that task, the snapshot branch, and `HEAD` still equal to the recorded Snapshot Commit.
-4. Coding owns the transition only after all rework preconditions pass. It must update both active task records to `IN_PROGRESS` and route to Coding before touching implementation files.
-5. If both status records cannot be synchronized, Coding must not modify implementation files or claim admission. It must report BLOCKED with the observed partial/mismatched state for Decision repair; it must not silently overwrite unrelated content.
-6. Rework admission must not reset or erase `handoff/code-review-gate.md`, remove issue evidence, repeat Task Review, or create another Git Snapshot.
-7. After admission, Coding fixes only the Code Review blocking findings unless Decision explicitly expands scope, then runs required verification and returns both task records to `REVIEWING`.
-8. Code Review remains owner of `REVIEWING -> CHANGES_REQUESTED` and must route the next role to Coding without pre-moving the task to `IN_PROGRESS`.
-9. Direct Coding entry from `PLANNED`, `READY`, `REVIEWING`, `COMPLETED`, `CANCELLED`, or an unapproved `BLOCKED` state remains forbidden.
-10. `docs/workflow.md`, `handoff/coding-window-prompt.md`, and `handoff/code-review-window-prompt.md` must use the same transition owner and gate semantics.
+1. Prefer stable Android Studio/SDK packages. Record exact installed versions and paths; do not use preview/canary components.
+2. Use the repository Gradle Wrapper for every build. Do not depend on a system `gradle` command or unpinned dynamic versions.
+3. Keep generated/local files out of Git, including `local.properties`, `.gradle/`, `.idea/`, module/root `build/`, captures, APK output, emulator data, and signing material.
+4. The committed project must build with the installed JDK 21 while explicitly targeting Java/Kotlin 17 bytecode/toolchain semantics.
+5. The default debug API base must be `http://10.0.2.2:8000/api/v1/`. Permit an override through a non-secret Gradle/local property such as `LIFEOS_API_BASE_URL`; never commit a machine LAN IP.
+6. Normalize and validate the configured base URL, including required scheme and trailing slash. Do not add network calls in this task.
+7. Debug may opt into cleartext HTTP solely for local development. Release must not inherit broad cleartext permission and must fail configuration or use an HTTPS placeholder when given HTTP.
+8. The first screen must be a usable app shell, not a marketing page: LifeOS identity, a restrained top bar, and a stable content area ready for the next identity task. It must support system light/dark theme, font scaling, and accessibility semantics.
+9. Keep UI state and dimensions stable at a common phone viewport and a narrow phone viewport; no overlap, clipping, or horizontal overflow.
+10. Add deterministic unit tests for API-base normalization/validation and at least one Compose UI smoke test for visible app identity/content semantics.
+11. Run Wrapper verification, unit tests, lint, and debug assembly. If an emulator can run, install the APK, launch it, inspect logcat for fatal errors, and capture evidence at normal and narrow phone profiles.
+12. If Android Studio installation, SDK license acceptance, WHPX/virtualization, or device authorization requires user interaction, stop only that external step with exact evidence; continue every independent repository/build check that remains possible.
 
 ## Acceptance Criteria
 
-- [ ] The correction-flow diagram explicitly names Coding as owner of `CHANGES_REQUESTED -> IN_PROGRESS`.
-- [ ] Initial Coding still requires synchronized `IN_PROGRESS`, Task Review PASS, Git Snapshot COMPLETE, and matching branch/HEAD.
-- [ ] Rework Coding can start from synchronized `CHANGES_REQUESTED` without intervention from an unspecified role.
-- [ ] Rework admission verifies matching task IDs and statuses across both active task records and all relevant gates.
-- [ ] A matching Code Review CHANGES_REQUESTED result and actionable blocking findings are mandatory.
-- [ ] Coding synchronizes both task records to `IN_PROGRESS` before implementation edits.
-- [ ] Partial or mismatched transition state blocks implementation and is routed to Decision for repair.
-- [ ] Code Review evidence remains intact until re-review; Coding cannot self-approve or clear the gate.
-- [ ] Rework does not repeat Task Review or create a second Git Snapshot.
-- [ ] Rework scope is limited to blocking findings unless Decision explicitly expands it.
-- [ ] Coding returns both task records to `REVIEWING` after fixes and verification.
-- [ ] Code Review prompt routes CHANGES_REQUESTED directly to Coding under the guarded admission rules.
-- [ ] All other invalid status entries remain blocked.
-- [ ] Workflow and role prompts agree, and searches find no remaining rule requiring an unidentified role to pre-move rework to `IN_PROGRESS`.
-- [ ] No business, product-contract, dependency, or completed-task archive file is modified.
-- [ ] `git diff --check` and independent new-file whitespace checks pass.
+- [ ] `android/` is a valid single-module Kotlin/Compose project with no generated IDE project noise committed.
+- [ ] Namespace and application ID are exactly `com.bpn0416.lifeos`.
+- [ ] `minSdk`, `compileSdk`, and `targetSdk` are exactly 26, 36, and 36.
+- [ ] Plugin and dependency versions are pinned; Gradle Wrapper files are committed and used successfully.
+- [ ] Build runs with local JDK 21 and Java/Kotlin target/toolchain level 17.
+- [ ] Debug API base defaults to `http://10.0.2.2:8000/api/v1/` and supports a non-committed LAN override.
+- [ ] Invalid API base values fail safely; no token, LAN IP, secret, or user-specific absolute path is committed.
+- [ ] Cleartext local HTTP is debug-only and release does not permit broad cleartext traffic.
+- [ ] The launch activity renders a nonblank LifeOS Compose shell with stable light/dark behavior and accessibility semantics.
+- [ ] Normal and narrow phone checks show no overlap, clipping, horizontal overflow, or unreadable text.
+- [ ] Unit tests and Compose UI smoke tests pass.
+- [ ] `gradlew.bat lintDebug`, `testDebugUnitTest`, and `assembleDebug` pass.
+- [ ] An API 36 AVD and `adb` installation/launch result are evidenced, or the exact external virtualization/authorization blocker is recorded without a false success claim.
+- [ ] Android setup documentation includes SDK requirements, Wrapper commands, emulator run, LAN override, and backend `0.0.0.0` requirement for a physical device.
+- [ ] `.gitignore` excludes local Android SDK, IDE, build, APK, capture, emulator, and signing artifacts.
+- [ ] No backend, PC Web, stable contract, completed task archive, auth, Todo, sync, reminder, or other out-of-scope change is included.
+- [ ] `git diff --check`, staged checks, artifact checks, and secret scans pass.
 
 ## Verification Plan
 
-- Compare the state diagram, ownership rules, Coding gate, Coding state updates, and Code Review CHANGES_REQUESTED instructions.
-- Exercise a textual transition matrix for initial `IN_PROGRESS`, valid `CHANGES_REQUESTED`, mismatched task/status, missing gate evidence, partial synchronization, and post-fix `REVIEWING` paths.
-- Search for stale wording such as requiring rework to be pre-moved by an unnamed role.
-- Confirm no second Task Review or Git Snapshot is required for ordinary rework.
-- Confirm the diff contains only Allowed Modify Files and no completed task archive changes.
-- Run `git diff --check`, `git diff --cached --check`, and independent whitespace checks for untracked files.
+- Record exact Java, Android Studio, SDK, build-tools, platform-tools, emulator, system-image, Gradle Wrapper, AGP, Kotlin, and Compose versions.
+- Run `android/gradlew.bat --version`, `testDebugUnitTest`, `lintDebug`, and `assembleDebug` from the repository.
+- Inspect Gradle dependency/plugin declarations for dynamic versions and unexpected repositories.
+- Verify package, SDK levels, Java/Kotlin target, API-base default/override, and debug/release cleartext separation.
+- Run unit and Compose UI smoke tests.
+- Use `adb devices -l`, AVD inventory, APK install, activity launch, screenshot/pixel inspection, and filtered logcat when an emulator/device is available.
+- Inspect normal and narrow rendering, font scaling, dark theme, semantics, and overflow.
+- Inspect exact Git status/diff, ignored/generated files, whitespace, credentials, absolute paths, LAN addresses, and signing files.
 
 ## Risks
 
-- An overly broad alternative gate could let Coding bypass initial Task Review or Git Snapshot.
-- Clearing Code Review evidence during admission could make re-review unverifiable.
-- Updating only one task record would leave routing ambiguous.
-- Repeating Git Snapshot after implementation changes could accidentally publish unreviewed code.
+- SDK and emulator downloads are large and may require interactive license acceptance.
+- Windows virtualization/WHPX may require a reboot or system setting outside repository work.
+- A fresh API 36 image may require substantial RAM and disk space.
+- Over-scaffolding architecture before identity/sync requirements are implemented would create avoidable abstraction.
+- Broad cleartext configuration could leak into release builds if variant ownership is not explicit.
 
 ## Coding Output Requirements
 
-Report modified files, final transition ownership, initial/rework gate matrix, dual-status synchronization behavior, mismatch/partial-failure behavior, evidence preservation, no-second-snapshot rule, stale-rule searches, exact-scope checks, whitespace results, unresolved issues, and next role.
+Report environment changes and exact versions/paths, modified files, package/SDK/toolchain settings, Wrapper/plugin/dependency versions, API-base and cleartext strategy, app-shell behavior, accessibility/responsive evidence, tests/lint/build, AVD/adb/install/launch/logcat/screenshot evidence or exact limitation, ignored/generated files, diff/whitespace/artifact/secret checks, unresolved issues, and next role.
 
 ## Current Stage
 
-Next role: Git Commit (Terminal Closure Commit)
+Next role: Git Snapshot
 
-Closure Check: PASS
-
-Checked at: 2026-09-10 09:51 +08:00
-
-Result Commit: `2b813497aa9a0742c3943082e309c9447f554a6a`
-
-Completion Commit: `39152210143d5f0e0c9ce63efe5f03187b182c12`
-
-Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `39152210143d5f0e0c9ce63efe5f03187b182c12` before these closure-document edits.
-
-Working Tree Before Closure Docs: clean; no staged or untracked files.
-
-Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-026-workflow-rework-admission.md` with message `docs(task): close TASK-026`; then return control to Decision. This terminal Closure Commit ends TASK-026 and must not trigger another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for the approved ten-file TASK-027 publication/readiness scope. Do not install Android tooling or start Coding before Git Snapshot completes.

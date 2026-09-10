@@ -1,25 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-09-09
+Last updated: 2026-09-10
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-026
+Task ID: TASK-027
 
-Branch: main
+Branch: Pending
 
-Base Commit: `b2d019793924c071c004bf50a8fe0026f0f48949`
+Base Commit: `0856e2896f4278938a9339e2b638ceb6e132968d`
 
-Working Tree: 9 approved TASK-026 pre-Coding publication and active workflow-state documents committed separately; no business code
+Working Tree: TASK-027 publication and Decision-owned audit/ADR documents pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: `c35a5d5608c94871bccb30ea8d9ad6ea5cf60a5e`
+Snapshot Commit: Pending
 
-Reason: approved TASK-026 readiness documents required a durable pre-Coding baseline
+Reason: Pending Task Review PASS
 
 ## Instructions
 
-Run only after Task Review PASS. Record a clean baseline or commit only the exact approved TASK-026 publication/readiness files, then synchronize both task files to `IN_PROGRESS` and route to Coding.
+Run only after Task Review PASS. Record a clean baseline or commit only the exact approved TASK-027 publication/readiness files, then synchronize both task files to `IN_PROGRESS` and route to Coding.
