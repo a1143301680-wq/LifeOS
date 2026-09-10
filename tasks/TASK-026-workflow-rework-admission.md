@@ -123,4 +123,44 @@ Remove the `CHANGES_REQUESTED -> IN_PROGRESS` deadlock by making Coding own a na
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-09-10 09:51 +08:00
+
+Result Commit: `2b813497aa9a0742c3943082e309c9447f554a6a`
+
+Completion Commit: `39152210143d5f0e0c9ce63efe5f03187b182c12`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `39152210143d5f0e0c9ce63efe5f03187b182c12` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+### Independent Verification
+
+- Textual admission/transition matrix: PASS, 16/16 checks after correcting the verifier to evaluate `rg` exit codes.
+- Workflow source, Coding prompt, and Code Review prompt consistently assign guarded rework admission to Coding.
+- Initial Coding admission remains separately protected by synchronized `IN_PROGRESS`, Task Review PASS, completed Snapshot, matching branch, and Snapshot Commit HEAD.
+- Valid rework requires synchronized `CHANGES_REQUESTED`, matching review/baseline evidence, and an actionable blocking finding before dual-record transition and implementation edits.
+- Mismatched or partial transition state blocks implementation and routes to Decision; review evidence is retained and no second Task Review or Git Snapshot is introduced.
+- `git diff --check` at the published completion HEAD: PASS.
+- Code Review: PASS with no blocking findings.
+- All 16 acceptance criteria were confirmed from the published rules, Code Review evidence, and independent verification.
+
+### Issue Disposition
+
+- `ISSUE-20260909-002` is `verified`; the workflow no longer requires an unidentified role to pre-move a rejected task to `IN_PROGRESS`.
+- No unresolved TASK-026 P0, P1, or P2 issue is recorded in `handoff/issue-log.md`.
+- The Code Review suggestion to keep the matrix synchronized with future role/gate changes is non-blocking maintenance guidance, not an open defect.
+
+### Remaining Follow-ups
+
+- Re-audit remaining PC Web Phase 1A gaps after the terminal Closure Commit.
+- Apply the corrected guarded rework path when a future Code Review returns `CHANGES_REQUESTED`.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-026-workflow-rework-admission.md`.
+- Recommended commit message: `docs(task): close TASK-026`.
+- After push and remote-parity verification, return to Decision without another Closure Check.

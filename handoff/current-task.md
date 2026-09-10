@@ -136,6 +136,18 @@ Report modified files, final transition ownership, initial/rework gate matrix, d
 
 ## Current Stage
 
-Next role: Decision
+Next role: Git Commit (Terminal Closure Commit)
 
-Required next action: run Decision Closure Check for TASK-026 after verifying result commit `2b813497aa9a0742c3943082e309c9447f554a6a` and the Git Commit completion record.
+Closure Check: PASS
+
+Checked at: 2026-09-10 09:51 +08:00
+
+Result Commit: `2b813497aa9a0742c3943082e309c9447f554a6a`
+
+Completion Commit: `39152210143d5f0e0c9ce63efe5f03187b182c12`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `39152210143d5f0e0c9ce63efe5f03187b182c12` before these closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged or untracked files.
+
+Required next action: commit and push only `docs/phase1a-progress.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-026-workflow-rework-admission.md` with message `docs(task): close TASK-026`; then return control to Decision. This terminal Closure Commit ends TASK-026 and must not trigger another Closure Check.

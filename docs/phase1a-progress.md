@@ -66,7 +66,7 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 ## Recommended Task Order
 
-1. Resolve TASK-026 workflow rework-admission ownership before the next business Coding task.
+1. Publish the exact-scope TASK-026 terminal Closure Commit, then return to Decision.
 2. Re-audit remaining PC Web Phase 1A gaps.
 3. Build Android Phase 1A client slices.
 4. Run PC/Android end-to-end Phase 1A acceptance.
