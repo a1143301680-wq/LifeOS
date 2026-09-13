@@ -4,21 +4,21 @@ Last updated: 2026-09-10
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-027
 
-Branch: Pending
+Branch: main
 
 Base Commit: `0856e2896f4278938a9339e2b638ceb6e132968d`
 
-Working Tree: TASK-027 publication and Decision-owned audit/ADR documents pending Task Review
+Working Tree: 10 approved TASK-027 pre-Coding publication/readiness documents committed separately; no business code
 
-Snapshot Commit Created: Pending
+Snapshot Commit Created: Yes
 
-Snapshot Commit: Pending
+Snapshot Commit: `cdfcf2befe7e8cb63ae4195e6df1e00d998c3bd9`
 
-Reason: Pending Task Review PASS
+Reason: approved TASK-027 readiness documents required a durable pre-Coding baseline
 
 ## Instructions
 

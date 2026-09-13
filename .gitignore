@@ -13,3 +13,17 @@ web/test-results/
 web/playwright-report/
 web/.env*
 !web/.env.example
+
+# Android local and generated files
+android/.gradle/
+android/.idea/
+android/.kotlin/
+android/local.properties
+android/**/build/
+android/captures/
+android/.android/
+android/**/*.iml
+android/**/*.apk
+android/**/*.aab
+android/**/*.jks
+android/**/*.keystore

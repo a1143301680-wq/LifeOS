@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 ## Metadata
 
 - Task ID: TASK-027
 - Task Name: Android toolchain and runnable Compose foundation
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
@@ -171,6 +171,6 @@ Report environment changes and exact versions/paths, modified files, package/SDK
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for the approved ten-file TASK-027 publication/readiness scope. Do not install Android tooling or start Coding before Git Snapshot completes.
+Required next action: publish the exact Code Review-approved TASK-027 Android foundation with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.
