@@ -6,7 +6,7 @@ Last updated: 2026-09-11
 
 - Task ID: TASK-027
 - Task Name: Android toolchain and runnable Compose foundation
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
@@ -171,6 +171,6 @@ Report environment changes and exact versions/paths, modified files, package/SDK
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the exact Code Review-approved TASK-027 Android foundation with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.
+Required next action: run Decision Closure Check for TASK-027 after verifying result commit `629bf710b7650938d8a42d16507f8add4b854b3c` and the Git Commit completion record.
