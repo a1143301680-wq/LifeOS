@@ -91,6 +91,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-027 Android toolchain and runnable Compose foundation was published with package, SDK-level, build, and local API-address decisions in `docs/adr/0001-android-foundation.md`.
 - TASK-027 Android runnable Compose foundation completed in result commit `629bf71`; Code Review: PASS; Android unit tests, lint, build, instrumentation, install, launch, and rendering checks passed.
 - TASK-027 Decision Closure Check passed on 2026-09-15; terminal Closure Commit is authorized for the five listed state/progress documents.
+- TASK-027 terminal Closure Commit `658f800` was published and the task workflow ended.
+- TASK-028 Android identity validation and token persistence was published as the next bounded Phase 1A Android slice.
 
 ## Recently Completed
 
@@ -139,7 +141,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-027 terminal Closure Commit using the exact five-file allowlist in `handoff/current-task.md`. After remote parity is verified, return to Decision to publish the Android identity validation and token-persistence slice.
+Run Task Review for TASK-028 Android identity validation and token persistence. Live routing and the exact task boundary are maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

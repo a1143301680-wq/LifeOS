@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-09-10
+Last updated: 2026-09-15
 
 ## Gate Status
 
@@ -10,19 +10,17 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-09-10 10:58 +08:00
+Reviewed at: 2026-09-15 10:18 +08:00
 
-Reviewed task: TASK-027 Android toolchain and runnable Compose foundation
+Reviewed task: TASK-028 Android identity validation and token persistence
 
 ## Required Review
 
-- [x] Toolchain absence is understood and safely included in task scope.
-- [x] Package, SDK levels, JVM target, Gradle Wrapper, and pinned-version decisions are coherent.
-- [x] Emulator and physical-device API-base strategies are explicit and do not commit a LAN IP.
-- [x] Debug/release cleartext separation is verifiable.
-- [x] The runnable Compose foundation is one closeable slice without identity, Todo, or sync scope.
-- [x] Build, lint, tests, AVD/install/launch, responsive, artifact, and secret checks are executable or have precise conditional handling.
-- [x] Branch, HEAD, worktree, staged changes, whitespace, and Snapshot readiness are persisted.
+- [x] Goal, contract, scope, exclusions, and dependencies are coherent.
+- [x] Token persistence, 401, recoverable error, startup, retry, switch, and stale-request rules are unambiguous.
+- [x] Acceptance criteria and verification are executable without exposing a real token.
+- [x] Allowed files fit one closeable identity slice and exclude later Android work.
+- [x] Branch, HEAD, worktree, staged state, diff check, and Git Snapshot readiness are persisted.
 
 ## Issues
 
@@ -33,17 +31,19 @@ None.
 ### Repository State
 
 - Branch: `main`
-- HEAD: `0856e2896f4278938a9339e2b638ceb6e132968d`
-- Upstream: `origin/main` at the same commit
-- Dependency check: TASK-026 terminal Closure Commit `0856e28` is the current HEAD.
-- Worktree summary before this review: 8 modified tracked files and 2 untracked files; all are TASK-027 Decision publication/readiness records.
-- Staged changes: None.
-- `git diff --check`: exit code 0. Git emitted LF-to-CRLF conversion warnings only; no whitespace errors were reported.
+- HEAD: `658f8003f84622d807094b2b13ab0d3594ca3d03`
+- origin/main: `658f8003f84622d807094b2b13ab0d3594ca3d03`
+- Remote `refs/heads/main`: `658f8003f84622d807094b2b13ab0d3594ca3d03`
+- Dependency check: TASK-027 terminal Closure Commit `658f800` is current local, tracking, and remote baseline.
+- Worktree Summary before this review: 7 modified tracked files and 1 untracked task archive; all are TASK-028 Decision publication, gate reset, and project-state/progress routing files.
+- Staged Changes: None.
+- `git diff --check`: exit code 0. Git emitted LF-to-CRLF working-copy warnings only; no whitespace errors were reported.
 - `git diff --cached --check`: exit code 0.
+- Untracked-file whitespace/EOF check: PASS for `tasks/TASK-028-android-identity-validation.md`.
+- Issue-log search for TASK-028 and unresolved/blocking markers: no matches.
 
 ### Changed Files
 
-- `docs/phase1a-completion-audit.md`
 - `docs/phase1a-progress.md`
 - `handoff/code-review-gate.md`
 - `handoff/current-task.md`
@@ -51,39 +51,36 @@ None.
 - `handoff/git-snapshot.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
-- `docs/adr/0001-android-foundation.md` (untracked)
-- `tasks/TASK-027-android-compose-foundation.md` (untracked)
+- `tasks/TASK-028-android-identity-validation.md` (untracked)
 
-The diff records TASK-026 closure, publishes TASK-027, resets the active gates for the new task, and introduces the Android foundation ADR and task archive. No backend, PC Web, Android implementation, workflow implementation, product contract, dependency output, credential, signing material, or generated build artifact is present.
+These eight files are the TASK-028 publication/readiness set. The diff resets the active gates and Git records from TASK-027 to TASK-028, updates project/progress routing after TASK-027 closure, and publishes the TASK-028 archive. No Android implementation, backend, PC Web, stable contract, completed task archive, generated build output, signing material, real LAN address, machine path, or raw credential is included.
 
-### Scope And Contract Review
+### Routed File Review
 
-- The task is one closeable foundation slice: install and pin the Android toolchain, create the single-module Compose project, prove build/test/lint, and produce a nonblank launchable shell. Identity, networking behavior, Todo behavior, local cache, sync, reminders, backend, and PC Web changes are explicitly excluded.
-- The package and SDK baseline is internally consistent: `com.bpn0416.lifeos`, `minSdk 26`, `compileSdk 36`, and `targetSdk 36`. Exact compatible plugin and library versions must be selected and pinned during Coding rather than left floating.
-- Java/Kotlin bytecode target 17 is distinct from the Gradle runtime. The available JDK 21 may run a compatible Gradle/AGP pair while source and target compatibility remain 17.
-- The emulator base URL `http://10.0.2.2:8000/api/v1/` is the Android Emulator host-loopback alias. A physical-device LAN URL is an uncommitted local override; no real LAN address is present in the publication.
-- Cleartext access is restricted to debug configuration and must be rejected by release configuration. The acceptance plan includes a release-side verification rather than relying on convention alone.
-- The absent Android Studio, SDK, platform tools, emulator, and AVD are explicit implementation work for this task, not an unstated prerequisite. AVD/install/launch evidence is required where the environment permits; otherwise the task requires the exact external blocker and completion of all unaffected checks.
-- Official compatibility review confirms that API 36 requires Android Studio Meerkat 2024.3.1 Patch 1 or newer and AGP 8.9.1 or newer; the current stable Android Studio supports compatible stable AGP versions. Android Gradle Plugin requires at least JDK 17, and Google Play now requires new apps and updates to target API 36 or higher. These constraints are compatible with the task baseline.
-- Official evidence: `https://developer.android.com/studio/releases/`, `https://developer.android.com/build/releases/agp-9-0-0-release-notes`, `https://developer.android.com/build/jdks`, and `https://developer.android.com/google/play/requirements/target-sdk`.
-- Emulator and cleartext evidence: `https://developer.android.com/studio/run/emulator-networking-address` and `https://developer.android.com/privacy-and-security/security-config`.
-- Test and verification requirements cover JVM unit tests, Compose UI smoke tests, lint, debug assembly, generated APK inspection, responsive rendering, accessibility, ignored/generated artifacts, absolute paths, LAN IPs, signing material, secrets, and install/launch/logcat evidence when available.
+- `docs/api-phase1a.md` confirms token-derived identity, `Authorization: Bearer <identity_token>`, no client-supplied `user_id`, `401 unauthorized` for invalid tokens, manual Android token storage in DataStore, and the `GET /api/v1/me` response envelope with UUID, alias, display name, and timezone.
+- `docs/architecture.md` confirms Android stores selected identity locally while backend resolves `user_id` from the bearer token and filters all data by the resolved user.
+- `docs/data-model-phase1.md` confirms server-side `bootstrap_token_hash` storage and Android DataStore usage for selected identity/settings. The server table rule that raw bootstrap tokens are not stored in plaintext is compatible with the API contract's client-side DataStore storage requirement; TASK-028 records app-private unencrypted-at-rest DataStore as an accepted Phase 1A residual risk.
+- `docs/adr/0001-android-foundation.md` and the current Android project confirm the fixed package, API 26/36/36 baseline, debug `10.0.2.2` API base, release HTTPS-only guard, and no committed real LAN address.
+- `android/app/src/main/AndroidManifest.xml`, `backup_rules.xml`, and `data_extraction_rules.xml` confirm the existing backup-disabled boundary that TASK-028 relies on.
 
-### Environment And File Checks
+### Start-Readiness Review
 
-- PowerShell: 7.6.5.
-- Java/Javac: 21.0.10 via `JAVA_HOME=D:\tool\Java\Java21`.
-- Android Studio, Android SDK variables, `adb`, `emulator`, `sdkmanager`, `avdmanager`, and local AVDs: not currently available.
-- Host: approximately 15.4 GB RAM with a running hypervisor; Decision recorded sufficient free space on C and D.
-- Both untracked files were checked independently because `git diff --check` does not cover them. Neither has trailing whitespace or an extra blank line at EOF.
-- PCRE2 credential, real-LAN-IP, absolute-user-path, signing-file, and tracked Android generated-artifact scans found no matches.
-- `.gitignore` does not yet contain Android-specific exclusions; adding the required exclusions is explicitly allowed and required during Coding.
-- No unresolved TASK-027 entry exists in `handoff/issue-log.md`.
+- The task is one closeable Android identity slice: token entry, `/me` validation, strict envelope parsing, app-private DataStore persistence, startup revalidation, 401 clear, recoverable retry, explicit switch identity, stale request ownership, UI states, and focused tests.
+- Scope boundaries are explicit. Todo, category, Today, Room/cache, sync/SSE, WorkManager, offline writes, reminders, widgets, notifications, backend, PC Web, stable contract docs, completed archives, dynamic dependency changes, real LAN addresses, signing material, and generated output are excluded.
+- The raw-token storage decision is explicit and bounded: persist only after successful `/me`, clear on 401 or switch, keep out of backup/device transfer, never expose through URL/body/query/log/error/screenshot/report, and record the compromised/rooted-device risk.
+- Acceptance criteria and verification are executable without a real token because mocked/fake or MockWebServer coverage is mandatory; any optional live-backend smoke test requires a disposable token and must avoid repository, command history, logs, screenshots, reports, and chat.
+- Verification covers unit tests, DataStore isolation, state transitions, stale/duplicate/cancel behavior, instrumentation/UI coverage, wrapper tests, lint, debug/release builds, install/launch, responsive/accessibility checks, exact-scope review, dependency pinning, artifact scans, token-like string checks, URL/LAN/path/signing scans, and debug-log inspection.
+- Current publication status is coherent: both active task records identify TASK-028 as `PLANNED`, the Task Review gate is pending before this update, Git Snapshot/Git Commit are pending for TASK-028, and Code Review is reset to pending.
+
+### Artifact And Secret Checks
+
+- Checked publication files for trailing whitespace, missing final newline, and extra EOF blank lines: PASS.
+- PCRE2 scans for private-key markers, API-key patterns, bearer-token literals, realistic token assignments, real private LAN IPs other than the documented emulator `10.0.2.2`, absolute user paths, signing files, APK/AAB names, `local.properties`, and generated-output markers: PASS. Human-readable terms such as "token", "password-style", and "secret evidence" are documentation requirements, not credentials.
 
 ### Git Snapshot Readiness
 
-READY. The next role is Git Snapshot. Its approved pre-Coding snapshot scope is exactly the ten files listed under Changed Files. Git Snapshot must independently verify the same branch, HEAD, staged state, diff, whitespace, scope, and secret/artifact conditions before creating the snapshot. Task Review did not install tooling, modify Android or workflow implementation, stage files, commit, or push.
+READY. The next role is Git Snapshot. Its approved pre-Coding snapshot scope is exactly the eight files listed under Changed Files, including this Task Review PASS update and the synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-028-android-identity-validation.md`. Git Snapshot must independently verify branch, HEAD, staged state, exact scope, whitespace, artifact, and secret conditions before creating or recording the baseline.
 
 ## Instructions
 
-Review TASK-027 independently. Keep both task files `PLANNED` on REJECT or move both to `READY` on PASS. Do not install Android tooling, start Git Snapshot/Coding, stage, commit, or push during review.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-028 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.

@@ -4,181 +4,129 @@ Last updated: 2026-09-15
 
 ## Metadata
 
-- Task ID: TASK-027
-- Task Name: Android toolchain and runnable Compose foundation
-- Status: COMPLETED
+- Task ID: TASK-028
+- Task Name: Android identity validation and token persistence
+- Status: READY
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
-  - TASK-026 terminal Closure Commit published in `0856e28`
-  - Phase 1A backend and stable API contract complete
-  - PC Web Phase 1A client scope complete through TASK-025
-  - Local JDK 21.0.10 available at `D:\tool\Java\Java21`
+  - TASK-027 terminal Closure Commit `658f800`
+  - Android foundation result `629bf71`
+  - Stable `/api/v1/me` contract and backend implementation from baseline `6a85b4a`
 
-## Decision
+## Background
 
-Create the first Android vertical slice as a reproducible development toolchain plus a buildable, installable, nonblank Jetpack Compose application. Do not add identity or Todo behavior yet. The next task will build identity validation on this verified foundation.
-
-Long-lived Android baseline decisions are recorded in `docs/adr/0001-android-foundation.md`:
-
-- namespace/application ID: `com.bpn0416.lifeos`
-- Kotlin + Jetpack Compose, Gradle Kotlin DSL
-- `minSdk 26`, `compileSdk 36`, `targetSdk 36`
-- Java source/toolchain level 17; Gradle may run on the installed JDK 21
-- committed Gradle Wrapper with pinned plugin/dependency versions
-- emulator debug API default: `http://10.0.2.2:8000/api/v1/`
-- physical-device debug API: non-committed override to the PC LAN address
-- cleartext HTTP permitted only for debug builds; release builds reject cleartext base URLs
-
-## Environment Baseline
-
-Checked by Decision on 2026-09-10:
-
-- JDK/Javac: 21.0.10, available and selected by `JAVA_HOME`
-- System Gradle: not on PATH; Gradle 8.14.3 distributions are cached, but TASK-027 must commit and use its own Wrapper
-- Android Studio: not found in system or user-level common installation locations
-- Android SDK: not found; `ANDROID_HOME` and `ANDROID_SDK_ROOT` are unset
-- `adb`, `emulator`, `sdkmanager`, `avdmanager`: not on PATH
-- Android AVD: unavailable because the SDK/emulator is absent
-- Physical Android/ADB device: none detected; debugging authorization cannot be verified without `adb`
-- Host capacity: 15.4 GB RAM; approximately 239.7 GB free on C and 113.3 GB free on D
-- Windows hypervisor: detected and running; individual optional-feature state requires elevation and remains to be proven by an actual emulator launch
-
-The missing Android toolchain is an explicit part of this bootstrap task, not an unknown prerequisite. Coding may install the selected stable Android Studio/SDK components, but must not change unrelated system software or claim emulator/device success without direct evidence.
+TASK-027 established a reproducible API 36 Compose application and verified the emulator, build, network-security, and API-base configuration. The Android client still has no authenticated identity. Phase 1A uses manually provisioned long-lived bootstrap tokens; the bearer token, not a visible alias or client-supplied `user_id`, determines the current user.
 
 ## Goal
 
-Produce a reproducible `android/` project that builds from the repository with its Gradle Wrapper, installs and launches on an available API 36 emulator, renders a compact LifeOS foundation screen without crashing or overflow, and documents the exact local setup and API-base override path for later Android tasks.
+Deliver a runnable Android identity flow that accepts a bootstrap token, validates it with `GET /api/v1/me`, persists only a validated identity session in app-private Preferences DataStore, restores and revalidates it after restart, and provides safe retry and identity-switch behavior.
 
-## Scope
+## In Scope
 
-### In Scope
+- Add the Android `INTERNET` permission and a typed `/me` client using the existing `BuildConfig.API_BASE_URL`.
+- Use pinned, toolchain-compatible OkHttp and Kotlinx Serialization dependencies for bearer HTTP and structured response parsing.
+- Use pinned Preferences DataStore for the raw token and validated identity metadata: UUID, alias, display name, and timezone.
+- Use a lifecycle-aware ViewModel/state holder with explicit loading, disconnected, validating, connected, recoverable-error, and unauthorized states.
+- Add a password-style token entry, connect/retry actions, validated identity display, and a clear/switch-identity action.
+- Add deterministic unit/instrumentation coverage, responsive/accessibility verification, and concise Android run documentation.
 
-- Install or locate a stable Android development toolchain compatible with API 36 and the pinned project build.
-- Install Android SDK Platform 36, compatible Build Tools, Platform Tools, Emulator, and one API 36 x86_64 phone system image.
-- Create and validate one reusable LifeOS API 36 phone AVD when Windows virtualization permits.
-- Add a single-module `android/` Kotlin/Jetpack Compose application using Gradle Kotlin DSL.
-- Commit Gradle Wrapper scripts/JAR/properties and pin every plugin/dependency version.
-- Configure namespace and application ID `com.bpn0416.lifeos`.
-- Configure `minSdk 26`, `compileSdk 36`, `targetSdk 36`, and Java/Kotlin JVM target 17.
-- Add a small real LifeOS app shell using Material 3 that renders on normal and narrow phone dimensions.
-- Add a typed, validated debug API-base build configuration with emulator default and non-committed LAN override.
-- Restrict cleartext HTTP to debug; release configuration must reject or exclude cleartext endpoints.
-- Add Android-specific ignore rules and setup/build/run documentation.
-- Add focused unit/UI smoke coverage and verify build, lint, install, launch, and nonblank rendering where the environment permits.
+## Out Of Scope
 
-### Out of Scope
-
-- Identity token entry, `/me`, authentication, secure token persistence, logout, or user switching.
-- Retrofit/Ktor API implementation, Todo/category calls, Room cache, sync cursor, SSE, WorkManager, or offline queue.
-- Today, Todo, category, reminder, widget, or notification product behavior.
-- Backend or PC Web modifications.
-- Stable requirements, MVP, architecture, API-contract, or data-model changes beyond the Decision-owned audit/ADR publication files.
-- Release signing, Play Console publication, developer registration, CI/CD, analytics, or crash reporting.
-- Supporting multiple app modules, flavors other than standard debug/release, tablets, Wear, TV, Automotive, or XR.
+- Identity discovery/listing, token generation/rotation, QR import, full login/account flows, biometric gating, and custom token encryption.
+- Todo/category/Today APIs or UI, Room, local entity cache, sync pull, SSE, WorkManager, offline write replay, reminders, widgets, and notifications.
+- Backend, PC Web, stable API/product/architecture/data-model changes, deployment, release server selection, or real LAN addresses.
 
 ## Relevant Files
 
-### Expected Read Files
+- `docs/api-phase1a.md`: sections 2, 4, 5, and 8.1
+- `docs/architecture.md`: Android and identity responsibilities
+- `docs/data-model-phase1.md`: user identity and Android DataStore guidance
+- `docs/adr/0001-android-foundation.md`: fixed Android/toolchain/API-base boundary
+- `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+- `android/app/src/main/java/com/bpn0416/lifeos/`
+- `android/app/src/test/` and `android/app/src/androidTest/`
 
-- `docs/adr/0001-android-foundation.md`
-- `docs/architecture.md` Android and offline sections
-- `docs/mvp.md` Phase 1A Android scope
-- `.gitignore`
-- repository root layout and existing build conventions
-- Android official compatibility documentation routed by the ADR
+## Allowed Files
 
-### Allowed Modify Files
-
-- `android/**`
-- `.gitignore`
-- `handoff/current-task.md`
-- `tasks/TASK-027-android-compose-foundation.md`
-
-### Forbidden Modify Files
-
-- `backend/**`
-- `web/**`
-- `docs/requirements.md`
-- `docs/architecture.md`
-- `docs/mvp.md`
-- `docs/api-phase1a.md`
-- `docs/data-model-phase1.md`
+- `android/build.gradle.kts`
+- `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+- `android/app/src/main/java/com/bpn0416/lifeos/**`
+- `android/app/src/main/res/values/strings.xml`
+- `android/app/src/test/**`
+- `android/app/src/androidTest/**`
+- `android/README.md`
+- `.gitignore` only if a newly introduced local/generated Android artifact requires a narrow exclusion
 - `docs/phase1a-progress.md`
-- `docs/phase1a-completion-audit.md`
-- `docs/adr/0001-android-foundation.md`
-- `handoff/project-state.md`
-- completed task archives through TASK-026
-- workflow prompts and gate result files
+- Active TASK-028 workflow state, gate, Git record, and issue-log files
+
+## Forbidden Files And Changes
+
+- All `backend/**` and `web/**` files
+- Stable contract documents, `docs/adr/0001-android-foundation.md`, and completed task archives
+- Todo, category, Today, Room, sync, SSE, WorkManager, reminder, widget, notification, or offline-write behavior
+- SharedPreferences or ad hoc token files as an alternative to DataStore
+- Deprecated `EncryptedSharedPreferences`, custom cryptography, token-bearing URLs/logs/errors/screenshots/test reports, committed raw tokens, real LAN IPs, machine paths, signing material, or generated build output
+- Dynamic dependency/plugin versions or unapproved SDK/package/API-base changes
 
 ## Implementation Requirements
 
-1. Prefer stable Android Studio/SDK packages. Record exact installed versions and paths; do not use preview/canary components.
-2. Use the repository Gradle Wrapper for every build. Do not depend on a system `gradle` command or unpinned dynamic versions.
-3. Keep generated/local files out of Git, including `local.properties`, `.gradle/`, `.idea/`, module/root `build/`, captures, APK output, emulator data, and signing material.
-4. The committed project must build with the installed JDK 21 while explicitly targeting Java/Kotlin 17 bytecode/toolchain semantics.
-5. The default debug API base must be `http://10.0.2.2:8000/api/v1/`. Permit an override through a non-secret Gradle/local property such as `LIFEOS_API_BASE_URL`; never commit a machine LAN IP.
-6. Normalize and validate the configured base URL, including required scheme and trailing slash. Do not add network calls in this task.
-7. Debug may opt into cleartext HTTP solely for local development. Release must not inherit broad cleartext permission and must fail configuration or use an HTTPS placeholder when given HTTP.
-8. The first screen must be a usable app shell, not a marketing page: LifeOS identity, a restrained top bar, and a stable content area ready for the next identity task. It must support system light/dark theme, font scaling, and accessibility semantics.
-9. Keep UI state and dimensions stable at a common phone viewport and a narrow phone viewport; no overlap, clipping, or horizontal overflow.
-10. Add deterministic unit tests for API-base normalization/validation and at least one Compose UI smoke test for visible app identity/content semantics.
-11. Run Wrapper verification, unit tests, lint, and debug assembly. If an emulator can run, install the APK, launch it, inspect logcat for fatal errors, and capture evidence at normal and narrow phone profiles.
-12. If Android Studio installation, SDK license acceptance, WHPX/virtualization, or device authorization requires user interaction, stop only that external step with exact evidence; continue every independent repository/build check that remains possible.
+1. Normalize manual input by trimming surrounding whitespace; reject an empty value locally. Never show the token again after successful connection.
+2. Call exactly `GET <API_BASE_URL>/me` with `Authorization: Bearer <token>` and `Accept: application/json`. Do not send `user_id`, alias, or token in the URL, body, query, logs, analytics, exception text, or user-facing error details.
+3. Parse the documented data/error envelopes structurally. A successful identity requires a valid UUID and nonblank alias, display name, and timezone. Authorization remains token-derived; persisted alias/UUID are display and future cache-partition metadata only.
+4. Persist the raw token and complete validated identity metadata atomically only after a valid 200 `/me` response. Use one app-private Preferences DataStore owned by a narrowly scoped identity store.
+5. On startup, read DataStore before rendering a final state. If a saved session exists, show a validating/restoring state and revalidate it with `/me`.
+6. A `/me` `401 unauthorized` response clears token and identity metadata atomically and returns to token entry with a concise re-entry message. Explicit switch identity does the same without making a network request.
+7. Network failures, timeouts, malformed responses, and non-401 server errors are recoverable. For an already saved session, retain the session and cached identity metadata, show an unavailable/retry state, and never falsely mark it freshly verified. For a newly entered token, do not persist it until validation succeeds.
+8. Ignore or cancel stale request completion after retry, identity switch, ViewModel disposal, or a newer validation attempt. Duplicate connect/retry actions must not create competing state writes.
+9. Preserve the existing API-base and debug-only cleartext/release HTTPS guarantees. Configure bounded connect/read/call timeouts and close response bodies.
+10. Keep DataStore out of cloud backup/device transfer using the existing backup-disabled application boundary; do not introduce a second credential store. Record app-private unencrypted-at-rest storage as the accepted Phase 1A residual risk.
+11. The operational first screen must support loading, token entry, validation, connected identity, recoverable unavailable/retry, invalid-token re-entry, and explicit switch states in light/dark normal and narrow layouts with large font scale.
+12. Keep the implementation small and testable. Do not scaffold Room, repositories for future entities, navigation graphs, dependency-injection frameworks, or sync abstractions in this task.
 
 ## Acceptance Criteria
 
-- [ ] `android/` is a valid single-module Kotlin/Compose project with no generated IDE project noise committed.
-- [ ] Namespace and application ID are exactly `com.bpn0416.lifeos`.
-- [ ] `minSdk`, `compileSdk`, and `targetSdk` are exactly 26, 36, and 36.
-- [ ] Plugin and dependency versions are pinned; Gradle Wrapper files are committed and used successfully.
-- [ ] Build runs with local JDK 21 and Java/Kotlin target/toolchain level 17.
-- [ ] Debug API base defaults to `http://10.0.2.2:8000/api/v1/` and supports a non-committed LAN override.
-- [ ] Invalid API base values fail safely; no token, LAN IP, secret, or user-specific absolute path is committed.
-- [ ] Cleartext local HTTP is debug-only and release does not permit broad cleartext traffic.
-- [ ] The launch activity renders a nonblank LifeOS Compose shell with stable light/dark behavior and accessibility semantics.
-- [ ] Normal and narrow phone checks show no overlap, clipping, horizontal overflow, or unreadable text.
-- [ ] Unit tests and Compose UI smoke tests pass.
-- [ ] `gradlew.bat lintDebug`, `testDebugUnitTest`, and `assembleDebug` pass.
-- [ ] An API 36 AVD and `adb` installation/launch result are evidenced, or the exact external virtualization/authorization blocker is recorded without a false success claim.
-- [ ] Android setup documentation includes SDK requirements, Wrapper commands, emulator run, LAN override, and backend `0.0.0.0` requirement for a physical device.
-- [ ] `.gitignore` excludes local Android SDK, IDE, build, APK, capture, emulator, and signing artifacts.
-- [ ] No backend, PC Web, stable contract, completed task archive, auth, Todo, sync, reminder, or other out-of-scope change is included.
-- [ ] `git diff --check`, staged checks, artifact checks, and secret scans pass.
+- [ ] A fresh install shows accessible token entry and cannot submit an empty token.
+- [ ] A valid mocked `/me` response stores one validated session and displays server-returned identity metadata.
+- [ ] Restart/process recreation restores the saved session, revalidates it, and reaches connected state without exposing the token.
+- [ ] Every `/me` request uses the bearer header only; no `user_id`, alias, or token appears in URL/body/query/logs/errors.
+- [ ] Invalid/missing authorization clears saved identity on 401 and provides a clear re-entry path.
+- [ ] Recoverable failures retain an existing saved session, do not persist a new unvalidated token, and provide retry without false verified state.
+- [ ] Explicit switch identity atomically clears token and metadata and prevents stale requests from restoring them.
+- [ ] Corrupt, partial, or invalid persisted identity metadata fails closed to token entry without crashing or leaking values.
+- [ ] Unit tests cover URL/header construction, strict envelope parsing, state transitions, persistence rules, 401, recoverable failures, cancellation/stale responses, and duplicate actions.
+- [ ] Instrumentation/UI checks cover DataStore persistence/clear behavior and the principal Compose states on the API 36 AVD.
+- [ ] `testDebugUnitTest`, `lintDebug`, `assembleDebug`, `assembleRelease`, and applicable instrumentation tests pass using `android\gradlew.bat` on JDK 21.
+- [ ] Normal/narrow, light/dark, font-scale, semantics, focus, keyboard, loading, error, retry, and switch controls are usable without clipping or overlap.
+- [ ] Dependency versions are pinned; generated artifacts, credentials, real LAN addresses, machine paths, and out-of-scope changes are absent.
 
 ## Verification Plan
 
-- Record exact Java, Android Studio, SDK, build-tools, platform-tools, emulator, system-image, Gradle Wrapper, AGP, Kotlin, and Compose versions.
-- Run `android/gradlew.bat --version`, `testDebugUnitTest`, `lintDebug`, and `assembleDebug` from the repository.
-- Inspect Gradle dependency/plugin declarations for dynamic versions and unexpected repositories.
-- Verify package, SDK levels, Java/Kotlin target, API-base default/override, and debug/release cleartext separation.
-- Run unit and Compose UI smoke tests.
-- Use `adb devices -l`, AVD inventory, APK install, activity launch, screenshot/pixel inspection, and filtered logcat when an emulator/device is available.
-- Inspect normal and narrow rendering, font scaling, dark theme, semantics, and overflow.
-- Inspect exact Git status/diff, ignored/generated files, whitespace, credentials, absolute paths, LAN addresses, and signing files.
+- Use deterministic fake or MockWebServer responses for valid identity, 401, malformed 200/error envelopes, timeout, connection failure, and non-401 server errors.
+- Test the identity store with isolated DataStore files and verify atomic save/clear, complete-record validation, corruption handling, and no write before successful validation.
+- Test ViewModel/state transitions with controllable requests, including retry, duplicate actions, stale completion, and switch during validation.
+- Run `android\gradlew.bat testDebugUnitTest --rerun-tasks --console=plain`.
+- Run `android\gradlew.bat lintDebug assembleDebug assembleRelease --rerun-tasks --console=plain`.
+- Run focused instrumentation/UI tests on `LifeOS_API_36`, then install and cold-launch the debug APK; inspect crash logs and normal/narrow screenshots when the emulator is available.
+- Optionally smoke-test `/me` against a running local backend only when a disposable raw token can be supplied without writing it to the repository, command history, logs, or chat. Mocked deterministic coverage is mandatory regardless.
+- Inspect exact Git scope, staged state, whitespace, dependency locking, ignored output, APK/resources, token-like strings, URLs, LAN IPs, user paths, signing files, and debug logging.
 
 ## Risks
 
-- SDK and emulator downloads are large and may require interactive license acceptance.
-- Windows virtualization/WHPX may require a reboot or system setting outside repository work.
-- A fresh API 36 image may require substantial RAM and disk space.
-- Over-scaffolding architecture before identity/sync requirements are implemented would create avoidable abstraction.
-- Broad cleartext configuration could leak into release builds if variant ownership is not explicit.
+- A long-lived raw token remains readable to a compromised/rooted device because Phase 1A specifies app-private DataStore without a custom encryption layer.
+- Startup network failure must not be confused with invalid authorization or erase a valid saved session.
+- Async validation can restore stale credentials after identity switch unless request ownership is explicit.
+- UI tests must avoid embedding realistic token material in screenshots or reports.
+- Adding broad networking or architecture layers now could accidentally absorb later Todo/sync scope.
 
 ## Coding Output Requirements
 
-Report environment changes and exact versions/paths, modified files, package/SDK/toolchain settings, Wrapper/plugin/dependency versions, API-base and cleartext strategy, app-shell behavior, accessibility/responsive evidence, tests/lint/build, AVD/adb/install/launch/logcat/screenshot evidence or exact limitation, ignored/generated files, diff/whitespace/artifact/secret checks, unresolved issues, and next role.
+Report modified files, pinned dependency versions, identity-store schema, HTTP request/response behavior, state model, persistence/clear rules, cancellation ownership, security checks, UI/accessibility behavior, unit/instrumentation/build/lint/emulator evidence, optional live-backend limitation, exact diff/artifact/secret checks, unresolved issues, task-outside findings, and next role.
 
 ## Current Stage
 
-Closure Check: PASS
+Next role: Git Snapshot
 
-Checked at: 2026-09-15 10:01 +08:00
-
-Result commit: `629bf710b7650938d8a42d16507f8add4b854b3c`
-
-Completion commit: `7960d02ef578f1fbe4048bfe84cadc521bacc07f`
-
-Next role: Git Commit (Terminal Closure Commit)
-
-Required next action: commit and push only the five Closure-authorized documents with message `docs(task): close TASK-027`, verify remote parity, and return control to Decision. Do not run another Closure Check.
+Required next action: establish the pre-Coding Git Snapshot for the approved TASK-028 publication/readiness scope. Do not start Coding until Git Snapshot completes.
