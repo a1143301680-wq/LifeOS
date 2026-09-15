@@ -27,3 +27,10 @@ android/**/*.apk
 android/**/*.aab
 android/**/*.jks
 android/**/*.keystore
+
+# Local artifact generation scratch/dependencies
+outputs/**/node_modules/
+outputs/**/*.inspect.ndjson
+outputs/**/~$*
+outputs/**/*.tmp
+outputs/**/_scratch/
