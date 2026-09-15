@@ -1,6 +1,6 @@
 # LifeOS Current Task
 
-Last updated: 2026-09-11
+Last updated: 2026-09-15
 
 ## Metadata
 
@@ -171,6 +171,14 @@ Report environment changes and exact versions/paths, modified files, package/SDK
 
 ## Current Stage
 
-Next role: Decision
+Closure Check: PASS
 
-Required next action: run Decision Closure Check for TASK-027 after verifying result commit `629bf710b7650938d8a42d16507f8add4b854b3c` and the Git Commit completion record.
+Checked at: 2026-09-15 10:01 +08:00
+
+Result commit: `629bf710b7650938d8a42d16507f8add4b854b3c`
+
+Completion commit: `7960d02ef578f1fbe4048bfe84cadc521bacc07f`
+
+Next role: Git Commit (Terminal Closure Commit)
+
+Required next action: commit and push only the five Closure-authorized documents with message `docs(task): close TASK-027`, verify remote parity, and return control to Decision. Do not run another Closure Check.

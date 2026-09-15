@@ -1,14 +1,14 @@
 # Phase 1A Completion Audit
 
-Audited at: 2026-09-10
+Audited at: 2026-09-15
 
-Baseline: `0856e2896f4278938a9339e2b638ceb6e132968d`
+Baseline: `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed`
 
 ## Verdict
 
 - Phase 1A backend: COMPLETE
 - Phase 1A PC Web: COMPLETE
-- Phase 1A Android: NOT STARTED
+- Phase 1A Android: IN PROGRESS; runnable foundation complete
 - Phase 1A PC/Android end-to-end product loop: INCOMPLETE
 - Current blocking gap: Android client delivery, followed by cross-client acceptance
 
@@ -26,19 +26,17 @@ Baseline: `0856e2896f4278938a9339e2b638ceb6e132968d`
 - PC Web verification at TASK-025 closure passed 107 tests, production build, two desktop/narrow Playwright flows, and the high-severity audit gate.
 - Live pull/SSE/disposable-write verification remained environment-limited and was not falsely claimed; deterministic API/component/E2E routes passed.
 
-## Android Environment Evidence
+## Android Foundation Evidence
 
-- No `android/` Kotlin project exists at baseline.
-- JDK 21.0.10 is available at `D:\tool\Java\Java21` through `JAVA_HOME`.
-- Android Studio and Android SDK were not found in common system or user locations.
-- `ANDROID_HOME` and `ANDROID_SDK_ROOT` are unset.
-- `adb`, `emulator`, `sdkmanager`, `avdmanager`, and system Gradle are not on PATH.
-- No AVD or physical ADB device could be validated before SDK installation.
-- The host has 15.4 GB RAM, sufficient free disk space, and a detected running Windows hypervisor; actual AVD acceleration remains unverified until the SDK/emulator is installed.
+- TASK-027 delivered a single-module Kotlin/Compose/Material 3 project under `android/` in result commit `629bf71`.
+- Package `com.bpn0416.lifeos`, SDK levels 26/36/36, JDK 21 runtime, JVM target 17, Gradle Wrapper 8.14.3, and pinned plugins/dependencies are verified.
+- The command-line Android SDK is available at `D:\tool\android-sdk`; reusable API 36 AVD `LifeOS_API_36` was installed and launched successfully.
+- Debug defaults to `http://10.0.2.2:8000/api/v1/`; cleartext is debug-only and release configuration rejects HTTP base URLs.
+- Four unit tests, one instrumentation test, lint, debug/release builds, APK install, cold launch, crash-buffer inspection, and normal/narrow rendering checks passed.
+- Android Studio remains uninstalled by design; the committed Wrapper and command-line toolchain provide the verified build interface.
 
 ## Remaining Phase 1A Work
 
-- Android toolchain and reproducible Compose application foundation.
 - Android identity selection and authenticated `/me` validation.
 - Identity-scoped local cache and durable sync pull/application.
 - Android Today/Todo read experience.
@@ -47,10 +45,9 @@ Baseline: `0856e2896f4278938a9339e2b638ceb6e132968d`
 
 ## Recommended Sequence
 
-1. TASK-027: Android toolchain and runnable Compose foundation.
-2. Android identity validation and token persistence.
-3. Android identity-scoped local cache, sync pull, and Today/Todo reads.
-4. Android quick add, edit, and complete writes.
-5. PC/Android end-to-end Phase 1A acceptance.
+1. Android identity selection, authenticated `/me` validation, and token persistence.
+2. Android identity-scoped local cache, sync pull, and Today/Todo reads.
+3. Android quick add, edit, and complete writes.
+4. PC/Android end-to-end Phase 1A acceptance.
 
 Phase 1B Reminder work must not start until these Android and end-to-end Phase 1A gaps are explicitly completed or re-scoped by Decision.

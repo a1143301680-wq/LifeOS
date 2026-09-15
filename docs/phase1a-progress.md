@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-09-10
+Last updated: 2026-09-15
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -61,16 +61,15 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
 | PC Web | done | Phase 1A scope closed through TASK-025 terminal closure `b2d0197`; 107 tests, build, two Playwright flows, and high-severity audit gate passed |
-| Android | next | TASK-027 toolchain and runnable Compose foundation is `PLANNED`; no Android project or SDK existed at publication baseline |
+| Android | partial | TASK-027 delivered the reproducible toolchain and runnable Compose foundation in result commit `629bf71`; identity, local sync/read, writes, and cross-client acceptance remain |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Review and deliver TASK-027 Android toolchain and runnable Compose foundation.
-2. Add Android identity validation and token persistence.
-3. Add identity-scoped local cache, sync pull, and Today/Todo reads.
-4. Add Android quick add, edit, and complete writes.
-5. Run PC/Android end-to-end Phase 1A acceptance.
+1. Add Android identity selection, authenticated `/me` validation, and token persistence.
+2. Add identity-scoped local cache, sync pull, and Today/Todo reads.
+3. Add Android quick add, edit, and complete writes.
+4. Run PC/Android end-to-end Phase 1A acceptance.
 
 ## Decision Rule
 

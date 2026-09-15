@@ -184,4 +184,42 @@ Establish a reproducible Android toolchain and create a buildable, installable, 
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-09-15 10:01 +08:00
+
+Result Commit: `629bf710b7650938d8a42d16507f8add4b854b3c`
+
+Completion Commit: `7960d02ef578f1fbe4048bfe84cadc521bacc07f`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed` before closure-document edits. The TASK-027 completion commit is an ancestor of that published head.
+
+Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked files.
+
+### Independent Verification
+
+- `android\gradlew.bat testDebugUnitTest lintDebug --rerun-tasks --console=plain`: PASS; 4 unit tests, 0 failures/errors/skips, and lint completed successfully.
+- `android\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease --console=plain`: PASS; debug and release APK assembly completed successfully.
+- Code Review: PASS with no blocking findings.
+- Code Review independently verified the API 36 instrumentation test (1/1), install, cold launch, empty crash buffer, normal/narrow rendering, accessibility, artifact boundaries, and secret scans.
+- All TASK-027 acceptance criteria are confirmed from the published implementation, Code Review evidence, and Closure verification.
+
+### Issue Disposition
+
+- No TASK-027 issue-log entry or unresolved P0/P1/P2 issue exists.
+- Android Studio remains uninstalled by design; the committed Wrapper and command-line SDK path are verified and non-blocking.
+- Three recorded lint warnings remain accepted and non-blocking: a newer Gradle version, a Core release requiring the API 37/AGP 9.1 line, and intentional debug-only cleartext configuration.
+
+### Remaining Follow-ups
+
+- Add Android identity selection, authenticated `/me` validation, and token persistence as the next Android slice.
+- Then add identity-scoped local cache, sync pull/application, Today/Todo reads, Android writes, and PC/Android end-to-end acceptance in bounded tasks.
+- Phase 1B reminder work remains excluded until Phase 1A Android and cross-client acceptance are complete or explicitly re-scoped.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/phase1a-progress.md`, `docs/phase1a-completion-audit.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-027-android-compose-foundation.md`.
+- Recommended commit message: `docs(task): close TASK-027`.
+- After this exact-scope commit is pushed and remote parity is verified, return to Decision without another Closure Check.

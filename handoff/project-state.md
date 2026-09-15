@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-09-13
+Last updated: 2026-09-15
 
 ## Current Phase
 
@@ -90,6 +90,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - Phase 1A re-audit on 2026-09-10 marked backend and PC Web complete; Android and cross-client acceptance remain.
 - TASK-027 Android toolchain and runnable Compose foundation was published with package, SDK-level, build, and local API-address decisions in `docs/adr/0001-android-foundation.md`.
 - TASK-027 Android runnable Compose foundation completed in result commit `629bf71`; Code Review: PASS; Android unit tests, lint, build, instrumentation, install, launch, and rendering checks passed.
+- TASK-027 Decision Closure Check passed on 2026-09-15; terminal Closure Commit is authorized for the five listed state/progress documents.
 
 ## Recently Completed
 
@@ -138,7 +139,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Decision Closure Check for TASK-027 Android toolchain and runnable Compose foundation. Live routing is maintained in `handoff/current-task.md`.
+Run the TASK-027 terminal Closure Commit using the exact five-file allowlist in `handoff/current-task.md`. After remote parity is verified, return to Decision to publish the Android identity validation and token-persistence slice.
 
 ## Notes For Windows
 
