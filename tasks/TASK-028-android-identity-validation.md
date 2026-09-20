@@ -1,6 +1,6 @@
 # TASK-028: Android identity validation and token persistence
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -237,7 +237,12 @@ Deliver a runnable Android identity flow that accepts a manually provisioned boo
 
 ## Git Commit
 
-Pending.
+- Result Commit: `6b2a1fd23f29b66f96adb87a57f955465ddd5f8b`
+- Commit Message: `feat(android): add identity validation and persistence`
+- Branch: main
+- Push Target: `origin/main`
+- Code Review Result: PASS
+- Completion Status: TASK-028 marked `COMPLETED` in both active task-status files after result commit publication.
 
 ## Closure
 

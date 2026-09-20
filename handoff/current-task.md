@@ -6,7 +6,7 @@ Last updated: 2026-09-20
 
 - Task ID: TASK-028
 - Task Name: Android identity validation and token persistence
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
@@ -127,6 +127,6 @@ Report modified files, pinned dependency versions, identity-store schema, HTTP r
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: publish the exact Code Review-approved TASK-028 identity implementation with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.
+Required next action: run Decision Closure Check for TASK-028 after verifying result commit `6b2a1fd23f29b66f96adb87a57f955465ddd5f8b` and the Git Commit completion record.

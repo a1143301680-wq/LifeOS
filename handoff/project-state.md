@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-09-15
+Last updated: 2026-09-20
 
 ## Current Phase
 
@@ -92,7 +92,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-027 Android runnable Compose foundation completed in result commit `629bf71`; Code Review: PASS; Android unit tests, lint, build, instrumentation, install, launch, and rendering checks passed.
 - TASK-027 Decision Closure Check passed on 2026-09-15; terminal Closure Commit is authorized for the five listed state/progress documents.
 - TASK-027 terminal Closure Commit `658f800` was published and the task workflow ended.
-- TASK-028 Android identity validation and token persistence was published as the next bounded Phase 1A Android slice.
+- TASK-028 Android identity validation and token persistence completed in result commit `6b2a1fd`; Code Review: PASS; Android unit tests, lint, build, instrumentation, install, launch, and identity UI checks passed.
 
 ## Recently Completed
 
@@ -141,7 +141,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-028 Android identity validation and token persistence. Live routing and the exact task boundary are maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-028 Android identity validation and token persistence. Live routing and the exact task boundary are maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 
