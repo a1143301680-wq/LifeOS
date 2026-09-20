@@ -127,6 +127,14 @@ Report modified files, pinned dependency versions, identity-store schema, HTTP r
 
 ## Current Stage
 
-Next role: Decision
+Closure Check: PASS
 
-Required next action: run Decision Closure Check for TASK-028 after verifying result commit `6b2a1fd23f29b66f96adb87a57f955465ddd5f8b` and the Git Commit completion record.
+Checked at: 2026-09-20 14:15 +08:00
+
+Result commit: `6b2a1fd23f29b66f96adb87a57f955465ddd5f8b`
+
+Completion commit: `e29d69204f2c64d72d305d890a444af52c0da6e0`
+
+Next role: Git Commit (Terminal Closure Commit)
+
+Required next action: commit and push only the five Closure-authorized documents with message `docs(task): close TASK-028`, verify remote parity, and return control to Decision. Do not run another Closure Check.

@@ -1,14 +1,14 @@
 # Phase 1A Completion Audit
 
-Audited at: 2026-09-15
+Audited at: 2026-09-20
 
-Baseline: `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed`
+Baseline: `e29d69204f2c64d72d305d890a444af52c0da6e0`
 
 ## Verdict
 
 - Phase 1A backend: COMPLETE
 - Phase 1A PC Web: COMPLETE
-- Phase 1A Android: IN PROGRESS; runnable foundation complete
+- Phase 1A Android: IN PROGRESS; runnable foundation and identity complete
 - Phase 1A PC/Android end-to-end product loop: INCOMPLETE
 - Current blocking gap: Android client delivery, followed by cross-client acceptance
 
@@ -26,7 +26,7 @@ Baseline: `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed`
 - PC Web verification at TASK-025 closure passed 107 tests, production build, two desktop/narrow Playwright flows, and the high-severity audit gate.
 - Live pull/SSE/disposable-write verification remained environment-limited and was not falsely claimed; deterministic API/component/E2E routes passed.
 
-## Android Foundation Evidence
+## Android Delivery Evidence
 
 - TASK-027 delivered a single-module Kotlin/Compose/Material 3 project under `android/` in result commit `629bf71`.
 - Package `com.bpn0416.lifeos`, SDK levels 26/36/36, JDK 21 runtime, JVM target 17, Gradle Wrapper 8.14.3, and pinned plugins/dependencies are verified.
@@ -34,10 +34,12 @@ Baseline: `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed`
 - Debug defaults to `http://10.0.2.2:8000/api/v1/`; cleartext is debug-only and release configuration rejects HTTP base URLs.
 - Four unit tests, one instrumentation test, lint, debug/release builds, APK install, cold launch, crash-buffer inspection, and normal/narrow rendering checks passed.
 - Android Studio remains uninstalled by design; the committed Wrapper and command-line toolchain provide the verified build interface.
+- TASK-028 delivered bearer-only `/me` validation, complete-session Preferences DataStore persistence, startup revalidation, 401/switch clearing, recoverable retention/retry, and stale-request protection in result commit `6b2a1fd`.
+- TASK-028 verification passed 17 JVM tests, 6 API 36 device tests, lint with 0 errors, debug/release builds, install, cold launch, and normal/narrow identity UI checks.
+- A real bootstrap token was not exposed or required for deterministic acceptance; the real-backend smoke test remains explicitly unclaimed.
 
 ## Remaining Phase 1A Work
 
-- Android identity selection and authenticated `/me` validation.
 - Identity-scoped local cache and durable sync pull/application.
 - Android Today/Todo read experience.
 - Android quick add, edit, and complete writes with sync recovery.
@@ -45,9 +47,8 @@ Baseline: `6f9687f8434586cb7a2ba61540d6cdf03a2b00ed`
 
 ## Recommended Sequence
 
-1. Android identity selection, authenticated `/me` validation, and token persistence.
-2. Android identity-scoped local cache, sync pull, and Today/Todo reads.
-3. Android quick add, edit, and complete writes.
-4. PC/Android end-to-end Phase 1A acceptance.
+1. Android identity-scoped local cache, durable sync pull/application, and Today/Todo reads.
+2. Android quick add, edit, and complete writes.
+3. PC/Android end-to-end Phase 1A acceptance.
 
 Phase 1B Reminder work must not start until these Android and end-to-end Phase 1A gaps are explicitly completed or re-scoped by Decision.

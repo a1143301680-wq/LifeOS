@@ -246,4 +246,45 @@ Deliver a runnable Android identity flow that accepts a manually provisioned boo
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-09-20 14:15 +08:00
+
+Result Commit: `6b2a1fd23f29b66f96adb87a57f955465ddd5f8b`
+
+Completion Commit: `e29d69204f2c64d72d305d890a444af52c0da6e0`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `e29d69204f2c64d72d305d890a444af52c0da6e0` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked files.
+
+### Independent Verification
+
+- `android\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease --rerun-tasks --console=plain`: PASS on the published completion state; all 105 tasks executed successfully.
+- JVM test reports: PASS, 17 tests with 0 failures, 0 errors, and 0 skipped.
+- Lint: PASS with 0 errors; the five version-availability/debug-cleartext warnings accepted by Code Review remain non-blocking.
+- Debug and release builds: PASS.
+- Code Review: PASS with no blocking findings.
+- Code Review independently verified 6/6 API 36 device tests, installation, cold launch, process/crash buffer, normal and narrow dark/font-scale rendering, backup exclusion, exact scope, artifact boundaries, and credential/security scans. No ADB device was connected during Closure, so these same-day device checks were not redundantly rerun.
+- All TASK-028 acceptance criteria are confirmed from the published implementation, Code Review evidence, and Closure verification.
+
+### Issue Disposition
+
+- No TASK-028 issue-log entry or unresolved P0/P1/P2 issue exists.
+- The optional ViewModel-disposal-only test remains non-blocking because lifecycle cancellation uses `viewModelScope`, while stale switch and duplicate-action paths have direct coverage.
+- App-private, backup-excluded DataStore remains unencrypted at rest as the explicitly accepted Phase 1A rooted-device residual risk.
+- A real-backend `/me` smoke test remains unclaimed because no disposable real token was supplied; deterministic MockWebServer, device tests, and the temporary fixture server cover the contract without credential exposure.
+
+### Remaining Follow-ups
+
+- Add Android identity-scoped local cache, durable sync pull/application, and Today/Todo read experience as the next bounded slice.
+- Follow with Android quick add/edit/complete writes and then PC/Android end-to-end Phase 1A acceptance.
+- Phase 1B reminder work remains excluded until Phase 1A Android and cross-client acceptance are complete or explicitly re-scoped.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/phase1a-progress.md`, `docs/phase1a-completion-audit.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-028-android-identity-validation.md`.
+- Recommended commit message: `docs(task): close TASK-028`.
+- After this exact-scope commit is pushed and remote parity is verified, return to Decision without another Closure Check.
