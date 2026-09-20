@@ -1,6 +1,6 @@
 # TASK-028: Android identity validation and token persistence
 
-Status: READY
+Status: REVIEWING
 
 Priority: P1
 
@@ -130,15 +130,110 @@ Deliver a runnable Android identity flow that accepts a manually provisioned boo
 
 ## Git Snapshot
 
-Pending.
+- Status: COMPLETE
+- Branch: main
+- Base Commit: `658f8003f84622d807094b2b13ab0d3594ca3d03`
+- Snapshot Commit: `3b1f1fe638321bf3cfc0b2e7e998ef9edfc37338`
+- Reason: approved TASK-028 readiness documents required a durable pre-Coding baseline
 
 ## Coding Result
 
-Pending.
+### Result
+
+- Result: PASS
+- Final Status: REVIEWING
+- Completed at: 2026-09-17
+- Next Role: Code Review
+
+### Modified Files
+
+- `android/build.gradle.kts`, `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+- `android/app/src/main/java/com/bpn0416/lifeos/IdentityClient.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/IdentityModels.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/IdentityStore.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/IdentityViewModel.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/LifeOSApp.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/MainActivity.kt`
+- `android/app/src/test/java/com/bpn0416/lifeos/IdentityApiClientTest.kt`
+- `android/app/src/test/java/com/bpn0416/lifeos/IdentityViewModelTest.kt`
+- `android/app/src/androidTest/java/com/bpn0416/lifeos/IdentityStoreTest.kt`
+- `android/app/src/androidTest/java/com/bpn0416/lifeos/LifeOSAppTest.kt`
+- `android/README.md`
+- `handoff/current-task.md`
+- `tasks/TASK-028-android-identity-validation.md`
+
+### Implementation Summary
+
+- Added `INTERNET` permission and a typed OkHttp `/me` client using `BuildConfig.API_BASE_URL`, bounded 10-second connect, 15-second read, and 20-second call timeouts, cancellable calls, closed response bodies, and strict Kotlinx Serialization envelopes.
+- Requests use only `GET /me`, `Authorization: Bearer <token>`, and `Accept: application/json`; no client request contains `user_id`, alias, body, query token, logging interceptor, or debug logging.
+- Added one Preferences DataStore containing `token`, `user_id`, `alias`, `display_name`, and `timezone`. Complete sessions are replaced or cleared atomically; partial, corrupt, invalid-UUID, or blank metadata fails closed.
+- Added lifecycle-aware states for loading, disconnected, validating, connected, unavailable/retry, and unauthorized. New tokens are persisted only after a valid 200 response; startup restores then revalidates; 401 and explicit switch clear the session; recoverable failures retain only an existing validated session.
+- Request generation plus cancellation and a storage mutex prevent duplicate/stale completion from restoring a switched identity or overwriting a newer operation.
+- Replaced the static shell with accessible password-style token entry, progress, validated identity, unavailable/retry, unauthorized re-entry, and switch controls. The screen is vertically scrollable and IME-aware.
+- Pinned Lifecycle 2.9.4, DataStore 1.2.1, OkHttp/MockWebServer 5.3.0, Kotlinx Serialization 1.11.0, and Coroutines 1.11.0. OkHttp 5.5.0 was rejected by direct build evidence because it requires compileSdk 37; TASK-027 fixes this project at API 36.
+- Documented identity connection, persistence, clear/retry behavior, and the accepted Phase 1A unencrypted app-private storage risk.
+
+### Acceptance Criteria Results
+
+- PASS: fresh entry rejects blank input; controlled valid `/me` persists and displays UUID, alias, display name, and timezone without exposing the token.
+- PASS: process restart restores the session and revalidates to connected; 401 and explicit switch clear it, and restart after switch remains disconnected.
+- PASS: recoverable failures retain saved metadata without claiming verification and never persist a failed new token; retry succeeds without competing writes.
+- PASS: stale response, duplicate connect, malformed envelope, 401, server error, connection refusal, call timeout, partial/corrupt storage, and invalid metadata paths are covered.
+- PASS: normal and 720x1280 narrow layouts, light/dark modes, 1.3 font scale, keyboard/IME, scrolling, semantics, loading, error, retry, connected, and switch states were exercised without clipping or overlap.
+- PASS: no Todo, Room, sync, SSE, backend, PC Web, stable-contract, SDK, package, or release API-base change was introduced.
+
+### Verification Commands And Results
+
+- `android\gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease connectedDebugAndroidTest --rerun-tasks --console=plain`: PASS; 17 JVM tests and 6 API 36 device tests, all with zero failures/errors; debug and release builds succeeded.
+- `android\gradlew.bat installDebug --console=plain`: PASS on `LifeOS_API_36`.
+- `adb shell am start -W -S -n com.bpn0416.lifeos/.MainActivity`: PASS; cold launch status `ok`, process present, 681 ms total time, crash buffer empty.
+- Temporary host-only fixture `/me` mock: PASS for actual token entry, bearer validation, connected display, restart/revalidation, switch clear, and restart-after-clear. It used no real bootstrap token and wrote nothing to the repository.
+- Normal 1080x2400 light and narrow 720x1280 dark/font-scale-1.3 screenshots and UI hierarchy checks: PASS; 0 out-of-bounds nodes, keyboard visible with input usable, final connected hierarchy contained no token.
+- Lint: 0 errors, 5 warnings. Accepted warnings are TASK-027-pinned Gradle/Core updates, OkHttp 5.5 requiring the forbidden API 37 baseline, its matching MockWebServer warning, and intentional debug-only cleartext networking.
+- Optional real-backend smoke test was not run because no disposable real token was supplied; deterministic MockWebServer, device tests, and the temporary fixture server cover the contract without credential exposure.
+
+### Git Diff Check
+
+- `git status --short --untracked-files=all`: only TASK-028 Android files, the two active task records, and the preserved pre-existing `handoff/git-snapshot.md` transition.
+- `git diff --check`: PASS; LF-to-CRLF notices are informational.
+- `git diff --cached` and `git diff --cached --check`: empty/PASS; nothing staged.
+- Independent trailing-whitespace/final-newline scan of 7 untracked text files: PASS.
+- Dynamic-version, production logging, report-token, private-key, user-path, private-LAN, signing, generated-artifact, and forbidden request-field scans: PASS.
+- Build outputs, APKs, captures, DataStore files, local properties, and emulator data remain ignored and absent from Git status.
+
+### Unresolved Issues
+
+- None blocking.
+- Phase 1A intentionally stores the long-lived token unencrypted in app-private, backup-excluded DataStore; a compromised or rooted device remains an accepted residual risk.
+
+### Task-Outside Findings
+
+- None.
 
 ## Code Review
 
-Pending.
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-09-20 13:26 +08:00
+- Branch: `main`
+- HEAD: `3b1f1fe638321bf3cfc0b2e7e998ef9edfc37338`
+- Snapshot Commit: `3b1f1fe638321bf3cfc0b2e7e998ef9edfc37338`
+- Blocking Issues: None.
+- Verification:
+  - PASS: typed bearer-only `/me` transport, strict identity parsing, complete-session DataStore persistence, startup revalidation, 401 clear, recoverable retention/retry, switch behavior, request generation/cancellation, and UI states match the approved task.
+  - PASS: independent JVM tests reported 17 tests with 0 failures/errors/skips; API 36 instrumentation reported 6 tests with 0 failures/errors/skips.
+  - PASS: lint reported 0 errors and 5 accepted warnings; debug/release builds, API 36 install, cold launch, process, crash-buffer, normal UI, and narrow dark/font-scale-1.3 checks passed.
+  - PASS: backup exclusion, exact scope, pinned dependencies, whitespace, staged state, artifact, credential, URL/LAN/path/signing, logging, and forbidden-field scans passed.
+- Non-blocking Suggestions:
+  - The five lint warnings are accepted version-availability/debug-cleartext warnings under the fixed API 36 foundation.
+  - An explicit ViewModel-disposal-only unit test is optional residual coverage; lifecycle cancellation is supplied by `viewModelScope`, and stale switch plus duplicate actions are directly tested.
+  - Unencrypted app-private, backup-excluded DataStore remains the accepted Phase 1A rooted-device residual risk.
+- Follow-up Tasks: None.
+- Reviewed Scope: exact TASK-028 Android identity implementation/tests/docs plus active workflow records listed in `handoff/code-review-gate.md`.
+- Recommended Commit Message: `feat(android): add identity validation and persistence`
+- Next Role: Git Commit
 
 ## Git Commit
 

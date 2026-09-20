@@ -17,6 +17,11 @@
 - Kotlin and Compose compiler plugin: 2.3.21
 - Compose UI/Foundation: 1.10.6
 - Material 3: 1.4.0
+- Lifecycle ViewModel/Compose: 2.9.4
+- Preferences DataStore: 1.2.1
+- OkHttp: 5.3.0
+- Kotlinx Serialization JSON: 1.11.0
+- Kotlinx Coroutines: 1.11.0
 
 ## Local Setup
 
@@ -67,3 +72,9 @@ Debug builds default to `http://10.0.2.2:8000/api/v1/`, which reaches the develo
 ```
 
 For a physical device, run the backend on `0.0.0.0` and allow its port through Windows Firewall. Release builds use the HTTPS placeholder `https://api.invalid/api/v1/`; an HTTP `LIFEOS_RELEASE_API_BASE_URL` fails Gradle configuration. Debug-only manifest resources permit local cleartext traffic, while the main/release manifest rejects it.
+
+## Identity Connection
+
+The first screen accepts a manually provisioned bootstrap token and validates it with `GET /api/v1/me`. Only a successful response is stored. The app restores saved identity metadata on startup, revalidates it, clears it after a `401` or explicit identity switch, and keeps a previously validated session available for retry during temporary network failures.
+
+The token is sent only in the `Authorization: Bearer` header. It is stored unencrypted in one app-private Preferences DataStore and excluded from Android backup/device transfer. This is the accepted Phase 1A baseline, not protection against a compromised or rooted device.

@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-09-15
+Last updated: 2026-09-20
 
 ## Metadata
 
 - Task ID: TASK-028
 - Task Name: Android identity validation and token persistence
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
@@ -127,6 +127,6 @@ Report modified files, pinned dependency versions, identity-store schema, HTTP r
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for the approved TASK-028 publication/readiness scope. Do not start Coding until Git Snapshot completes.
+Required next action: publish the exact Code Review-approved TASK-028 identity implementation with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.
