@@ -305,4 +305,45 @@ Code Review. Independently re-review ISSUE-20260926-001 and TASK-029; do not sta
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked by: Decision window
+
+Checked at: 2026-09-26 23:31 +08:00
+
+Result Commit: `5bcdfab0541afd3229109f8437f381dd21c4d935`
+
+Completion Commit: `e5e302760178e0d3ed34d32b372575fb42e28b43`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `e5e302760178e0d3ed34d32b372575fb42e28b43` before closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked files.
+
+### Independent Verification
+
+- Published Room schema inspection: PASS; schema version 1 contains `cached_todos`, `cached_todo_categories`, and `sync_state` with owner-scoped keys and no credential table/column.
+- Source inspection: PASS; page application uses `withTransaction`, DAO operations require `owner_id`, bearer material is confined to the Authorization header, and no destructive migration fallback exists.
+- ISSUE-20260926-001 correction inspection: PASS; initial cursor-read `CancellationException` is rethrown to the typed `Cancelled(0)` boundary and the owner lock is released.
+- Persisted published-state JVM reports: 5 suites, 28 tests, 0 failures, 0 errors, and 0 skipped.
+- Final Code Review: PASS with no blocking findings; it independently ran 28 JVM tests, 11 API 36 tests, lint with 0 errors, debug/release builds, install, cold launch, process/crash checks, Room/ownership/transaction checks, and repository security/scope scans.
+- Decision attempted a fresh standard Gradle rerun. Online dependency resolution stalled before compilation; offline mode confirmed the ordinary cache lacks `org.xerial:sqlite-jdbc:3.41.2.2` after the temporary KSP mirror/init script was removed. The attempt was stopped without repository changes. This known host dependency-resolution limitation does not invalidate the same-day checksum-verified external-mirror review evidence.
+- All TASK-029 acceptance criteria are confirmed from the published implementation, final Code Review, persisted test reports, and Closure inspection.
+
+### Issue Disposition
+
+- `ISSUE-20260926-001` is `verified`; cursor-load cancellation is correctly typed and same-owner lock reuse is covered by regression testing.
+- No unresolved TASK-029 P0/P1/P2 issue remains.
+- The cache remains intentionally non-authoritative and disconnected from product UI until REST bootstrap/reconciliation is implemented.
+- Standard host dependency resolution remains a non-blocking environment limitation. Future Android build windows must either restore the required artifacts to the ordinary Gradle cache or use a checksum-verified external mirror without committing machine-specific paths.
+
+### Remaining Follow-ups
+
+- Add authoritative category and paginated Todo REST bootstrap/reconciliation, then expose Android Today/Todo reads from the reconciled identity-scoped cache.
+- Follow with Android quick add/edit/complete writes and PC/Android end-to-end Phase 1A acceptance.
+- Keep SSE, background scheduling, offline replay, and Phase 1B reminders outside the next read slice.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/phase1a-progress.md`, `docs/phase1a-completion-audit.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-029-android-room-sync-foundation.md`.
+- Recommended commit message: `docs(task): close TASK-029`.
+- After this exact-scope commit is pushed and remote parity is verified, return to Decision without another Closure Check.

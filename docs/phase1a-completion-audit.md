@@ -37,19 +37,20 @@ Baseline: `e29d69204f2c64d72d305d890a444af52c0da6e0`
 - TASK-028 delivered bearer-only `/me` validation, complete-session Preferences DataStore persistence, startup revalidation, 401/switch clearing, recoverable retention/retry, and stale-request protection in result commit `6b2a1fd`.
 - TASK-028 verification passed 17 JVM tests, 6 API 36 device tests, lint with 0 errors, debug/release builds, install, cold launch, and normal/narrow identity UI checks.
 - A real bootstrap token was not exposed or required for deterministic acceptance; the real-backend smoke test remains explicitly unclaimed.
+- TASK-029 delivered owner-scoped Room Todo/category caches, per-owner durable cursors, strict paginated sync parsing, transactional snapshot/tombstone application, resume/cancellation behavior, and schema export in result commit `5bcdfab`.
+- TASK-029 final verification passed 28 JVM tests, 11 API 36 tests, lint with 0 errors, debug/release builds, install, cold launch, owner-isolation/transaction checks, and credential/artifact scans.
+- The Room cache intentionally remains disconnected from product UI until authoritative REST bootstrap/reconciliation closes the known default-category sync-history gap.
 
 ## Remaining Phase 1A Work
 
-- Identity-scoped local cache and durable sync pull/application.
 - Android Today/Todo read experience.
 - Android quick add, edit, and complete writes with sync recovery.
 - End-to-end PC/Android acceptance for create, complete, SSE refresh, and `me`/`partner` isolation.
 
 ## Recommended Sequence
 
-1. Android identity-scoped Room cache and durable sync pull/application foundation.
-2. Authoritative REST bootstrap/reconciliation and Android Today/Todo reads.
-3. Android quick add, edit, and complete writes.
-4. PC/Android end-to-end Phase 1A acceptance.
+1. Authoritative REST bootstrap/reconciliation and Android Today/Todo reads.
+2. Android quick add, edit, and complete writes.
+3. PC/Android end-to-end Phase 1A acceptance.
 
 Phase 1B Reminder work must not start until these Android and end-to-end Phase 1A gaps are explicitly completed or re-scoped by Decision.

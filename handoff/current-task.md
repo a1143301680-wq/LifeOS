@@ -121,6 +121,14 @@ Report modified files, exact Room/KSP versions, exported schema, entity/DAO/data
 
 ## Current Stage
 
-Next role: Decision
+Closure Check: PASS
 
-Required next action: perform Decision Closure Check for TASK-029 using Result Commit `5bcdfab0541afd3229109f8437f381dd21c4d935` and the completion record, then authorize only the exact Closure documents if the check passes.
+Checked at: 2026-09-26 23:31 +08:00
+
+Result commit: `5bcdfab0541afd3229109f8437f381dd21c4d935`
+
+Completion commit: `e5e302760178e0d3ed34d32b372575fb42e28b43`
+
+Next role: Git Commit (Terminal Closure Commit)
+
+Required next action: commit and push only the five Closure-authorized documents with message `docs(task): close TASK-029`, verify remote parity, and return control to Decision. Do not run another Closure Check.
