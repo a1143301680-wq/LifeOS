@@ -22,6 +22,8 @@
 - OkHttp: 5.3.0
 - Kotlinx Serialization JSON: 1.11.0
 - Kotlinx Coroutines: 1.11.0
+- Room: 2.8.5
+- Kotlin Symbol Processing (KSP): 2.3.12
 
 ## Local Setup
 
@@ -78,3 +80,9 @@ For a physical device, run the backend on `0.0.0.0` and allow its port through W
 The first screen accepts a manually provisioned bootstrap token and validates it with `GET /api/v1/me`. Only a successful response is stored. The app restores saved identity metadata on startup, revalidates it, clears it after a `401` or explicit identity switch, and keeps a previously validated session available for retry during temporary network failures.
 
 The token is sent only in the `Authorization: Bearer` header. It is stored unencrypted in one app-private Preferences DataStore and excluded from Android backup/device transfer. This is the accepted Phase 1A baseline, not protection against a compromised or rooted device.
+
+## Local Cache And Sync Foundation
+
+Room stores owner-scoped Todo/category cache rows and one durable cursor per validated identity. Bearer tokens remain exclusively in the identity DataStore and are never persisted in Room.
+
+`SyncCoordinator` validates complete `/sync/changes` pages before applying snapshots, tombstones, and `next_cursor` in one Room transaction. This cache is recovery infrastructure only; authoritative REST bootstrap and reconciliation are required before product data is displayed.

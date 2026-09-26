@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-09-20
+Last updated: 2026-09-26
 
 ## Metadata
 
 - Task ID: TASK-029
 - Task Name: Android identity-scoped Room cache and durable sync pull foundation
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: Phase 1A Android client
 - Dependencies:
@@ -121,6 +121,6 @@ Report modified files, exact Room/KSP versions, exported schema, entity/DAO/data
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for the approved TASK-029 publication/readiness scope. Do not start Coding until Git Snapshot completes.
+Required next action: publish the exact Code Review-approved TASK-029 Room/sync foundation with the recommended commit message, then update both task records to `COMPLETED` only after commit/push succeeds.

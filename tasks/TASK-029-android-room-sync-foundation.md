@@ -1,6 +1,6 @@
 # TASK-029: Android identity-scoped Room cache and durable sync pull foundation
 
-Status: READY
+Status: REVIEWING
 
 Priority: P1
 
@@ -110,15 +110,187 @@ Add an identity-isolated Room cache and transactional, resumable `/sync/changes`
 
 ## Git Snapshot
 
-Pending.
+- Status: COMPLETE
+- Branch: `main`
+- Base Commit: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
+- Snapshot Commit Created: Yes
+- Snapshot Commit: `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`
+- Reason: approved TASK-029 readiness documents required a durable pre-Coding baseline
+- Next Role: Coding
 
 ## Coding Result
 
-Pending.
+Result: PASS
+
+Completed at: 2026-09-26
+
+### Modified Files
+
+- `android/build.gradle.kts`
+- `android/app/build.gradle.kts`
+- `android/README.md`
+- `android/app/schemas/com.bpn0416.lifeos.LifeOSDatabase/1.json`
+- `android/app/src/main/java/com/bpn0416/lifeos/CacheDatabase.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/SyncModels.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/SyncClient.kt`
+- `android/app/src/main/java/com/bpn0416/lifeos/SyncCoordinator.kt`
+- `android/app/src/test/java/com/bpn0416/lifeos/SyncPageParserTest.kt`
+- `android/app/src/test/java/com/bpn0416/lifeos/SyncClientCoordinatorTest.kt`
+- `android/app/src/androidTest/java/com/bpn0416/lifeos/SyncRoomStoreTest.kt`
+- `handoff/current-task.md`
+- `tasks/TASK-029-android-room-sync-foundation.md`
+
+`handoff/git-snapshot.md` remains the pre-existing, unstaged Git Snapshot transition and was not changed by Coding.
+
+### Implementation Summary
+
+- Pinned Room `2.8.5` and KSP `2.3.12` while preserving Kotlin `2.3.21`, AGP `8.13.2`, API 26/36/36, JVM 17, and the existing API-base policy.
+- Added exported Room schema version 1 with `cached_todos`, `cached_todo_categories`, and `sync_state`. Todo/category keys are `(owner_id, entity_id)` and sync state is keyed by `owner_id`; no credential column exists and no destructive migration fallback is configured.
+- Todo rows preserve category summary, status, priority, planning/due/completion timestamps, entity version, source timestamps, and `last_sync_cursor`. Category rows preserve the stable DTO and `last_sync_cursor`.
+- Added strict page parsing for Todo create/update/complete/reopen/delete and category create/update/delete. It rejects unknown fields/types, invalid UUIDs/timestamps, stale or out-of-order cursors, version/snapshot mismatches, malformed tombstones, and non-progressing pagination while accepting cursor gaps and empty high-water pages.
+- Added bearer-only `GET /sync/changes?cursor=<cursor>&limit=<bounded-limit>` client behavior. Token data is confined to the Authorization header and never enters URL, body, Room, logs, or result objects.
+- Added `RoomSyncPageStore`, which rechecks the durable owner cursor and applies each validated page plus `next_cursor` in one Room transaction. Upserts and tombstones always receive explicit owner predicates; database failure rolls back entity and cursor changes together.
+- Added per-owner coordinator locks with deterministic duplicate rejection, durable resume, multi-page continuation, and typed completed, unauthorized, recoverable, invalid cursor/page, database failure, and cancellation outcomes.
+- Kept the cache disconnected from UI and documented that TASK-030 REST bootstrap/reconciliation is required before product reads.
+
+### Acceptance Criteria Results
+
+- [x] Exported owner-scoped Room schema, composite keys, per-owner cursor, pinned dependencies, and non-destructive migration policy are present.
+- [x] Sync requests use only bearer header, owner cursor, and bounded limit; request tests prove no body, `user_id`, or token URL leakage.
+- [x] Pagination, cursor gaps, empty high-water pages, snapshots, tombstones, durable resume, and final high-water cursor are covered.
+- [x] Malformed, stale, out-of-order, mismatched, unknown, non-progressing, corrupt-cursor, and database-failure paths fail without partial page persistence or cursor advancement.
+- [x] Todo/category upserts and tombstones remain isolated for two owners even with identical entity IDs; owner cursors are independent.
+- [x] 401, network/server recovery, cancellation, duplicate runs, and stale/database completion paths return deterministic outcomes without clearing identity/cache.
+- [x] File-backed Room reopen retains cursor state; in-memory tests prove transaction rollback and owner isolation.
+- [x] Existing identity/UI tests, JVM tests, API 36 device tests, lint, debug/release builds, install, and cold launch pass.
+- [x] No product UI, REST bootstrap, SSE, WorkManager, writes, backend/web, stable contract, or completed-task archive was modified.
+
+### Verification Commands And Results
+
+- From `android`, with Android SDK environment configured, ran `./gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease connectedDebugAndroidTest --rerun-tasks --console=plain --offline --init-script <temporary-external-local-maven-init>`: PASS, 140 tasks executed.
+- JVM: 27 tests across 5 suites, 0 failures, 0 errors.
+- API 36 AVD: 11 tests, including 5 Room tests plus existing identity/UI coverage, 0 failures, 0 errors.
+- Lint: 0 errors and 5 warnings. Warnings are the existing Gradle 8.14.5 availability, core-ktx 1.19/API-37 baseline mismatch, OkHttp/MockWebServer 5.5/API-37 mismatch, and intentional debug cleartext configuration.
+- `./gradlew.bat installDebug`: PASS on `LifeOS_API_36`.
+- Cold launch: `Status: ok`, `LaunchState: COLD`, `TotalTime: 683 ms`; process remained alive and crash buffer was empty.
+- Room/KSP first-use artifacts were supplied through a temporary external local Maven mirror after checksum verification because the host proxy stalled on the 77 MB KSP compiler artifact. No mirror path or artifact was added to the repository; ordinary dependency coordinates remain standard and pinned.
+
+### Git Diff Check
+
+- Branch remains `main`; HEAD remains Snapshot Commit `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`.
+- `git diff --check`: PASS; only informational LF-to-CRLF working-copy warnings were emitted.
+- `git diff --cached`: empty. Coding did not stage, commit, or push.
+- Exact-scope scan found only approved Android cache/sync files, schema, README, and active task-state updates. No backend, web, stable contract, UI/identity implementation, generated build output, database file, APK/AAB, signing material, secret, real LAN IP, absolute user path, debug logging, or dynamic dependency is present.
+- Exported schema and DAO scan confirm explicit owner columns/predicates, no token column, and no destructive migration fallback.
+- All new text files have no trailing whitespace and end with a newline.
+
+### Unresolved Issues
+
+None blocking. The cache intentionally remains non-authoritative until TASK-030 adds REST bootstrap/reconciliation, and bearer storage remains the accepted TASK-028 DataStore residual risk.
+
+### Task-Outside Findings
+
+None.
+
+### Next Role
+
+Code Review. Independently review TASK-029; do not stage, commit, or push during review.
 
 ## Code Review
 
-Pending.
+- Result: CHANGES_REQUESTED
+- Target Status: CHANGES_REQUESTED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-09-26 23:08 +08:00
+- Branch: `main`
+- HEAD: `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`
+- Snapshot Commit: `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`
+- Blocking Issues:
+  - P2 / ISSUE-20260926-001: `SyncCoordinator.sync()` catches `CancellationException` from the initial `store.cursor(ownerId)` call as a generic `Exception` and returns `InvalidLocalState(0)` instead of the required typed cancellation result.
+- Verification:
+  - PASS: 27 JVM tests and 11 API 36 device tests, with 0 failures/errors/skips.
+  - PASS: lint reported 0 errors and 5 accepted warnings; debug/release builds, API 36 install, cold launch, process, and crash-buffer checks passed through the external checksum-verified Maven mirror.
+  - PASS: Room schema, owner isolation, page transaction, strict payload parsing, pagination/high-water behavior, scope, whitespace, staged state, artifact, credential, path/LAN/signing, logging, and destructive-migration checks passed.
+  - FAIL: cancellation during the initial durable cursor read is neither correctly classified nor directly tested.
+- Non-blocking Suggestions:
+  - Keep the documented host-only external Maven mirror limitation; normal offline mode does not currently contain the KSP compiler artifact in its standard resolution cache.
+- Follow-up Tasks: None outside the blocking correction.
+- Reviewed Scope: exact TASK-029 files and review records listed in `handoff/code-review-gate.md`.
+- Recommended Commit Message: Not authorized until re-review passes.
+- Next Role: Coding
+
+## Coding Rework 2026-09-26
+
+Result: PASS
+
+### Modified Files
+
+- `android/app/src/main/java/com/bpn0416/lifeos/SyncCoordinator.kt`
+- `android/app/src/test/java/com/bpn0416/lifeos/SyncClientCoordinatorTest.kt`
+- `handoff/current-task.md`
+- `tasks/TASK-029-android-room-sync-foundation.md`
+
+### Implementation Summary
+
+- Fixed ISSUE-20260926-001 by rethrowing `CancellationException` from the initial durable cursor read so the coordinator's existing outer cancellation boundary returns `Cancelled(0)`.
+- Preserved `InvalidLocalState(0)` for non-cancellation cursor-read failures.
+- Added a same-owner regression test that cancels the first cursor load and proves a subsequent run completes, confirming the per-owner lock is released.
+
+### Acceptance Criteria Results
+
+- [x] Cursor-load cancellation is classified as `Cancelled(0)`, not `InvalidLocalState(0)`.
+- [x] Cancellation does not strand the owner lock; the same coordinator and owner can run again successfully.
+- [x] Existing cancellation, database-failure, sync, Room, identity, build, lint, install, and launch behavior remains green.
+
+### Verification Commands And Results
+
+- Focused TDD RED: `gradlew.bat testDebugUnitTest --tests com.bpn0416.lifeos.SyncClientCoordinatorTest.cursorLoadCancellationReturnsCancelledAndReleasesOwnerLock --rerun-tasks --console=plain --offline --init-script <temporary-external-init>` failed with 1 test / 1 failure before the implementation correction.
+- Focused GREEN: the same command passed after the correction.
+- Full JVM: `gradlew.bat testDebugUnitTest --rerun-tasks --console=plain --offline --init-script <temporary-external-init>` passed with 28 tests across 5 suites, 0 failures, 0 errors, and 0 skipped.
+- Full task regression: `gradlew.bat testDebugUnitTest lintDebug assembleDebug assembleRelease connectedDebugAndroidTest --rerun-tasks --console=plain --offline --init-script <temporary-external-init>` passed; 140 tasks executed, 11 API 36 device tests passed, and lint reported 0 errors / 5 accepted warnings.
+- `gradlew.bat installDebug --console=plain --offline --init-script <temporary-external-init>` passed on `LifeOS_API_36`.
+- Cold launch passed with `Status: ok`, `LaunchState: COLD`, and `TotalTime: 1395 ms`; the app process remained alive and the crash buffer was empty.
+
+### Git Diff Check
+
+- Branch and HEAD remain `main` at Snapshot Commit `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`.
+- Rework is limited to the reviewed coordinator defect, its focused test, and active Coding records. Code Review gate and issue evidence were preserved.
+- Coding did not stage, commit, push, reset, discard, or overwrite the pre-existing TASK-029 implementation/state changes.
+
+### Unresolved Issues
+
+None blocking. The temporary external dependency mirror remains a host-only verification aid and is not part of the repository.
+
+### Task-Outside Findings
+
+None.
+
+### Next Role
+
+Code Review. Independently re-review ISSUE-20260926-001 and TASK-029; do not stage, commit, or push during review.
+
+## Code Review Re-review 2026-09-26
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-09-26 23:22 +08:00
+- Branch: `main`
+- HEAD: `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`
+- Snapshot Commit: `e597e8842ba7ac4e9b0f434efe2a20c8380fcf3f`
+- Blocking Issues: None. ISSUE-20260926-001 is verified fixed.
+- Verification:
+  - PASS: cursor-read cancellation now reaches the typed `Cancelled(0)` boundary, while non-cancellation cursor-read errors remain `InvalidLocalState(0)`.
+  - PASS: focused regression proves cancellation and subsequent same-owner lock reuse.
+  - PASS: independent full JVM run reported 28 tests with 0 failures/errors/skips; API 36 instrumentation reported 11 tests with 0 failures/errors/skips.
+  - PASS: lint reported 0 errors and 5 accepted warnings; debug/release builds, API 36 install, cold launch, process, and crash-buffer checks passed through the external checksum-verified Maven mirror.
+  - PASS: the initial full-scope contract, Room, ownership, transaction, parser, pagination, artifact, credential, and scope checks remain valid.
+- Non-blocking Suggestions:
+  - Preserve the host-only external Maven mirror limitation in durable evidence; standard offline mode still lacks the large KSP compiler artifact in its ordinary cache.
+- Follow-up Tasks: None.
+- Reviewed Scope: exact TASK-029 files and review records listed in `handoff/code-review-gate.md`.
+- Recommended Commit Message: `feat(android): add Room sync pull foundation`
+- Next Role: Git Commit
 
 ## Git Commit
 

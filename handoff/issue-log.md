@@ -183,6 +183,24 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: Preserve the initial Coding gate; add a distinct rework gate, dual-file transition ownership, mismatch/partial-failure handling, retained review evidence, and no second Snapshot.
 - Verification: Verified by Code Review on 2026-09-10. Workflow, Coding prompt, and Code Review prompt consistently assign guarded rework admission to Coding. An independent 16-case transition matrix passed; stale-rule, exact-scope, boundary-prompt, staged-state, and whitespace checks also passed.
 
+### ISSUE-20260926-001: TASK-029 cursor-load cancellation is misclassified
+
+- Status: verified
+- Severity: P2
+- Found by: Code Review window
+- Found at: 2026-09-26 23:08 +08:00
+- Related task: TASK-029 Android identity-scoped Room cache and durable sync pull foundation
+- Files:
+  - `D:\LifeOS\android\app\src\main\java\com\bpn0416\lifeos\SyncCoordinator.kt:75`
+  - `D:\LifeOS\android\app\src\test\java\com\bpn0416\lifeos\SyncClientCoordinatorTest.kt:102`
+- Description: `SyncCoordinator.sync()` catches every `Exception` thrown by `store.cursor(ownerId)` and returns `InvalidLocalState(0)`. JVM `CancellationException` extends `IllegalStateException`, so cancellation during initial cursor loading is consumed before the outer cancellation handler can return the typed cancellation outcome. Existing cancellation coverage starts in `SyncClient.fetch()` and does not exercise this path.
+- Impact: Normal lifecycle or parent-task cancellation can be reported as corrupt local sync state. The future integration layer could choose invalid-cursor recovery instead of ordinary cancellation handling, and TASK-029's deterministic cancellation acceptance criterion is not met.
+- Expected: Cancellation from the initial durable cursor read returns `SyncRunResult.Cancelled(0)` consistently with fetch/apply cancellation, and the per-owner lock is released for a later run.
+- Actual: Fixed by Coding. Cursor-load `CancellationException` is rethrown before the general exception handler, reaches the outer typed cancellation boundary, returns `SyncRunResult.Cancelled(0)`, and the owner lock is released in `finally`.
+- Fix owner/window: Coding window through guarded Code Review rework admission.
+- Fix notes: Catch and rethrow `CancellationException` before the general cursor-read `Exception` handler, allowing the existing outer cancellation handler to produce `Cancelled(0)`. Add a focused regression test using a store whose `cursor()` throws `CancellationException`; also verify a subsequent same-owner run can proceed so lock release remains proven.
+- Verification: Verified by Code Review on 2026-09-26. The focused cursor-load cancellation/lock-release regression passed independently. The full JVM suite passed 28/28, API 36 instrumentation passed 11/11, lint reported 0 errors, debug/release builds passed, and install/cold-launch/crash-buffer checks passed.
+
 ## Entry Template
 
 ```text
