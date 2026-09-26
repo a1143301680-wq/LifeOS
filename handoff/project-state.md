@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-09-26
+Last updated: 2026-09-27
 
 ## Current Phase
 
@@ -98,6 +98,10 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-029 Android identity-scoped Room cache and durable sync pull foundation was published as the next bounded Phase 1A Android slice.
 - TASK-029 Android identity-scoped Room cache and durable sync pull foundation completed in result commit `5bcdfab`; Code Review: PASS; 28 JVM tests, 11 API 36 instrumentation tests, lint, debug/release builds, install, and cold launch passed.
 - TASK-029 Decision Closure Check passed on 2026-09-26; terminal Closure Commit is authorized for the five listed state/progress documents.
+- TASK-029 terminal Closure Commit `3aea6a4` was published and the task workflow ended.
+- At the user's request, TASK-030 PC AI Today planning agent was inserted as a bounded near-term demonstration slice before Android REST bootstrap/read UI.
+- TASK-030 uses DeepSeek `deepseek-flash`, one server-controlled identity-scoped read-only context tool, strict structured output, and explicit user confirmation through the existing Todo quick-create form. It does not reopen completed PC Web Phase 1A scope.
+- Android authoritative REST bootstrap/reconciliation and Today/Todo reads move to TASK-031 and remain the next Phase 1A product slice after TASK-030.
 
 ## Recently Completed
 
@@ -146,7 +150,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-029 terminal Closure Commit using the exact five-file allowlist in `handoff/current-task.md`. After remote parity is verified, return to Decision to publish the Android REST bootstrap/reconciliation and Today/Todo read slice.
+Run Task Review for TASK-030. Review the experimental showcase boundary, one-tool/read-only agent contract, DeepSeek credential/privacy/cost controls, structured output and server validation, explicit user-confirmation boundary, executable tests, exact publication scope, and Git Snapshot readiness. Do not start Coding.
 
 ## Notes For Windows
 

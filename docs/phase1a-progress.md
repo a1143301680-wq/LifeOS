@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-09-20
+Last updated: 2026-09-27
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -64,11 +64,20 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | Android | partial | TASK-029 identity-scoped Room cache and durable sync pull completed in result commit `5bcdfab`; authoritative REST bootstrap/read UI, writes, and cross-client acceptance remain |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
+## Inserted PC AI Showcase
+
+| Capability | Status | Evidence / Notes |
+| --- | --- | --- |
+| PC AI Today planning agent | next | TASK-030 published as a bounded DeepSeek `deepseek-flash` showcase slice; one read-only identity-scoped tool, strict structured output, and explicit user confirmation before existing Todo quick-create |
+
+This inserted showcase does not reopen completed PC Web Phase 1A scope and does not change the remaining Android completion criteria.
+
 ## Recommended Task Order
 
-1. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads.
-2. Add Android quick add, edit, and complete writes.
-3. Run PC/Android end-to-end Phase 1A acceptance.
+1. Deliver TASK-030 PC AI Today planning showcase.
+2. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
+3. Add Android quick add, edit, and complete writes.
+4. Run PC/Android end-to-end Phase 1A acceptance.
 
 ## Decision Rule
 

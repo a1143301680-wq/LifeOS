@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-09-20
+Last updated: 2026-09-27
 
 ## Gate Status
 
@@ -10,17 +10,17 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-09-26 21:48 +08:00
+Reviewed at: 2026-09-27 00:19 +08:00
 
-Reviewed task: TASK-029 Android identity-scoped Room cache and durable sync pull foundation
+Reviewed task: TASK-030 PC AI Today planning agent with DeepSeek
 
 ## Required Review
 
-- [x] Goal, scope split, exclusions, dependencies, and ADR-0002 are coherent.
-- [x] Room ownership/schema and no-authoritative-bootstrap boundary are explicit.
-- [x] Sync page validation, transaction, cursor, resume, unauthorized, and concurrency semantics are unambiguous.
-- [x] Acceptance and verification cover identity isolation without requiring a real token.
-- [x] Branch, HEAD, worktree, staged state, diff check, and Git Snapshot readiness are persisted.
+- [x] Goal, showcase boundary, dependencies, exclusions, and deferred Android sequence are coherent.
+- [x] Endpoint, one-tool agent loop, strict output schema, server validation, and explicit user-confirmation boundary are unambiguous.
+- [x] DeepSeek configuration, credential/privacy/cost/error boundaries, context caps, and no-autonomous-write rule are safe.
+- [x] Backend/frontend acceptance and verification are executable without a live key, with an honest optional live-smoke condition.
+- [x] Branch, HEAD, worktree, staged state, diff check, exact publication scope, and Git Snapshot readiness are persisted.
 
 ## Issues
 
@@ -31,16 +31,16 @@ None.
 ### Repository State
 
 - Branch: `main`
-- HEAD: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
-- origin/main: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
-- Remote `refs/heads/main`: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
-- Dependency check: TASK-028 terminal Closure Commit `118de68`, Android identity result `6b2a1fd`, and sync changes pull API result `f6f9091` exist.
-- Worktree Summary before this review: 8 modified tracked files and 2 untracked publication files; all are TASK-029 Decision publication, ADR/progress/audit routing, and gate/Git-record reset files.
+- HEAD: `3aea6a4275825bfa07b7773747db58845f839c34`
+- `origin/main`: `3aea6a4275825bfa07b7773747db58845f839c34`
+- Remote `refs/heads/main`: `3aea6a4275825bfa07b7773747db58845f839c34`
+- Dependency commits verified as Git commits: TASK-029 terminal Closure Commit `3aea6a4`, PC Web Phase 1A terminal Closure Commit `b2d0197`, Today aggregation result `2a698f3`, and Todo quick-create result `5a1a433`.
+- Worktree Summary before this review: 8 modified tracked files and 1 untracked task archive; all nine files are TASK-030 Decision publication, progress/audit routing, and active gate/Git-record reset files.
 - Staged Changes: None.
 - `git diff --check`: exit code 0. Git emitted LF-to-CRLF working-copy warnings only; no whitespace errors were reported.
 - `git diff --cached --check`: exit code 0.
-- Publication-file whitespace/EOF check: PASS for all 10 current files.
-- Issue-log search for TASK-029 and unresolved/blocking markers: no matches.
+- Publication-file whitespace/EOF check: PASS for all nine files.
+- Issue-log search: no TASK-030 or unresolved blocking entry.
 
 ### Changed Files
 
@@ -52,41 +52,38 @@ None.
 - `handoff/git-snapshot.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
-- `docs/adr/0002-android-local-cache-sync-foundation.md` (untracked)
-- `tasks/TASK-029-android-room-sync-foundation.md` (untracked)
+- `tasks/TASK-030-pc-ai-today-planning-agent.md` (untracked)
 
-These 10 files are the TASK-029 publication/readiness set. The diff closes the TASK-028 routing, publishes TASK-029, resets active gates and Git records, adds ADR-0002, and updates Phase 1A progress/audit sequence to split Room/sync foundation from authoritative REST bootstrap/read UI. No Android implementation, backend, PC Web, stable product/API/data-model change, generated build output, signing material, real LAN address, machine path, or raw credential is included.
+These nine files form the exact TASK-030 publication/readiness scope. No backend, web, Android, database, stable product/API/data-model document, accepted ADR, completed task archive, generated output, credential, machine path, or real LAN address is included.
 
-### Routed File Review
+### Routed Contract And Code Review
 
-- `docs/api-phase1a.md` confirms `/sync/changes` uses global monotonically increasing cursors, current-token user filtering, valid cursor gaps, cursor-ordered results, empty high-water pages with `next_cursor`, and client looping while `has_more = true`.
-- `docs/data-model-phase1.md` confirms `sync_changes` is lightweight recovery data, SSE is a wake-up signal only, Android local data uses Room, and DataStore remains the selected identity/settings store.
-- `docs/architecture.md` confirms Android local cache responsibility, bearer-token-derived identity, backend user filtering, and future offline behavior without requiring this task to expose product reads.
-- `docs/adr/0001-android-foundation.md` remains the fixed Android package, SDK, API-base, debug cleartext, release HTTPS, backup, and toolchain baseline.
-- `docs/adr/0002-android-local-cache-sync-foundation.md` explicitly states that cursor-0 sync replay cannot reconstruct bootstrap-created default categories, so TASK-029 must not expose cached product data before REST bootstrap/reconciliation.
-- Existing TASK-028 identity files show the token remains in Preferences DataStore and the validated profile provides the owner UUID needed by TASK-029; Room must not store bearer tokens.
-- Backend sync implementation and tests confirm `/api/v1/sync/changes` filters by current user, captures high water, supports cursor gaps, pages with `limit + 1`, rejects future cursors, and exposes `401 unauthorized` through bearer auth.
+- DeepSeek's official current Responses API documentation confirms that `deepseek-flash` supports the OpenAI Responses format, function tools, explicit `tool_choice`, `max_output_tokens`, and JSON Schema structured output through `https://api.deepseek.com`.
+- Existing backend bearer authentication supplies the current user, and existing Today/Todo/category query paths already enforce user ownership, active/deleted filtering, timezone/date semantics, and deterministic ordering that the read-only planner context can reuse.
+- Existing Todo create validation constrains title, priority, planned date, and category ownership; the task requires the suggested Todo to pass the same server constraints before it can prefill the existing quick-add form.
+- Existing PC quick-create flow owns Todo creation and fresh idempotency keys. TASK-030 gives the model no write tool or database access and permits only draft prefill followed by an explicit user Save.
+- Existing backend pytest, web Vitest, TypeScript/Vite build, and Playwright setup can execute the stated deterministic fake-provider and focused browser verification.
 
 ### Start-Readiness Review
 
-- The task is one closeable foundation slice: Room/KSP setup, owner-scoped Todo/category/cache schema, per-owner sync cursor, strict `/sync/changes` parsing, transactional page application, resume behavior, unauthorized/recoverable typed results, duplicate/stale run ownership, schema export, and focused tests.
-- The no-authoritative-bootstrap boundary is explicit. TASK-029 does not wire cache data into UI and does not claim first-install product completeness; TASK-030 is required for REST snapshot/bootstrap reconciliation and Today/Todo reads.
-- Room ownership rules are explicit: one app-private database, `(owner_id, entity_id)` composite keys, per-owner sync-state row, explicit owner predicates on reads/writes/deletes/cursor advancement, and no token columns.
-- Sync validation is sufficiently constrained: full-page validation before mutation, item cursors strictly greater than requested cursor, supported Todo/category change combinations only, valid UUID/version/snapshot/tombstone semantics, `next_cursor`/`has_more` progress checks, and fail-closed handling for malformed/unknown/non-progressing pages.
-- Transaction semantics are clear: one complete page plus cursor advance in a single Room transaction; parse or database failure rolls back the whole page and preserves the prior cursor.
-- Resume and concurrency semantics are clear: committed pages survive cancellation/recoverable failures, the durable cursor is the resume point, runs are serialized per identity, duplicate/stale completions are deterministic, and identities cannot mutate each other's rows or cursors.
-- The backend test fixture includes a historical `sync.refresh`/`system` example, but production create/update/delete paths emit Todo and Todo Category changes. TASK-029 intentionally treats unknown entity/change combinations as fail-closed rather than silently supporting out-of-scope system events.
-- Acceptance criteria and verification are executable without a real token: MockWebServer/JVM tests cover request safety and page behavior; Room tests cover schema, owner isolation, transactions, persistence, tombstones, and resume; build/lint/device checks preserve TASK-028 identity UI.
+- The task is one closeable showcase slice: one authenticated endpoint, one replaceable provider boundary, one allowlisted read-only context function, one strict typed result, and one compact Today UI interaction that reuses the existing form.
+- Identity and date are server-owned inputs derived from the authenticated request. The model cannot select an identity, arbitrary date, URL, database operation, shell/file operation, search tool, or write action.
+- Todo disclosure is explicitly limited to unique active current-user records: Today order first and existing pending-list order second, capped by `AI_CONTEXT_TODO_LIMIT` at 1-100 with default 50; active categories are capped at 50. Existing schema limits bound title/category-label sizes, and user-authored text is treated as untrusted data rather than instructions.
+- Tool and cost bounds are deterministic: exactly one accepted context function call, then exactly one final structured response; no parallel calls, streaming, persistent conversation, or autonomous retries; request timeout is restricted to 5-60 seconds; output is capped by `AI_MAX_OUTPUT_TOKENS` at 256-2000 with default 1200.
+- Structured output bounds are explicit: summary at most 600 characters, zero to three unique focus items, zero to three risks, reason/message fields at most 300 characters, and zero or one suggested Todo. Invalid, unknown, duplicated, cross-user, deleted, incomplete, excessive, or malformed output rejects the entire provider result.
+- Credential and logging rules are explicit: `DEEPSEEK_API_KEY` is server-only; `.env.example` contains placeholders only; prompts, tool payloads, Todo titles, model output, raw provider responses, response IDs, reasoning text, authorization headers, user IDs, and credentials are neither persisted nor logged or returned.
+- Automated verification does not require a real key. A fake provider must cover success, identity isolation, zero mutation, bounds, invalid calls/output, sanitized failures, and frontend races. A real DeepSeek smoke is conditional on a locally available key and must otherwise be reported as an external-credential limitation without fabricated success.
+- Provider/account availability remains a demo risk, but graceful failure keeps existing Today/Todo/category functions usable and does not prevent deterministic completion of the approved slice.
 
 ### Artifact And Secret Checks
 
-- Checked all 10 publication files for trailing whitespace, missing final newline, and extra EOF blank lines: PASS.
-- PCRE2 scans for private-key markers, API-key patterns, bearer-token literals, realistic token assignments, real private LAN IPs other than emulator `10.0.2.2`, absolute user paths, signing files, APK/AAB names, `local.properties`, and generated-output markers: PASS. Human-readable terms such as "token", "secrets", and "bearer literals" are documentation requirements, not credentials.
+- All nine publication files passed trailing-whitespace, final-newline, and extra-EOF-blank checks.
+- Pattern scans found no private key, API key value, bearer credential, user-machine path, real private LAN address, generated build output, or sensitive Todo fixture. Configuration names and security terms are documentation only.
 
 ### Git Snapshot Readiness
 
-READY. The next role is Git Snapshot. Its approved pre-Coding snapshot scope is exactly the 10 files listed under Changed Files, including this Task Review PASS update and the synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-029-android-room-sync-foundation.md`. Git Snapshot must independently verify branch, HEAD, staged state, exact scope, whitespace, artifact, and secret conditions before creating or recording the baseline.
+READY. The next role is Git Snapshot. Its approved pre-Coding scope is exactly the nine files listed under Changed Files, including this Task Review PASS update and synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-030-pc-ai-today-planning-agent.md`. Git Snapshot must independently verify branch, HEAD, staged state, exact scope, whitespace, artifact, and secret conditions before creating or recording the baseline.
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-029 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-030 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
