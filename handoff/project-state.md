@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-09-20
+Last updated: 2026-09-26
 
 ## Current Phase
 
@@ -96,6 +96,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-028 Decision Closure Check passed on 2026-09-20; terminal Closure Commit is authorized for the five listed state/progress documents.
 - TASK-028 terminal Closure Commit `118de68` was published and the task workflow ended.
 - TASK-029 Android identity-scoped Room cache and durable sync pull foundation was published as the next bounded Phase 1A Android slice.
+- TASK-029 Android identity-scoped Room cache and durable sync pull foundation completed in result commit `5bcdfab`; Code Review: PASS; 28 JVM tests, 11 API 36 instrumentation tests, lint, debug/release builds, install, and cold launch passed.
 
 ## Recently Completed
 
@@ -144,7 +145,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-029 Android identity-scoped Room cache and durable sync pull foundation. Live routing and the exact task boundary are maintained in `handoff/current-task.md`.
+Run Decision Closure Check for TASK-029. Live routing and the exact closure boundary are maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

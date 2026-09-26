@@ -1,6 +1,6 @@
 # TASK-029: Android identity-scoped Room cache and durable sync pull foundation
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -294,7 +294,14 @@ Code Review. Independently re-review ISSUE-20260926-001 and TASK-029; do not sta
 
 ## Git Commit
 
-Pending.
+- Status: COMPLETE
+- Branch: `main`
+- Result Commit: `5bcdfab0541afd3229109f8437f381dd21c4d935`
+- Commit Message: `feat(android): add Room sync pull foundation`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review Result: PASS
+- Next Role: Decision
 
 ## Closure
 
