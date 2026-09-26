@@ -61,14 +61,15 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 | --- | --- | --- |
 | Phase 1A backend | done | All contracted endpoints published; 101 backend tests pass |
 | PC Web | done | Phase 1A scope closed through TASK-025 terminal closure `b2d0197`; 107 tests, build, two Playwright flows, and high-severity audit gate passed |
-| Android | partial | TASK-027 foundation is closed in `658f800`; TASK-028 identity validation and token persistence completed in result commit `6b2a1fd`; local sync/read, writes, and cross-client acceptance remain |
+| Android | partial | TASK-027 foundation and TASK-028 identity are closed through `118de68`; TASK-029 identity-scoped Room cache and durable sync pull is the next published slice |
 | PC/Android end-to-end sync acceptance | pending | Requires both clients |
 
 ## Recommended Task Order
 
-1. Add Android identity-scoped local cache, durable sync pull/application, and Today/Todo reads.
-2. Add Android quick add, edit, and complete writes.
-3. Run PC/Android end-to-end Phase 1A acceptance.
+1. Review and deliver TASK-029 Android identity-scoped Room cache and durable sync pull foundation.
+2. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads.
+3. Add Android quick add, edit, and complete writes.
+4. Run PC/Android end-to-end Phase 1A acceptance.
 
 ## Decision Rule
 

@@ -94,6 +94,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-027 terminal Closure Commit `658f800` was published and the task workflow ended.
 - TASK-028 Android identity validation and token persistence completed in result commit `6b2a1fd`; Code Review: PASS; Android unit tests, lint, build, instrumentation, install, launch, and identity UI checks passed.
 - TASK-028 Decision Closure Check passed on 2026-09-20; terminal Closure Commit is authorized for the five listed state/progress documents.
+- TASK-028 terminal Closure Commit `118de68` was published and the task workflow ended.
+- TASK-029 Android identity-scoped Room cache and durable sync pull foundation was published as the next bounded Phase 1A Android slice.
 
 ## Recently Completed
 
@@ -142,7 +144,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-028 terminal Closure Commit using the exact five-file allowlist in `handoff/current-task.md`. After remote parity is verified, return to Decision to publish the Android local sync/read slice.
+Run Task Review for TASK-029 Android identity-scoped Room cache and durable sync pull foundation. Live routing and the exact task boundary are maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

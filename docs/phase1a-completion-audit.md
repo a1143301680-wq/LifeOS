@@ -47,8 +47,9 @@ Baseline: `e29d69204f2c64d72d305d890a444af52c0da6e0`
 
 ## Recommended Sequence
 
-1. Android identity-scoped local cache, durable sync pull/application, and Today/Todo reads.
-2. Android quick add, edit, and complete writes.
-3. PC/Android end-to-end Phase 1A acceptance.
+1. Android identity-scoped Room cache and durable sync pull/application foundation.
+2. Authoritative REST bootstrap/reconciliation and Android Today/Todo reads.
+3. Android quick add, edit, and complete writes.
+4. PC/Android end-to-end Phase 1A acceptance.
 
 Phase 1B Reminder work must not start until these Android and end-to-end Phase 1A gaps are explicitly completed or re-scoped by Decision.

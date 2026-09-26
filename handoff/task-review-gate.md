@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-09-15
+Last updated: 2026-09-20
 
 ## Gate Status
 
@@ -10,16 +10,16 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-09-15 10:18 +08:00
+Reviewed at: 2026-09-26 21:48 +08:00
 
-Reviewed task: TASK-028 Android identity validation and token persistence
+Reviewed task: TASK-029 Android identity-scoped Room cache and durable sync pull foundation
 
 ## Required Review
 
-- [x] Goal, contract, scope, exclusions, and dependencies are coherent.
-- [x] Token persistence, 401, recoverable error, startup, retry, switch, and stale-request rules are unambiguous.
-- [x] Acceptance criteria and verification are executable without exposing a real token.
-- [x] Allowed files fit one closeable identity slice and exclude later Android work.
+- [x] Goal, scope split, exclusions, dependencies, and ADR-0002 are coherent.
+- [x] Room ownership/schema and no-authoritative-bootstrap boundary are explicit.
+- [x] Sync page validation, transaction, cursor, resume, unauthorized, and concurrency semantics are unambiguous.
+- [x] Acceptance and verification cover identity isolation without requiring a real token.
 - [x] Branch, HEAD, worktree, staged state, diff check, and Git Snapshot readiness are persisted.
 
 ## Issues
@@ -31,19 +31,20 @@ None.
 ### Repository State
 
 - Branch: `main`
-- HEAD: `658f8003f84622d807094b2b13ab0d3594ca3d03`
-- origin/main: `658f8003f84622d807094b2b13ab0d3594ca3d03`
-- Remote `refs/heads/main`: `658f8003f84622d807094b2b13ab0d3594ca3d03`
-- Dependency check: TASK-027 terminal Closure Commit `658f800` is current local, tracking, and remote baseline.
-- Worktree Summary before this review: 7 modified tracked files and 1 untracked task archive; all are TASK-028 Decision publication, gate reset, and project-state/progress routing files.
+- HEAD: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
+- origin/main: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
+- Remote `refs/heads/main`: `118de6867a4fb06d32022dd1117fcfb5681b5d26`
+- Dependency check: TASK-028 terminal Closure Commit `118de68`, Android identity result `6b2a1fd`, and sync changes pull API result `f6f9091` exist.
+- Worktree Summary before this review: 8 modified tracked files and 2 untracked publication files; all are TASK-029 Decision publication, ADR/progress/audit routing, and gate/Git-record reset files.
 - Staged Changes: None.
 - `git diff --check`: exit code 0. Git emitted LF-to-CRLF working-copy warnings only; no whitespace errors were reported.
 - `git diff --cached --check`: exit code 0.
-- Untracked-file whitespace/EOF check: PASS for `tasks/TASK-028-android-identity-validation.md`.
-- Issue-log search for TASK-028 and unresolved/blocking markers: no matches.
+- Publication-file whitespace/EOF check: PASS for all 10 current files.
+- Issue-log search for TASK-029 and unresolved/blocking markers: no matches.
 
 ### Changed Files
 
+- `docs/phase1a-completion-audit.md`
 - `docs/phase1a-progress.md`
 - `handoff/code-review-gate.md`
 - `handoff/current-task.md`
@@ -51,36 +52,41 @@ None.
 - `handoff/git-snapshot.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
-- `tasks/TASK-028-android-identity-validation.md` (untracked)
+- `docs/adr/0002-android-local-cache-sync-foundation.md` (untracked)
+- `tasks/TASK-029-android-room-sync-foundation.md` (untracked)
 
-These eight files are the TASK-028 publication/readiness set. The diff resets the active gates and Git records from TASK-027 to TASK-028, updates project/progress routing after TASK-027 closure, and publishes the TASK-028 archive. No Android implementation, backend, PC Web, stable contract, completed task archive, generated build output, signing material, real LAN address, machine path, or raw credential is included.
+These 10 files are the TASK-029 publication/readiness set. The diff closes the TASK-028 routing, publishes TASK-029, resets active gates and Git records, adds ADR-0002, and updates Phase 1A progress/audit sequence to split Room/sync foundation from authoritative REST bootstrap/read UI. No Android implementation, backend, PC Web, stable product/API/data-model change, generated build output, signing material, real LAN address, machine path, or raw credential is included.
 
 ### Routed File Review
 
-- `docs/api-phase1a.md` confirms token-derived identity, `Authorization: Bearer <identity_token>`, no client-supplied `user_id`, `401 unauthorized` for invalid tokens, manual Android token storage in DataStore, and the `GET /api/v1/me` response envelope with UUID, alias, display name, and timezone.
-- `docs/architecture.md` confirms Android stores selected identity locally while backend resolves `user_id` from the bearer token and filters all data by the resolved user.
-- `docs/data-model-phase1.md` confirms server-side `bootstrap_token_hash` storage and Android DataStore usage for selected identity/settings. The server table rule that raw bootstrap tokens are not stored in plaintext is compatible with the API contract's client-side DataStore storage requirement; TASK-028 records app-private unencrypted-at-rest DataStore as an accepted Phase 1A residual risk.
-- `docs/adr/0001-android-foundation.md` and the current Android project confirm the fixed package, API 26/36/36 baseline, debug `10.0.2.2` API base, release HTTPS-only guard, and no committed real LAN address.
-- `android/app/src/main/AndroidManifest.xml`, `backup_rules.xml`, and `data_extraction_rules.xml` confirm the existing backup-disabled boundary that TASK-028 relies on.
+- `docs/api-phase1a.md` confirms `/sync/changes` uses global monotonically increasing cursors, current-token user filtering, valid cursor gaps, cursor-ordered results, empty high-water pages with `next_cursor`, and client looping while `has_more = true`.
+- `docs/data-model-phase1.md` confirms `sync_changes` is lightweight recovery data, SSE is a wake-up signal only, Android local data uses Room, and DataStore remains the selected identity/settings store.
+- `docs/architecture.md` confirms Android local cache responsibility, bearer-token-derived identity, backend user filtering, and future offline behavior without requiring this task to expose product reads.
+- `docs/adr/0001-android-foundation.md` remains the fixed Android package, SDK, API-base, debug cleartext, release HTTPS, backup, and toolchain baseline.
+- `docs/adr/0002-android-local-cache-sync-foundation.md` explicitly states that cursor-0 sync replay cannot reconstruct bootstrap-created default categories, so TASK-029 must not expose cached product data before REST bootstrap/reconciliation.
+- Existing TASK-028 identity files show the token remains in Preferences DataStore and the validated profile provides the owner UUID needed by TASK-029; Room must not store bearer tokens.
+- Backend sync implementation and tests confirm `/api/v1/sync/changes` filters by current user, captures high water, supports cursor gaps, pages with `limit + 1`, rejects future cursors, and exposes `401 unauthorized` through bearer auth.
 
 ### Start-Readiness Review
 
-- The task is one closeable Android identity slice: token entry, `/me` validation, strict envelope parsing, app-private DataStore persistence, startup revalidation, 401 clear, recoverable retry, explicit switch identity, stale request ownership, UI states, and focused tests.
-- Scope boundaries are explicit. Todo, category, Today, Room/cache, sync/SSE, WorkManager, offline writes, reminders, widgets, notifications, backend, PC Web, stable contract docs, completed archives, dynamic dependency changes, real LAN addresses, signing material, and generated output are excluded.
-- The raw-token storage decision is explicit and bounded: persist only after successful `/me`, clear on 401 or switch, keep out of backup/device transfer, never expose through URL/body/query/log/error/screenshot/report, and record the compromised/rooted-device risk.
-- Acceptance criteria and verification are executable without a real token because mocked/fake or MockWebServer coverage is mandatory; any optional live-backend smoke test requires a disposable token and must avoid repository, command history, logs, screenshots, reports, and chat.
-- Verification covers unit tests, DataStore isolation, state transitions, stale/duplicate/cancel behavior, instrumentation/UI coverage, wrapper tests, lint, debug/release builds, install/launch, responsive/accessibility checks, exact-scope review, dependency pinning, artifact scans, token-like string checks, URL/LAN/path/signing scans, and debug-log inspection.
-- Current publication status is coherent: both active task records identify TASK-028 as `PLANNED`, the Task Review gate is pending before this update, Git Snapshot/Git Commit are pending for TASK-028, and Code Review is reset to pending.
+- The task is one closeable foundation slice: Room/KSP setup, owner-scoped Todo/category/cache schema, per-owner sync cursor, strict `/sync/changes` parsing, transactional page application, resume behavior, unauthorized/recoverable typed results, duplicate/stale run ownership, schema export, and focused tests.
+- The no-authoritative-bootstrap boundary is explicit. TASK-029 does not wire cache data into UI and does not claim first-install product completeness; TASK-030 is required for REST snapshot/bootstrap reconciliation and Today/Todo reads.
+- Room ownership rules are explicit: one app-private database, `(owner_id, entity_id)` composite keys, per-owner sync-state row, explicit owner predicates on reads/writes/deletes/cursor advancement, and no token columns.
+- Sync validation is sufficiently constrained: full-page validation before mutation, item cursors strictly greater than requested cursor, supported Todo/category change combinations only, valid UUID/version/snapshot/tombstone semantics, `next_cursor`/`has_more` progress checks, and fail-closed handling for malformed/unknown/non-progressing pages.
+- Transaction semantics are clear: one complete page plus cursor advance in a single Room transaction; parse or database failure rolls back the whole page and preserves the prior cursor.
+- Resume and concurrency semantics are clear: committed pages survive cancellation/recoverable failures, the durable cursor is the resume point, runs are serialized per identity, duplicate/stale completions are deterministic, and identities cannot mutate each other's rows or cursors.
+- The backend test fixture includes a historical `sync.refresh`/`system` example, but production create/update/delete paths emit Todo and Todo Category changes. TASK-029 intentionally treats unknown entity/change combinations as fail-closed rather than silently supporting out-of-scope system events.
+- Acceptance criteria and verification are executable without a real token: MockWebServer/JVM tests cover request safety and page behavior; Room tests cover schema, owner isolation, transactions, persistence, tombstones, and resume; build/lint/device checks preserve TASK-028 identity UI.
 
 ### Artifact And Secret Checks
 
-- Checked publication files for trailing whitespace, missing final newline, and extra EOF blank lines: PASS.
-- PCRE2 scans for private-key markers, API-key patterns, bearer-token literals, realistic token assignments, real private LAN IPs other than the documented emulator `10.0.2.2`, absolute user paths, signing files, APK/AAB names, `local.properties`, and generated-output markers: PASS. Human-readable terms such as "token", "password-style", and "secret evidence" are documentation requirements, not credentials.
+- Checked all 10 publication files for trailing whitespace, missing final newline, and extra EOF blank lines: PASS.
+- PCRE2 scans for private-key markers, API-key patterns, bearer-token literals, realistic token assignments, real private LAN IPs other than emulator `10.0.2.2`, absolute user paths, signing files, APK/AAB names, `local.properties`, and generated-output markers: PASS. Human-readable terms such as "token", "secrets", and "bearer literals" are documentation requirements, not credentials.
 
 ### Git Snapshot Readiness
 
-READY. The next role is Git Snapshot. Its approved pre-Coding snapshot scope is exactly the eight files listed under Changed Files, including this Task Review PASS update and the synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-028-android-identity-validation.md`. Git Snapshot must independently verify branch, HEAD, staged state, exact scope, whitespace, artifact, and secret conditions before creating or recording the baseline.
+READY. The next role is Git Snapshot. Its approved pre-Coding snapshot scope is exactly the 10 files listed under Changed Files, including this Task Review PASS update and the synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-029-android-room-sync-foundation.md`. Git Snapshot must independently verify branch, HEAD, staged state, exact scope, whitespace, artifact, and secret conditions before creating or recording the baseline.
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-028 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-029 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
