@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-09-27
+Last updated: 2026-10-09
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -68,16 +68,15 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 | Capability | Status | Evidence / Notes |
 | --- | --- | --- |
-| PC AI Today planning agent | partial | TASK-030 has 123 passing backend tests and 112 passing Web tests, plus production-build and desktop/narrow browser checks. After an object-shaped first request received HTTP 422, the user authorized the array shape; the restarted PC page passed a bounded live DeepSeek check with synthetic data. Independent Code Review is pending. |
+| PC AI Today planning agent | done | TASK-030 result `3cbee44`; Code Review and Decision Closure PASS; 123 backend tests, 112 Web tests, production build, Playwright flows, and a bounded live DeepSeek PC-page check passed |
 
 This inserted showcase does not reopen completed PC Web Phase 1A scope and does not change the remaining Android completion criteria.
 
 ## Recommended Task Order
 
-1. Review and publish TASK-030 PC AI Today planning showcase.
-2. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
-3. Add Android quick add, edit, and complete writes.
-4. Run PC/Android end-to-end Phase 1A acceptance.
+1. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
+2. Add Android quick add, edit, and complete writes.
+3. Run PC/Android end-to-end Phase 1A acceptance.
 
 ## Decision Rule
 
