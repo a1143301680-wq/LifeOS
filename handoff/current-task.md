@@ -6,7 +6,7 @@ Last updated: 2026-10-09
 
 - Task ID: TASK-030
 - Task Name: PC AI Today planning agent with DeepSeek
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC AI showcase vertical slice
 - Dependencies:
@@ -146,9 +146,9 @@ Report modified files, dependency/version choice, configuration names, endpoint 
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the exact Code Review PASS scope, then mark TASK-030 completed only after publication succeeds.
+Required next action: perform Decision Closure Check for TASK-030 using Result Commit `3cbee4477d6f6b9e5b974cb4edc6bf7ae75c8ca2` and the completion record, then authorize only the exact Closure documents if the check passes.
 
 ## Decision Resolution (2026-10-09)
 
