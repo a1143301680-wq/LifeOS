@@ -56,8 +56,9 @@ Baseline: `315888094d2a3328f03019ecac6cf4ea68bb0fb5`
 
 ## Recommended Sequence
 
-1. Authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
-2. Android quick add, edit, and complete writes.
-3. PC/Android end-to-end Phase 1A acceptance.
+1. Complete PC V1 delivery under `docs/pc-delivery-plan.md`, starting with TASK-031 Project/Goal core. This changes sequencing, not the Phase 1A completion verdict.
+2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance (currently reserved as TASK-038).
+3. Android quick add, edit, and complete writes.
+4. PC/Android end-to-end Phase 1A acceptance.
 
 Phase 1B Reminder work must not start until these Android and end-to-end Phase 1A gaps are explicitly completed or re-scoped by Decision.

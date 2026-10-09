@@ -1,10 +1,10 @@
 # LifeOS Project State
 
-Last updated: 2026-09-27
+Last updated: 2026-10-09
 
 ## Current Phase
 
-Phase 1A client delivery: backend and PC Web complete; Android and end-to-end sync acceptance remain.
+PC V1 MVP delivery is prioritized. Phase 1A backend and PC Todo/Today are complete; Android and cross-client acceptance remain open and resume after the PC sequence in `docs/pc-delivery-plan.md`.
 
 ## Source Of Truth
 
@@ -103,7 +103,9 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-030 uses DeepSeek `deepseek-flash`, one server-controlled identity-scoped read-only context tool, strict structured output, and explicit user confirmation through the existing Todo quick-create form. It does not reopen completed PC Web Phase 1A scope.
 - TASK-030 PC AI Today planning agent completed in result commit `3cbee44`; Code Review: PASS; 123 backend tests, 112 Web tests, production build, Playwright flows, and bounded live PC-page verification passed.
 - TASK-030 Decision Closure Check passed on 2026-10-09; terminal Closure Commit is authorized for the exact five state/progress documents listed in the task record.
-- Android authoritative REST bootstrap/reconciliation and Today/Todo reads move to TASK-031 and remain the next Phase 1A product slice after TASK-030.
+- TASK-030 terminal Closure Commit `da506ae` was published and the task workflow ended.
+- On 2026-10-09 the user prioritized PC V1 completion ahead of Android. `docs/pc-delivery-plan.md` sequences Project/Goal core, AI Session records, Dashboard/Resume, project depth, Notes, Calendar, and PC acceptance before Android resumes.
+- TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
 
 ## Recently Completed
 
@@ -152,7 +154,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-030 terminal Closure Commit using the exact five-file allowlist in `handoff/current-task.md`. After remote parity is verified, return to Decision to publish TASK-031 Android authoritative REST bootstrap/reconciliation and Today/Todo reads.
+Run Task Review for TASK-031. Verify the Project/Goal contract, migration, identity and idempotency boundaries, PC usability, exact publication scope, and Git Snapshot readiness. Do not start Coding.
 
 ## Notes For Windows
 
