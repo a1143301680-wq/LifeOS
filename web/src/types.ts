@@ -116,3 +116,35 @@ export type TodayData = {
   sections: TodaySections;
   summary: TodaySummary;
 };
+
+export type AIFocusItem = {
+  todo_id: string;
+  reason: string;
+};
+
+export type AIRisk = {
+  todo_id: string | null;
+  message: string;
+};
+
+export type AISuggestedTodo = {
+  title: string;
+  priority: Todo["priority"];
+  planned_date: string;
+  category_id: string | null;
+  reason: string;
+};
+
+export type AITodayPlan = {
+  date: string;
+  summary: string;
+  focus_items: AIFocusItem[];
+  risks: AIRisk[];
+  suggested_todo: AISuggestedTodo | null;
+  usage: {
+    model: string;
+    input_tokens: number | null;
+    output_tokens: number | null;
+    total_tokens: number | null;
+  };
+};

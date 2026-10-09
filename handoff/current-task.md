@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-09-27
+Last updated: 2026-10-09
 
 ## Metadata
 
 - Task ID: TASK-030
 - Task Name: PC AI Today planning agent with DeepSeek
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC AI showcase vertical slice
 - Dependencies:
@@ -146,6 +146,40 @@ Report modified files, dependency/version choice, configuration names, endpoint 
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for the exact nine-file TASK-030 publication/readiness scope approved in `handoff/task-review-gate.md`. Do not start Coding until Git Snapshot completes.
+Required next action: commit and push the exact Code Review PASS scope, then mark TASK-030 completed only after publication succeeds.
+
+## Decision Resolution (2026-10-09)
+
+- The user explicitly authorized the array-shaped first DeepSeek Responses request after the approved object shape returned HTTP 422 in a controlled check. This is a new decision; CR-TASK-030-001 remains historically withdrawn.
+- Scope: change only the first request shape and its SDK outbound regression; preserve CR-002/003, strict whole-response validation, and the no-retry boundary. Repeat one bounded live PC-page check with synthetic data and synchronize the audit evidence.
+- Coding admission: the prior BLOCKED reason is resolved by this direct user decision; TASK-030 and the current-task record return to `IN_PROGRESS` on the existing snapshot branch and HEAD.
+
+## Resolved Blocked Report (historical)
+
+- Blocked Reason: the approved single-message object shape for the first DeepSeek request now receives HTTP 422, so Coding cannot satisfy the required live provider/page verification within the existing authorization.
+- Evidence: the object-shape SDK serialization regression passed; a controlled PC-page call returned 503 with the plan error surface, and an isolated first-request call using the same object shape returned HTTP 422. The previous array-shaped implementation had a bounded live PC-page PASS, but CR-001 withdrew authorization for that shape.
+- Attempted Solutions: restored the approved object shape, updated its SDK outbound regression, ran the AI file (22 passed), full backend (123 passed), Web (112 passed), production build, and Playwright (2 passed); corrected the stale Phase 1A evidence in both progress documents and the task archive. Synthetic local verification data was removed.
+- Required Decision: authorize and record the array-shaped first request against the new 422 evidence, or specify another approved provider-compatible request form. Then return the task to Coding for one bounded live PC-page check and independent Code Review.
+
+## Prior Coding Rework Result (CR-003)
+
+- Result: PASS
+- Fixed Issues: `CR-TASK-030-003`; `CR-TASK-030-002` remains preserved and pending final Code Review; `CR-TASK-030-001` remains withdrawn.
+- Modified Files: `backend/app/services/ai_today_provider.py`, `backend/tests/test_ai_today_plan.py`, `handoff/current-task.md`, `handoff/issue-log.md`, `tasks/TASK-030-pc-ai-today-planning-agent.md`.
+- Implementation Summary: added explicit provider instructions that a Todo ID may appear at most once across `focus_items` and `risks`; if a risk concerns an already-focused Todo, the model must set `risk.todo_id = null`. Existing strict duplicate-reference rejection is unchanged; no silent repair, filtering, rewrite, retry, or output mutation was added.
+- Verification: `python -m pytest tests/test_ai_today_plan.py::test_deepseek_adapter_sends_cross_list_reference_instructions tests/test_ai_today_plan.py::test_invalid_provider_references_reject_the_complete_result -q` PASS, 4 tests; `python -m pytest tests/test_ai_today_plan.py -q` PASS, 22 tests; `python -m pytest` PASS, 123 tests; `npm test -- --run` PASS, 10 files / 112 tests; `npm run build` PASS; `npx playwright install chromium` completed because the local Playwright browser binary was missing; `.\stop-lifeos.ps1` and `.\start-lifeos.ps1 -NoBrowser -LocalOnly` completed after PostgreSQL was started with local `pg_ctl`; bounded live PC-page planning check PASS with disposable synthetic local data, `/api/v1/ai/today-plan` returned 200, result surface rendered, suggestion action visible, and no console/page errors; disposable `ai_live_%` local DB verification users were removed after the check.
+- Sensitive Data Handling: no bearer token, provider key, real Todo content, raw provider body, response ID, model text, reasoning text, or credential was recorded in task output.
+- Next Role: Code Review.
+
+## Coding Rework Result (CR-004/005)
+
+- Result: PASS.
+- Modified Files This Rework: `backend/app/services/ai_today_provider.py`, `backend/tests/test_ai_today_plan.py`, `docs/phase1a-progress.md`, `docs/phase1a-completion-audit.md`, `handoff/current-task.md`, `handoff/issue-log.md`, and `tasks/TASK-030-pc-ai-today-planning-agent.md`.
+- Implementation Summary: the first DeepSeek request again sends an array containing one user message, as explicitly authorized after the object-shape HTTP 422. The SDK outbound regression checks that serialized array. CR-002/003, strict duplicate rejection, and no-retry behavior remain intact.
+- Acceptance Criteria: AI backend 22/22; full backend 123/123; Web 112/112; production build PASS; existing Playwright 2/2. After service restart, the bounded live PC-page check returned 200, displayed the plan, and showed zero console/page errors. Synthetic local data was removed.
+- Git Diff Check: `git diff --check` PASS with line-ending notices only; staged diff empty; no stage, commit, or push.
+- Unresolved Issues: none for Coding; independent Code Review is required.
+- Task-Outside Findings: none.
+- Next Role: Code Review.

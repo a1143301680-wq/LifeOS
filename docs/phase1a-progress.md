@@ -68,13 +68,13 @@ Purpose: give the Decision window a concrete progress map so tasks are selected 
 
 | Capability | Status | Evidence / Notes |
 | --- | --- | --- |
-| PC AI Today planning agent | next | TASK-030 published as a bounded DeepSeek `deepseek-flash` showcase slice; one read-only identity-scoped tool, strict structured output, and explicit user confirmation before existing Todo quick-create |
+| PC AI Today planning agent | partial | TASK-030 has 123 passing backend tests and 112 passing Web tests, plus production-build and desktop/narrow browser checks. After an object-shaped first request received HTTP 422, the user authorized the array shape; the restarted PC page passed a bounded live DeepSeek check with synthetic data. Independent Code Review is pending. |
 
 This inserted showcase does not reopen completed PC Web Phase 1A scope and does not change the remaining Android completion criteria.
 
 ## Recommended Task Order
 
-1. Deliver TASK-030 PC AI Today planning showcase.
+1. Review and publish TASK-030 PC AI Today planning showcase.
 2. Add authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
 3. Add Android quick add, edit, and complete writes.
 4. Run PC/Android end-to-end Phase 1A acceptance.

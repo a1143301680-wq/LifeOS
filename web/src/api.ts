@@ -1,4 +1,5 @@
 import type {
+  AITodayPlan,
   DataEnvelope,
   ListEnvelope,
   Todo,
@@ -76,6 +77,16 @@ export async function getTodayTodos(token: string, date: string) {
     `/todos/today?date=${encodeURIComponent(date)}`,
     token,
   );
+  return response.data;
+}
+
+export async function createAITodayPlan(token: string, date: string, signal?: AbortSignal) {
+  const response = await authenticatedRequest<DataEnvelope<AITodayPlan>>("/ai/today-plan", token, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date }),
+    signal,
+  });
   return response.data;
 }
 

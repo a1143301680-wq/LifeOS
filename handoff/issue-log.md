@@ -201,6 +201,99 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: Catch and rethrow `CancellationException` before the general cursor-read `Exception` handler, allowing the existing outer cancellation handler to produce `Cancelled(0)`. Add a focused regression test using a store whose `cursor()` throws `CancellationException`; also verify a subsequent same-owner run can proceed so lock release remains proven.
 - Verification: Verified by Code Review on 2026-09-26. The focused cursor-load cancellation/lock-release regression passed independently. The full JVM suite passed 28/28, API 36 instrumentation passed 11/11, lint reported 0 errors, debug/release builds passed, and install/cold-launch/crash-buffer checks passed.
 
+### CR-TASK-030-001: First DeepSeek Responses request uses an invalid input shape
+
+- Status: withdrawn
+- Severity: P1
+- Found by: Code Review window from live-provider evidence
+- Found at: 2026-09-27 09:53 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files:
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:152`
+  - `D:\LifeOS\backend\tests\test_ai_today_plan.py:292`
+- Description: Withdrawn initial diagnosis. Later evidence established that the first Responses request and context tool call succeed; the failure occurs during the second structured-response request and is tracked as `CR-TASK-030-002`.
+- Impact: None from the alleged first-request shape. The earlier Code Review PASS remains withdrawn because later live findings `CR-TASK-030-002` and `CR-TASK-030-003` require rework and independent re-review.
+- Expected: preserve the currently working first request and tool call.
+- Actual: first request succeeds against DeepSeek.
+- Fix owner/window: None; no Coding change is authorized by this withdrawn issue.
+- Fix notes: do not change the first request to `input=[message]` on the basis of this finding.
+- Verification: Withdrawn on 2026-09-27 10:02 +08:00 after corrected live evidence showed that the first request and context tool call succeeded. No `input=[message]` change is authorized by this finding.
+- Later Decision (2026-10-09): after the object-shaped request returned HTTP 422 in a controlled check, the user explicitly authorized array input for TASK-030. This new decision does not retroactively reopen the withdrawn CR-001 diagnosis.
+
+### CR-TASK-030-002: DeepSeek rejects UUID and date JSON Schema format constraints
+
+- Status: verified
+- Severity: P1
+- Found by: Coding live-provider diagnosis, accepted into scope by Code Review
+- Found at: 2026-09-27 10:02 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files:
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:37`
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:52`
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:69`
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:72`
+  - `D:\LifeOS\backend\tests\test_ai_today_plan.py`
+- Description: the first DeepSeek context-tool round succeeds. The second structured-response request sends `PLAN_JSON_SCHEMA` containing `format: "uuid"` and `format: "date"`; DeepSeek currently rejects these unsupported constraints with HTTP 400. The backend correctly sanitizes the raw provider failure to `ai_provider_unavailable`, and the PC client displays its stable fallback message.
+- Impact: the real AI Today flow cannot produce a final plan even though the tool boundary, sanitized error path, and deterministic fake-provider tests pass.
+- Expected: the provider-facing schema omits these unsupported `format` keywords, while Pydantic `UUID`/`date` parsing and authenticated Todo/category reference validation continue to reject malformed or invented output.
+- Actual: Coding removed the four unsupported `format` fields. Both DeepSeek rounds now complete; Pydantic malformed UUID/date rejection tests remain in place.
+- Fix owner/window: Coding within the existing TASK-030 guarded rework.
+- Fix notes: remove only the unsupported provider schema keywords. Do not weaken `AIProviderPlan`, duplicate/reference/category checks, sanitized errors, tool bounds, or explicit Todo confirmation. Add regression coverage for schema compatibility and malformed UUID/date rejection.
+- Verification: Verified independently by Code Review on 2026-10-09. The outbound schema contains no `format`; malformed UUID/date outputs remain rejected; focused AI tests passed 22/22 and the full backend suite passed 123/123.
+
+### CR-TASK-030-003: Provider instructions omit cross-list Todo-reference uniqueness
+
+- Status: verified
+- Severity: P1
+- Found by: Coding live-page diagnosis, accepted into scope by Code Review
+- Found at: 2026-09-28 11:15 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files:
+  - `D:\LifeOS\backend\app\services\ai_today_provider.py:89-91`
+  - `D:\LifeOS\backend\tests\test_ai_today_plan.py`
+- Description: after CR-002, both DeepSeek request rounds succeed. The model repeatedly returns the same Todo ID in `focus_items` and `risks` because `INSTRUCTIONS` does not state the task's cross-list uniqueness invariant. `AIProviderPlan.reject_duplicate_references()` correctly rejects the complete result.
+- Impact: real planning remains operationally unusable even though provider transport and structured output now succeed; the PC page consistently displays its safe generic error.
+- Expected: outbound instructions state that each Todo ID may appear at most once across both lists. If a risk concerns a Todo already used as a focus item, that risk must set `todo_id` to `null`.
+- Actual: Coding added the cross-list uniqueness guidance and null-risk fallback to outbound provider instructions. The strict duplicate-reference rejection remains in place, with no silent repair, filtering, omission, rewrite, or autonomous retry.
+- Fix owner/window: Coding within the existing TASK-030 guarded rework.
+- Fix notes: clarify provider instructions and add an outbound-instructions regression. Keep duplicate-reference rejection and whole-response failure unchanged; do not add silent repair, filtering, omission, rewrite, or autonomous retry.
+- Verification: Verified independently by Code Review on 2026-10-09. Both outbound calls contain the required instructions, strict duplicate rejection remains unchanged, focused checks passed 4/4, the AI file passed 22/22, and the full backend suite passed 123/123. Coding's bounded live PC-page evidence is retained without sensitive payloads.
+
+### CR-TASK-030-004: Withdrawn first-request shape change remains in TASK-030
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-10-09 19:20 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files: `D:\LifeOS\backend\app\services\ai_today_provider.py:154`, `D:\LifeOS\backend\tests\test_ai_today_plan.py:418`
+- Description: CR-001 is withdrawn and explicitly records that `input=[message]` is not authorized, but the implementation and a new regression test retain exactly that request shape.
+- Impact: the worktree contradicts its approved rework boundary and durable provider diagnosis, so the final contract cannot be independently determined from repository evidence.
+- Expected: restore the approved first-request shape, or obtain an explicit evidence-backed workflow decision authorizing the array shape before retaining it.
+- Actual: Coding restored `input=self._request_message(selected_date)` and changed the SDK outbound regression to require a single message object. That object shape receives HTTP 422 from the current DeepSeek endpoint; the controlled PC-page call returned 503. A prior array-shaped live PC-page check passed, but that shape still requires a new durable authorization.
+- Fix owner/window: Coding after guarded rework admission; route to Decision first if the request shape itself requires a new product/provider decision.
+- Fix notes: preserve the verified CR-002/003 schema, instructions, strict validation, and no-retry behavior. Do not guess between conflicting live diagnoses.
+- Verification: SDK object-shape regression, AI backend 22/22, full backend 123/123, Web 112/112, production build, and existing Playwright 2/2 passed. Controlled page call with object input returned 503; isolated object-shaped first request returned HTTP 422. Synthetic local data was removed. Decision must resolve the request shape before live PASS can be claimed.
+- Decision Resolution (2026-10-09): the user explicitly authorized the array-shaped first request based on the new controlled HTTP 422 evidence. This is a new authorization and does not rewrite the historical withdrawal of CR-001. Coding may now restore array input, update its SDK regression, and repeat bounded live PC-page verification.
+- Final Verification: verified independently by Code Review on 2026-10-09. The new Decision authorization, single-message array implementation, and real-SDK serialized request regression agree. AI backend passed 22/22, the full backend passed 123/123, Web passed 112/112, build and Playwright passed, and Coding's sanitized live PC-page PASS is retained.
+
+### CR-TASK-030-005: TASK-030 progress evidence is stale and contradictory
+
+- Status: verified
+- Severity: P2
+- Found by: Code Review window
+- Found at: 2026-10-09 19:20 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files: `D:\LifeOS\docs\phase1a-progress.md:71`, `D:\LifeOS\docs\phase1a-completion-audit.md:48`, `D:\LifeOS\tasks\TASK-030-pc-ai-today-planning-agent.md:84`
+- Description: modified status documents still claim the live smoke was credential-limited and the backend suite had 118 tests, while the active task records a configured-key bounded live PASS and independent review now confirms 123 passing backend tests.
+- Impact: publication would leave Decision and future review windows with mutually contradictory audit evidence.
+- Expected: synchronize the three records with the final sanitized result and current test counts without recording credentials or provider-sensitive content.
+- Actual: both modified Phase 1A documents and the task acceptance record now state the final authorized array shape, the controlled object-shape HTTP 422, the bounded live PC-page PASS, and the verified 123 backend / 112 Web test counts.
+- Verification: verified independently by Code Review on 2026-10-09 against the final Decision record, current documents, full test output, and `git diff --check`.
+- Fix owner/window: Coding through guarded rework admission.
+- Fix notes: update evidence only; do not change product scope or claim additional verification.
+- Final Verification: records are synchronized and contain no credential, model output, raw provider body, response ID, raw token, or real Todo content.
+
 ## Entry Template
 
 ```text

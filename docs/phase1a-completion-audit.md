@@ -45,6 +45,7 @@ Baseline: `3aea6a4275825bfa07b7773747db58845f839c34`
 
 - TASK-030 is a bounded, PC-only AI Today planning demonstration inserted before the next Android slice at the user's request.
 - It uses DeepSeek `deepseek-flash` through a server-held key, one identity-scoped read-only context tool, strict structured output, and the existing user-confirmed quick-create flow.
+- TASK-030 verification passed 123 backend tests, 112 Web tests, the production build, existing Playwright flows, and focused desktop/narrow AI browser checks. A controlled check found that DeepSeek returns HTTP 422 for the object-shaped first request; after explicit user authorization for the array shape, a bounded live PC-page check passed with synthetic data and a configured local key. Independent Code Review remains pending.
 - It does not reopen completed PC Web Phase 1A scope, alter the stable Phase 1A contract, or count toward the remaining Android and cross-client completion criteria.
 
 ## Remaining Phase 1A Work
@@ -55,7 +56,7 @@ Baseline: `3aea6a4275825bfa07b7773747db58845f839c34`
 
 ## Recommended Sequence
 
-1. TASK-030 PC AI Today planning showcase.
+1. Review and publish TASK-030 PC AI Today planning showcase.
 2. Authoritative REST bootstrap/reconciliation and Android Today/Todo reads as TASK-031.
 3. Android quick add, edit, and complete writes.
 4. PC/Android end-to-end Phase 1A acceptance.

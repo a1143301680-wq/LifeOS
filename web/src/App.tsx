@@ -15,6 +15,7 @@ import {
   RefreshCw,
   RotateCcw,
   ShieldCheck,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
 import {
   ApiError,
   completeTodo,
+  createAITodayPlan,
   createTodo,
   createTodoCategory,
   deleteTodoCategory,
@@ -39,11 +41,12 @@ import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
 import type { SyncEffects } from "./sync-engine";
-import type { Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
+import type { AISuggestedTodo, AITodayPlan, Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
 type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
+type AIPlanStatus = "idle" | "loading" | "ready" | "error";
 type AppView = "today" | "todos" | "categories";
 type QuickCreateOrigin = "today" | "todos";
 type TodoPriority = Todo["priority"];
@@ -210,6 +213,49 @@ function TodayContent({
   );
 }
 
+function AITodayPlanContent({
+  plan,
+  onReviewSuggestion,
+  suggestionDisabled,
+}: {
+  plan: AITodayPlan;
+  onReviewSuggestion: (suggestion: AISuggestedTodo, trigger: HTMLButtonElement) => void;
+  suggestionDisabled: boolean;
+}) {
+  return (
+    <section className="ai-plan" aria-labelledby="ai-plan-title">
+      <div className="ai-plan-heading">
+        <div>
+          <p className="eyebrow">AI planning</p>
+          <h2 id="ai-plan-title">Plan for this day</h2>
+        </div>
+        <span>{plan.usage.model}</span>
+      </div>
+      <p className="ai-plan-summary">{plan.summary}</p>
+      <div className="ai-plan-columns">
+        <div>
+          <h3>Focus</h3>
+          {plan.focus_items.length ? (
+            <ol>{plan.focus_items.map((item) => <li key={item.todo_id}>{item.reason}</li>)}</ol>
+          ) : <p>No additional focus items.</p>}
+        </div>
+        <div>
+          <h3>Risks</h3>
+          {plan.risks.length ? (
+            <ul>{plan.risks.map((risk, index) => <li key={`${risk.todo_id ?? "general"}-${index}`}>{risk.message}</li>)}</ul>
+          ) : <p>No immediate risks identified.</p>}
+        </div>
+      </div>
+      {plan.suggested_todo ? (
+        <div className="ai-suggestion">
+          <div><span>Suggested draft</span><strong>{plan.suggested_todo.title}</strong><p>{plan.suggested_todo.reason}</p></div>
+          <button className="secondary-button" type="button" onClick={(event) => onReviewSuggestion(plan.suggested_todo!, event.currentTarget)} disabled={suggestionDisabled}>Review suggested todo</button>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function categoryColor(color: string | null) {
   return color && /^#[0-9a-fA-F]{6}$/.test(color) ? color : null;
 }
@@ -303,6 +349,9 @@ export default function App() {
   const restoreTodoEditFocus = useRef(false);
   const syncSessionRef = useRef<SyncSession | null>(null);
   const syncGenerationRef = useRef(0);
+  const aiPlanGenerationRef = useRef(0);
+  const aiPlanAbortRef = useRef<AbortController | null>(null);
+  const aiPlanInFlight = useRef(false);
   const projectionStateRef = useRef({
     selectedDate: "",
     todayStatus: "idle" as LoadStatus,
@@ -368,10 +417,22 @@ export default function App() {
   const [tokenInput, setTokenInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncSessionStatus | null>(null);
+  const [aiPlan, setAIPlan] = useState<AITodayPlan | null>(null);
+  const [aiPlanStatus, setAIPlanStatus] = useState<AIPlanStatus>("idle");
 
   projectionStateRef.current = { selectedDate, todayStatus, todoStatus, categoryStatus };
 
+  const invalidateAIPlan = useCallback(() => {
+    aiPlanGenerationRef.current += 1;
+    aiPlanAbortRef.current?.abort();
+    aiPlanAbortRef.current = null;
+    aiPlanInFlight.current = false;
+    setAIPlan(null);
+    setAIPlanStatus("idle");
+  }, []);
+
   const returnToSetup = useCallback((nextMessage: string | null = null) => {
+    invalidateAIPlan();
     clearIdentity();
     setActiveToken(null);
     setIdentity(null);
@@ -428,9 +489,10 @@ export default function App() {
     setIdentityStatus("setup");
     setTokenInput("");
     setMessage(nextMessage);
-  }, []);
+  }, [invalidateAIPlan]);
 
   const loadToday = useCallback(async (token: string, date: string, shouldApply: () => boolean = () => true) => {
+    invalidateAIPlan();
     setTodayStatus("loading");
     try {
       const loadedToday = await getTodayTodos(token, date);
@@ -445,7 +507,7 @@ export default function App() {
       }
       setTodayStatus("error");
     }
-  }, [returnToSetup]);
+  }, [invalidateAIPlan, returnToSetup]);
 
   const loadTodos = useCallback(async (token: string, shouldApply: () => boolean = () => true) => {
     setTodoStatus("loading");
@@ -618,18 +680,21 @@ export default function App() {
 
   function selectTodayDate(date: string) {
     if (!activeToken || !date || date === selectedDate) return;
+    invalidateAIPlan();
     setSelectedDate(date);
     void loadToday(activeToken, date);
   }
 
   function openTodos() {
     dismissTodoNotice();
+    invalidateAIPlan();
     setView("todos");
     if (activeToken && todoStatus === "idle") void loadTodos(activeToken);
   }
 
   function openCategories() {
     dismissTodoNotice();
+    invalidateAIPlan();
     setView("categories");
     if (activeToken && (categoryStatus === "idle" || categoryStatus === "error")) void loadCategories(activeToken);
   }
@@ -647,6 +712,50 @@ export default function App() {
     setFailedTodoAttempt(null);
     setTodoNotice(null);
     if (activeToken && categoryStatus === "idle") void loadCategories(activeToken);
+  }
+
+  function reviewSuggestedTodo(suggestion: AISuggestedTodo, trigger: HTMLButtonElement) {
+    quickCreateTrigger.current = trigger;
+    setQuickCreateOrigin("today");
+    setTodoTitle(suggestion.title);
+    setTodoCategoryId(suggestion.category_id ?? "");
+    setTodoPriority(suggestion.priority);
+    setTodoPlannedDate(suggestion.planned_date);
+    setTodoCreateStatus("idle");
+    setTodoCreateMessage(null);
+    setFailedTodoAttempt(null);
+    setTodoNotice(null);
+    if (activeToken && categoryStatus === "idle") void loadCategories(activeToken);
+  }
+
+  async function requestAIPlan() {
+    if (!activeToken || !selectedDate || aiPlanInFlight.current) return;
+    const generation = aiPlanGenerationRef.current + 1;
+    aiPlanGenerationRef.current = generation;
+    aiPlanAbortRef.current?.abort();
+    const controller = new AbortController();
+    aiPlanAbortRef.current = controller;
+    aiPlanInFlight.current = true;
+    setAIPlan(null);
+    setAIPlanStatus("loading");
+    try {
+      const plan = await createAITodayPlan(activeToken, selectedDate, controller.signal);
+      if (aiPlanGenerationRef.current !== generation) return;
+      setAIPlan(plan);
+      setAIPlanStatus("ready");
+    } catch (error) {
+      if (aiPlanGenerationRef.current !== generation) return;
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      setAIPlanStatus("error");
+    } finally {
+      if (aiPlanGenerationRef.current === generation) {
+        aiPlanInFlight.current = false;
+        aiPlanAbortRef.current = null;
+      }
+    }
   }
 
   function cancelQuickCreate() {
@@ -1177,6 +1286,7 @@ export default function App() {
     editInFlight.current = true;
     try {
       const updatedResponse = await updateTodoCategory(activeToken, editTarget.id, idempotencyKey, payload);
+      invalidateAIPlan();
       cancelCategoryEditor();
       setCategoryNotice({ kind: "success", message: "Category updated." });
       await loadCategories(activeToken);
@@ -1227,6 +1337,7 @@ export default function App() {
     deleteInFlight.current = true;
     try {
       const deletedResponse = await deleteTodoCategory(activeToken, categoryId, idempotencyKey);
+      invalidateAIPlan();
       cancelCategoryDelete();
       setCategoryNotice({ kind: "success", message: "Category deleted." });
       await loadCategories(activeToken);
@@ -1290,6 +1401,7 @@ export default function App() {
     setCreateMessage(null);
     try {
       const createdResponse = await createTodoCategory(activeToken, idempotencyKey, payload);
+      invalidateAIPlan();
       setCategoryName("");
       setSelectedCategoryColor("");
       setFailedCreateAttempt(null);
@@ -1383,6 +1495,7 @@ export default function App() {
                   <p className="date-label">{selectedDate ? calendarDateLabel(selectedDate) : ""}</p>
                 </div>
                 <div className="today-actions">
+                  <button className="secondary-button compact" type="button" onClick={() => void requestAIPlan()} disabled={aiPlanStatus === "loading" || todoInteractionActive || todoActionSubmitting}><Sparkles aria-hidden="true" />{aiPlanStatus === "loading" ? "Planning..." : "Plan my day"}</button>
                   <button className="primary-button compact" type="button" onClick={(event) => openQuickCreate("today", event.currentTarget)} disabled={todoInteractionActive || todoActionSubmitting}><Plus aria-hidden="true" />Add todo</button>
                   <div className="date-controls">
                   <button className="icon-button bordered" onClick={() => selectTodayDate(shiftCalendarDate(selectedDate, -1))} disabled={todoActionSubmitting} title="Previous date" aria-label="Previous date"><ChevronLeft aria-hidden="true" /></button>
@@ -1395,6 +1508,8 @@ export default function App() {
               {todoNoticeContent()}
               {quickCreateOrigin === "today" ? quickCreateForm() : null}
               {todoEditTarget ? todoEditForm() : null}
+              {aiPlanStatus === "error" ? <div className="ai-plan-error" role="alert"><span>Could not create a plan. Your todos are still available.</span><button className="secondary-button" type="button" onClick={() => void requestAIPlan()}>Retry planning</button></div> : null}
+              {aiPlanStatus === "ready" && aiPlan ? <AITodayPlanContent plan={aiPlan} onReviewSuggestion={reviewSuggestedTodo} suggestionDisabled={todoInteractionActive || todoActionSubmitting} /> : null}
 
               {todayStatus === "loading" ? <div className="list-status" role="status">Loading Today...</div> : null}
               {todayStatus === "error" ? (
