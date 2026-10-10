@@ -1,6 +1,6 @@
 # LifeOS PC Delivery Plan
 
-Updated: 2026-10-10
+Updated: 2026-10-11
 
 ## Direction
 
@@ -21,7 +21,7 @@ Near-term demonstration path: create a Project/Goal, record an AI Session, and r
 | 7 | TASK-037 PC acceptance and demo | Cross-module PC regression, two-identity isolation, real local backend flow, responsive/browser checks, demo data and runbook without secrets | The PC MVP can be shown end to end |
 | 8 | TASK-038 Android REST bootstrap and reads | Resume authoritative category/Todo reconciliation and Today/Todo reads | Android Phase 1A delivery resumes |
 
-Task IDs after TASK-031 are reserved for sequencing only. Decision publishes each full task after the prior task is terminally closed and may split a row further if Task Review finds it too large. No future task is READY or authorized for Coding by this plan.
+Task IDs after TASK-033 are reserved for sequencing only. Decision publishes each full task after the prior task is terminally closed and may split a row further if Task Review finds it too large. No future task is READY or authorized for Coding by this plan.
 
 ## Boundaries
 
@@ -35,4 +35,4 @@ Task IDs after TASK-031 are reserved for sequencing only. Decision publishes eac
 
 For each task: Task Review PASS, Git Snapshot, Coding, Code Review PASS, Git Commit with remote parity, Decision Closure Check, and terminal Closure Commit. TASK-037 additionally checks a real local PC path across projects, AI Sessions, Dashboard, Notes, and Calendar, and records any external-service limitation honestly.
 
-TASK-031 result commit `79be962` and terminal Closure Commit `6acfaaf` are published. TASK-032 result commit `500d317` and completion commit `623426e` are published; Decision Closure Check passed on 2026-10-11 and its terminal Closure Commit is pending. The TASK-032 migration was verified on a disposable PostgreSQL schema, not applied to the configured user database. The normal startup/deployment path must verify and upgrade that database through `20261010_0006` before AI Session endpoints are used there. TASK-033 remains unstarted until TASK-032 terminal closure.
+TASK-031 terminal Closure Commit `6acfaaf` and TASK-032 terminal Closure Commit `e8e013f` are published. TASK-033 Dashboard/Resume is PLANNED and awaits Task Review; Coding is not authorized. The TASK-032 migration was verified on a disposable PostgreSQL schema, not applied to the configured user database. The normal startup/deployment path must verify and upgrade that database through `20261010_0006` before AI Session/Dashboard use against it.
