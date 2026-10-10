@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 ## Metadata
 
 - Task ID: TASK-031
 - Task Name: PC Project/Goal core
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-030 terminal Closure Commit `da506ae691b822dc022485e1272594534943e1b4`; existing bearer identity, API envelope, and PC shell
@@ -99,6 +99,6 @@ Report modified files, migration/schema, API behavior, idempotency/no-op rule, i
 
 ## Current Stage
 
-Next role: Git Commit
+Next role: Decision
 
-Required next action: commit and push the exact Code Review PASS scope, then mark TASK-031 completed only after publication succeeds.
+Required next action: perform Decision Closure Check for TASK-031 using Result Commit `79be9625571714e085fb51fb446653e61213c5f7` and the completion record, then authorize only the exact Closure documents if the check passes.

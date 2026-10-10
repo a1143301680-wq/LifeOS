@@ -106,6 +106,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-030 terminal Closure Commit `da506ae` was published and the task workflow ended.
 - On 2026-10-09 the user prioritized PC V1 completion ahead of Android. `docs/pc-delivery-plan.md` sequences Project/Goal core, AI Session records, Dashboard/Resume, project depth, Notes, Calendar, and PC acceptance before Android resumes.
 - TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
+- TASK-031 PC Project/Goal core completed in result commit `79be962`; Code Review: PASS; 130 backend tests, 117 Web tests, production build, migration verification, and browser flows passed.
 
 ## Recently Completed
 
@@ -154,7 +155,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Task Review for TASK-031. Verify the Project/Goal contract, migration, identity and idempotency boundaries, PC usability, exact publication scope, and Git Snapshot readiness. Do not start Coding.
+Run Decision Closure Check for TASK-031. Live routing and the exact closure boundary are maintained in `handoff/current-task.md`.
 
 ## Notes For Windows
 

@@ -1,6 +1,6 @@
 # TASK-031: PC Project/Goal core
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -106,3 +106,18 @@ A signed-in user can create, list, open, edit, and pin their own Project/Goal wi
 - Recommended Commit Message: `feat(project): add Project Goal core`
 - Authorization: Git Commit may commit and push the exact reviewed scope. Keep task status `REVIEWING` until publication succeeds.
 - Next Role: Git Commit.
+
+## Git Commit
+
+- Status: COMPLETE
+- Branch: `main`
+- Result Commit: `79be9625571714e085fb51fb446653e61213c5f7`
+- Commit Message: `feat(project): add Project Goal core`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review Result: PASS
+- Next Role: Decision
+
+## Closure
+
+Pending.
