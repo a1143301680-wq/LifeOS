@@ -1,4 +1,6 @@
 import type {
+  AISession,
+  AISessionPayload,
   AITodayPlan,
   DataEnvelope,
   ListEnvelope,
@@ -99,6 +101,36 @@ export async function updateProject(token: string, projectId: string, idempotenc
     headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload),
   });
+  return response.data;
+}
+
+export async function getAISessions(token: string, projectId: string) {
+  const response = await authenticatedRequest<ListEnvelope<AISession>>(
+    `/projects/${encodeURIComponent(projectId)}/ai-sessions`, token,
+  );
+  return response.items;
+}
+
+export async function getAISession(token: string, projectId: string, sessionId: string) {
+  const response = await authenticatedRequest<DataEnvelope<AISession>>(
+    `/projects/${encodeURIComponent(projectId)}/ai-sessions/${encodeURIComponent(sessionId)}`, token,
+  );
+  return response.data;
+}
+
+export async function createAISession(token: string, projectId: string, idempotencyKey: string, payload: AISessionPayload) {
+  const response = await authenticatedRequest<DataEnvelope<AISession>>(
+    `/projects/${encodeURIComponent(projectId)}/ai-sessions`, token,
+    { method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey }, body: JSON.stringify(payload) },
+  );
+  return response.data;
+}
+
+export async function updateAISession(token: string, projectId: string, sessionId: string, idempotencyKey: string, payload: AISessionPayload) {
+  const response = await authenticatedRequest<DataEnvelope<AISession>>(
+    `/projects/${encodeURIComponent(projectId)}/ai-sessions/${encodeURIComponent(sessionId)}`, token,
+    { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey }, body: JSON.stringify(payload) },
+  );
   return response.data;
 }
 

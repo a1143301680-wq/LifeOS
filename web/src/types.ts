@@ -38,6 +38,29 @@ export type Project = {
 
 export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "status" | "manual_progress" | "next_step" | "is_pinned">;
 
+export type AISession = {
+  id: string;
+  goal: string;
+  completed_work: string | null;
+  modified_files: string | null;
+  verification_result: string | null;
+  remaining_issues: string | null;
+  next_step: string | null;
+  recommended_next_prompt: string | null;
+  ai_tool: string | null;
+  user_note: string | null;
+  started_at: string;
+  ended_at: string | null;
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AISessionPayload = Pick<AISession,
+  "goal" | "completed_work" | "modified_files" | "verification_result" | "remaining_issues" |
+  "next_step" | "recommended_next_prompt" | "ai_tool" | "user_note" | "ended_at"
+> & { started_at?: string };
+
 export type Todo = {
   id: string;
   category_id: string | null;

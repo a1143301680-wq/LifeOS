@@ -1,6 +1,6 @@
 # TASK-032: PC AI Session records
 
-Status: READY
+Status: REVIEWING
 
 Priority: P1
 
@@ -66,13 +66,13 @@ Compose locally from the saved session and current linked project as UTF-8 plain
 
 ## Acceptance Criteria
 
-- [ ] Session migration/model and nested API satisfy owner/project isolation, validation, ordering, idempotency, and version/no-op rules.
-- [ ] Create omission/default, supplied and equivalent-offset timestamps, single-field time edits, clearing `ended_at`, invalid merged-state ranges, and replay are covered.
-- [ ] PC can create, open, edit, and reopen a real AI Session, with latest summary visible on project detail.
-- [ ] All three prompt templates match exact full/sparse expected output, including recommended/fallback rules and clipboard failure, without external provider traffic.
-- [ ] Loading/empty/error/retry, identity/project switch, and desktop/narrow behavior are verified.
-- [ ] Full backend/Web suites, build, disposable migration, browser flow, and diff/security/scope checks pass or report exact limits.
-- [ ] Future-module, Android, provider, timeline, and autonomous-write boundaries remain intact.
+- [x] Session migration/model and nested API satisfy owner/project isolation, validation, ordering, idempotency, and version/no-op rules.
+- [x] Create omission/default, supplied and equivalent-offset timestamps, single-field time edits, clearing `ended_at`, invalid merged-state ranges, and replay are covered.
+- [x] PC can create, open, edit, and reopen a real AI Session, with latest summary visible on project detail.
+- [x] All three prompt templates match exact full/sparse expected output, including recommended/fallback rules and clipboard failure, without external provider traffic.
+- [x] Loading/empty/error/retry, identity/project switch, and desktop/narrow behavior are verified.
+- [x] Full backend/Web suites, build, disposable migration, browser flow, and diff/security/scope checks pass or report exact limits.
+- [x] Future-module, Android, provider, timeline, and autonomous-write boundaries remain intact.
 
 ## Verification Plan
 
@@ -88,12 +88,51 @@ Task Review Result: PASS
 
 Reviewed At: 2026-10-10 10:14 +08:00
 
-Target Status: READY
+Git Snapshot Status: COMPLETE
+
+Branch: `main`
+
+Base Commit: `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`
+
+Snapshot Commit Created: Yes
+
+Snapshot Commit: `e22e94004b645f60acc912090fc9baa8715a8eba`
+
+Snapshot Reason: approved TASK-032 readiness documents required a durable pre-Coding baseline
+
+Target Status: REVIEWING
 
 Previous Blocking Issues: the 10:04 Task Review rejected ambiguous timestamp mutability/resulting-range semantics and underspecified prompt templates. Decision revised both contracts; the 10:14 fresh review verified both resolutions.
 
 Blocking Issues: None. Full fresh-review evidence and prior REJECT history are retained in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Next Role: Git Commit
 
-Required Next Action: establish the pre-Coding Git Snapshot for the exact eight-file TASK-032 publication/readiness scope. Do not start Coding until Git Snapshot completes.
+Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep task status REVIEWING until publication succeeds.
+
+## Coding Result
+
+- Result: PASS; final status: REVIEWING. No commit or push.
+- Modified Files: `backend/alembic/env.py`, `backend/alembic/versions/20261010_0006_add_ai_sessions.py`, `backend/app/api/v1/ai_sessions.py`, `backend/app/api/v1/router.py`, `backend/app/models/__init__.py`, `backend/app/models/ai_session.py`, `backend/app/schemas/ai_session.py`, `backend/tests/test_ai_sessions.py`, `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, `web/src/App.ai-sessions.test.tsx`, `web/src/ai-session-prompts.test.ts`, `web/e2e/ai-sessions.spec.ts`, `web/e2e/projects.spec.ts`, `docs/pc-delivery-plan.md`, and active TASK-032 handoff/task records. The pre-existing `handoff/git-snapshot.md` change was preserved unchanged.
+- Implementation Summary: Added owner-scoped AI Session persistence and additive migration; nested bearer-authenticated create/list/detail/update endpoints with shared idempotency replay/conflict, UTC time validation, deterministic order, and effective/no-op version rules. Added Project detail session create/list/open/edit/latest-summary and three local copyable prompts. No provider request, sync write, project log, or Dashboard work.
+- Acceptance Criteria Results: All seven task criteria met by focused automated tests and a disposable PostgreSQL-backed browser flow. Owner/project mismatch returns 404; session text and time validation, replay, no-op, identity switching, clipboard outcomes, and responsive layout are covered.
+- Verification Commands and Results: `python -m pytest -q` in `backend`: 136 passed. `npm test` in `web`: 125 passed across 13 files. `npm run build` in `web`: PASS. `npx playwright test` in `web`: 6 passed, 2 conditionally skipped live-backend cases; `npx playwright test e2e/ai-sessions.spec.ts --grep 'disposable PostgreSQL backend'` with a temporary synthetic token/backend: 1 passed. Disposable PostgreSQL Alembic `upgrade head`, schema/index/check/FK inspection, then `downgrade -1`: PASS; temporary schema dropped. Normal Playwright run reported only `NO_COLOR`/`FORCE_COLOR` environment warnings; no backend/Web test warnings were reported.
+- Git Diff Check: reviewed tracked/untracked changes against the task allowlist; `git diff --check` passed (Git emitted LF-to-CRLF conversion notices only). Staging remained empty. Targeted secret/path scan found only a synthetic bearer-token assertion in a test, no credential or machine path. No generated outputs appear in Git status.
+- Unresolved Issues: configured user PostgreSQL database was intentionally not migrated. Its revision must be verified and upgraded through `20261010_0006` before using AI Session endpoints outside the disposable test schema.
+- Task-Outside Findings: none. Existing PostgreSQL service remained running; only the temporary test API server and schema were removed.
+
+## Code Review Result
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-10 20:36 +08:00
+- Blocking Issues: None.
+- Findings: migration/model, bearer owner and parent isolation, exact field/time validation, UUID idempotency, merged-state range checks, normalized no-op semantics, deterministic ordering, no-sync boundary, PC session flow, stale-response protection, and exact local prompt templates match the approved contract.
+- Independent Verification: focused backend 6 passed; full backend 136 passed; focused Web 8 passed; full Web 125 passed; production build PASS; Playwright 6 passed / 2 conditional tests skipped; `git diff --check` and cached check PASS; staging empty.
+- Migration Evidence: one Alembic head at `20261010_0006`; migration source and registration reviewed. Coding's disposable PostgreSQL upgrade/schema inspection/downgrade and conditional persisted browser flow passed. Code Review did not modify the configured user database, whose current revision was not confirmed during the bounded check.
+- Residual Risk: the normal runtime/deployment path must verify and upgrade the configured PostgreSQL database through `20261010_0006` before AI Session endpoints are used there.
+- Reviewed Scope: the 20 Coding/snapshot files listed above plus `handoff/code-review-gate.md`.
+- Recommended Commit Message: `feat(ai-session): add project AI Session records`
+- Authorization: Git Commit may commit and push the exact reviewed scope. Keep task status `REVIEWING` until publication succeeds.
+- Next Role: Git Commit.

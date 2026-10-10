@@ -6,7 +6,7 @@ Last updated: 2026-10-10
 
 - Task ID: TASK-032
 - Task Name: PC AI Session records
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-031 terminal Closure Commit `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`; existing Project/Goal API, bearer identity, idempotency service, and PC shell
@@ -85,15 +85,15 @@ A signed-in user can manually save an AI Session under their own Project/Goal, e
 
 ## Acceptance Criteria
 
-- [ ] Additive migration and model support owner-scoped, project-linked AI Sessions with constraints, timestamps, version, and deterministic order.
-- [ ] Create/list/detail/update follow the contract and existing envelopes; malformed/empty input and missing or cross-owner IDs fail closed.
-- [ ] Idempotency replay/conflict and effective/no-op edit semantics are deterministic and tested.
-- [ ] Create omission/default, supplied and equivalent-offset timestamps, single-field time edits, `ended_at` clearing, invalid resulting ranges, and no-op/replay cases are tested against the full resulting record.
-- [ ] PC user can save, reopen, edit, and review sessions in a real project, and the latest summary appears on project detail.
-- [ ] All three prompt actions match the exact composition contract for full and sparse records, with and without `recommended_next_prompt`; clipboard success/failure is visible and no provider or external import is invoked.
-- [ ] Identity/project switching, loading/empty/error/retry, and desktop/narrow layout work without stale data or overflow.
-- [ ] Full backend tests, full Web tests, Web production build, disposable migration check, focused browser flow, and exact Git/security scans pass or record exact environmental limits.
-- [ ] No Android, Dashboard, timeline, provider integration, autonomous write, secret, or generated artifact is included.
+- [x] Additive migration and model support owner-scoped, project-linked AI Sessions with constraints, timestamps, version, and deterministic order.
+- [x] Create/list/detail/update follow the contract and existing envelopes; malformed/empty input and missing or cross-owner IDs fail closed.
+- [x] Idempotency replay/conflict and effective/no-op edit semantics are deterministic and tested.
+- [x] Create omission/default, supplied and equivalent-offset timestamps, single-field time edits, `ended_at` clearing, invalid resulting ranges, and no-op/replay cases are tested against the full resulting record.
+- [x] PC user can save, reopen, edit, and review sessions in a real project, and the latest summary appears on project detail.
+- [x] All three prompt actions match the exact composition contract for full and sparse records, with and without `recommended_next_prompt`; clipboard success/failure is visible and no provider or external import is invoked.
+- [x] Identity/project switching, loading/empty/error/retry, and desktop/narrow layout work without stale data or overflow.
+- [x] Full backend tests, full Web tests, Web production build, disposable migration check, focused browser flow, and exact Git/security scans pass or record exact environmental limits.
+- [x] No Android, Dashboard, timeline, provider integration, autonomous write, secret, or generated artifact is included.
 
 ## Verification Plan
 
@@ -114,6 +114,6 @@ Report modified files, migration/schema, API behavior, owner isolation, idempote
 
 ## Current Stage
 
-Next Role: Git Snapshot
+Next Role: Git Commit
 
-Required Next Action: establish the pre-Coding Git Snapshot for the exact eight-file TASK-032 publication/readiness scope approved in `handoff/task-review-gate.md`. Do not start Coding until Git Snapshot completes.
+Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep both task statuses at REVIEWING until publication succeeds.

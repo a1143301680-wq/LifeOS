@@ -617,6 +617,33 @@ h1, h2, p { margin-top: 0; }
 .project-copy p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
 .project-notice { color: var(--green); font-size: 12px; }
 
+.ai-sessions { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.ai-session-heading, .session-detail-heading { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+.ai-session-heading h3 { margin: 5px 0 14px; font-size: 16px; }
+.ai-session-heading .secondary-button, .session-detail-heading .secondary-button { flex: 0 0 auto; }
+.session-empty { color: var(--muted); font-size: 13px; }
+.session-latest { display: grid; gap: 4px; padding: 13px 0; border-top: 1px solid var(--line); }
+.session-latest strong { color: var(--muted); font-size: 11px; }
+.session-latest span { font-size: 14px; font-weight: 750; overflow-wrap: anywhere; }
+.session-latest p { margin: 0; color: var(--muted); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.session-list { list-style: none; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.session-list button { display: grid; gap: 5px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; }
+.session-list button:hover, .session-list button[aria-current="true"] { background: #eef1ec; }
+.session-list strong { font-size: 13px; overflow-wrap: anywhere; }
+.session-list time { color: var(--muted); font-size: 11px; }
+.session-form, .session-detail { display: grid; gap: 9px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); min-width: 0; }
+.session-form h4, .session-detail h4 { margin: 0 0 8px; font-size: 15px; overflow-wrap: anywhere; }
+.session-form label { color: var(--muted); font-size: 11px; font-weight: 750; }
+.session-field, .session-time-grid > div { display: grid; gap: 7px; min-width: 0; }
+.session-form input, .session-form textarea { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #bfc5bb; border-radius: 5px; background: var(--surface); color: var(--ink); }
+.session-form textarea { resize: vertical; line-height: 1.5; }
+.session-time-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.session-actions, .session-copy-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.session-copy-actions button { max-width: 100%; }
+.session-detail-field { min-width: 0; }
+.session-detail-field strong { color: var(--muted); font-size: 11px; }
+.session-detail-field p { margin: 5px 0 0; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
 .spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

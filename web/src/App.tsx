@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Copy,
   Folder,
   FolderOpen,
   Inbox,
@@ -24,11 +25,14 @@ import {
 import {
   ApiError,
   completeTodo,
+  createAISession,
   createAITodayPlan,
   createTodo,
   createTodoCategory,
   deleteTodoCategory,
   getCurrentUser,
+  getAISession,
+  getAISessions,
   getPendingTodos,
   getProject,
   getProjects,
@@ -38,6 +42,7 @@ import {
   reopenTodo,
   createProject,
   updateProject,
+  updateAISession,
   updateTodo,
   updateTodoCategory,
 } from "./api";
@@ -46,7 +51,46 @@ import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
 import type { SyncEffects } from "./sync-engine";
-import type { AISuggestedTodo, AITodayPlan, Project, ProjectPayload, Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
+import type { AISession, AISessionPayload, AISuggestedTodo, AITodayPlan, Project, ProjectPayload, Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
+
+type AISessionPromptKind = "start" | "end" | "continue";
+
+function renderPromptValue(value: string | null) {
+  return (value ?? "").trim().replace(/\s+/g, " ");
+}
+
+export function composeAISessionPrompt(kind: AISessionPromptKind, project: Project, session: AISession) {
+  const title = kind === "start" ? "Start collaboration" : kind === "end" ? "End-of-session summary" : "Continue progress";
+  const lines = [title, `Project: ${renderPromptValue(project.name)}`, `Type: ${project.type}`,
+    `Status: ${project.status}`, `Progress: ${project.manual_progress}%`];
+  const add = (label: string, value: string | null) => {
+    const normalized = renderPromptValue(value);
+    if (normalized) lines.push(`${label}: ${normalized}`);
+  };
+  add("Project next step", project.next_step);
+  add("AI tool", session.ai_tool);
+  lines.push(`Session goal: ${renderPromptValue(session.goal)}`);
+  add("Completed work", session.completed_work);
+  if (kind !== "start") {
+    add("Modified files", session.modified_files);
+    add("Verification result", session.verification_result);
+  }
+  add("Remaining issues", session.remaining_issues);
+  add("Next step", session.next_step);
+  add("User note", session.user_note);
+  if (kind === "start") {
+    lines.push("Request: Help me work on this session goal using the context above.");
+  } else if (kind === "end") {
+    lines.push("Request: Summarize this session and propose the next prompt using the context above.");
+  } else {
+    const request = renderPromptValue(session.recommended_next_prompt) ||
+      (renderPromptValue(session.next_step) ? `Continue with: ${renderPromptValue(session.next_step)}` :
+        renderPromptValue(project.next_step) ? `Continue with: ${renderPromptValue(project.next_step)}` :
+          `Help me work toward: ${renderPromptValue(session.goal)}`);
+    lines.push(`Request: ${request}`);
+  }
+  return lines.join("\n");
+}
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
@@ -146,6 +190,247 @@ function ProjectEditor({ mode, draft, onChange, onSubmit, onCancel, status, mess
       {message ? <p className="create-message create-message-error" role="alert">{message}</p> : null}
     </section>
   );
+}
+
+type AISessionDraft = Record<"goal" | "completed_work" | "modified_files" | "verification_result" |
+  "remaining_issues" | "next_step" | "recommended_next_prompt" | "ai_tool" | "user_note" | "started_at" | "ended_at", string>;
+
+const sessionFields: Array<{ key: keyof AISessionPayload; label: string; max: number }> = [
+  { key: "completed_work", label: "Completed work", max: 4000 },
+  { key: "modified_files", label: "Modified files", max: 4000 },
+  { key: "verification_result", label: "Verification result", max: 4000 },
+  { key: "remaining_issues", label: "Remaining issues", max: 4000 },
+  { key: "next_step", label: "Session next step", max: 4000 },
+  { key: "recommended_next_prompt", label: "Recommended next prompt", max: 4000 },
+  { key: "ai_tool", label: "AI tool", max: 100 },
+  { key: "user_note", label: "User note", max: 4000 },
+];
+
+function emptyAISessionDraft(): AISessionDraft {
+  return { goal: "", completed_work: "", modified_files: "", verification_result: "", remaining_issues: "",
+    next_step: "", recommended_next_prompt: "", ai_tool: "", user_note: "", started_at: "", ended_at: "" };
+}
+
+function localDateTime(value: string | null) {
+  if (!value) return "";
+  const date = new Date(value);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 23);
+}
+
+function AISessionPanel({ project, token, onUnauthorized }: {
+  project: Project; token: string; onUnauthorized: (message: string | null) => void;
+}) {
+  const activeRef = useRef(false);
+  const listRequestRef = useRef(0);
+  const detailRequestRef = useRef(0);
+  const submitInFlight = useRef(false);
+  const [sessions, setSessions] = useState<AISession[]>([]);
+  const [listStatus, setListStatus] = useState<LoadStatus>("idle");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AISession | null>(null);
+  const [detailStatus, setDetailStatus] = useState<LoadStatus>("idle");
+  const [mode, setMode] = useState<"create" | "edit" | null>(null);
+  const [draft, setDraft] = useState<AISessionDraft>(emptyAISessionDraft);
+  const [submitStatus, setSubmitStatus] = useState<CreateStatus>("idle");
+  const [message, setMessage] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const [failedAttempt, setFailedAttempt] = useState<FailedCreateAttempt | null>(null);
+
+  const loadList = useCallback(async () => {
+    const requestId = ++listRequestRef.current;
+    setListStatus("loading");
+    try {
+      const loaded = await getAISessions(token, project.id);
+      if (!Array.isArray(loaded)) throw new Error("Invalid AI session list");
+      if (!activeRef.current || listRequestRef.current !== requestId) return;
+      setSessions(loaded);
+      setListStatus("ready");
+    } catch (error) {
+      if (!activeRef.current || listRequestRef.current !== requestId) return;
+      if (error instanceof ApiError && error.status === 401) { onUnauthorized("Your identity expired. Enter the token again."); return; }
+      setListStatus("error");
+    }
+  }, [onUnauthorized, project.id, token]);
+
+  useEffect(() => {
+    activeRef.current = true;
+    void loadList();
+    return () => { activeRef.current = false; listRequestRef.current += 1; detailRequestRef.current += 1; };
+  }, [loadList]);
+
+  async function openSession(id: string) {
+    const requestId = ++detailRequestRef.current;
+    setSelectedId(id);
+    setSelected(null);
+    setMode(null);
+    setNotice(null);
+    setCopyMessage(null);
+    setDetailStatus("loading");
+    try {
+      const loaded = await getAISession(token, project.id, id);
+      if (!activeRef.current || detailRequestRef.current !== requestId) return;
+      setSelected(loaded);
+      setDetailStatus("ready");
+    } catch (error) {
+      if (!activeRef.current || detailRequestRef.current !== requestId) return;
+      if (error instanceof ApiError && error.status === 401) { onUnauthorized("Your identity expired. Enter the token again."); return; }
+      setDetailStatus("error");
+    }
+  }
+
+  function beginCreate() {
+    detailRequestRef.current += 1;
+    setSelectedId(null);
+    setSelected(null);
+    setMode("create");
+    setDraft(emptyAISessionDraft());
+    setSubmitStatus("idle");
+    setMessage(null);
+    setFailedAttempt(null);
+  }
+
+  function beginEdit() {
+    if (!selected) return;
+    setDraft({ goal: selected.goal, completed_work: selected.completed_work ?? "", modified_files: selected.modified_files ?? "",
+      verification_result: selected.verification_result ?? "", remaining_issues: selected.remaining_issues ?? "",
+      next_step: selected.next_step ?? "", recommended_next_prompt: selected.recommended_next_prompt ?? "",
+      ai_tool: selected.ai_tool ?? "", user_note: selected.user_note ?? "",
+      started_at: localDateTime(selected.started_at), ended_at: localDateTime(selected.ended_at) });
+    setMode("edit");
+    setSubmitStatus("idle");
+    setMessage(null);
+    setFailedAttempt(null);
+  }
+
+  function changeDraft(key: keyof AISessionDraft, value: string) {
+    setDraft((current) => ({ ...current, [key]: value }));
+    setSubmitStatus("idle");
+    setMessage(null);
+  }
+
+  async function saveSession(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!mode || submitInFlight.current) return;
+    const goal = draft.goal.trim();
+    const start = draft.started_at ? new Date(draft.started_at) : null;
+    const end = draft.ended_at ? new Date(draft.ended_at) : null;
+    if (!goal || goal.length > 500 || (mode === "edit" && !draft.started_at) ||
+        sessionFields.some(({ key, max }) => draft[key].trim().length > max) ||
+        (start && Number.isNaN(start.getTime())) || (end && Number.isNaN(end.getTime())) ||
+        (start && end && end < start)) {
+      setSubmitStatus("validation");
+      setMessage("Check the AI session fields and times.");
+      return;
+    }
+    const optional = (value: string) => value.trim() || null;
+    const payload: AISessionPayload = {
+      goal, completed_work: optional(draft.completed_work), modified_files: optional(draft.modified_files),
+      verification_result: optional(draft.verification_result), remaining_issues: optional(draft.remaining_issues),
+      next_step: optional(draft.next_step), recommended_next_prompt: optional(draft.recommended_next_prompt),
+      ai_tool: optional(draft.ai_tool), user_note: optional(draft.user_note), ended_at: null,
+    };
+    if (draft.started_at) payload.started_at = mode === "edit" && selected && draft.started_at === localDateTime(selected.started_at)
+      ? selected.started_at : start!.toISOString();
+    else if (mode === "edit" && selected) payload.started_at = selected.started_at;
+    payload.ended_at = draft.ended_at
+      ? mode === "edit" && selected && draft.ended_at === localDateTime(selected.ended_at) ? selected.ended_at : end!.toISOString()
+      : null;
+    const resultingStart = payload.started_at ? new Date(payload.started_at) : new Date();
+    if (payload.ended_at && new Date(payload.ended_at) < resultingStart) {
+      setSubmitStatus("validation");
+      setMessage("End time must be at or after start time.");
+      return;
+    }
+    const sessionId = mode === "edit" ? selected?.id : null;
+    if (mode === "edit" && !sessionId) return;
+    const fingerprint = JSON.stringify({ sessionId, payload });
+    const key = failedAttempt?.fingerprint === fingerprint ? failedAttempt.idempotencyKey : crypto.randomUUID();
+    submitInFlight.current = true;
+    setSubmitStatus("submitting");
+    setMessage(null);
+    try {
+      const saved = sessionId
+        ? await updateAISession(token, project.id, sessionId, key, payload)
+        : await createAISession(token, project.id, key, payload);
+      if (!activeRef.current) return;
+      setSelectedId(saved.id);
+      setSelected(saved);
+      setDetailStatus("ready");
+      setMode(null);
+      setSubmitStatus("idle");
+      setNotice(sessionId ? "AI session saved." : "AI session created.");
+      setFailedAttempt(null);
+      await loadList();
+    } catch (error) {
+      if (!activeRef.current) return;
+      if (error instanceof ApiError && error.status === 401) { onUnauthorized("Your identity expired. Enter the token again."); return; }
+      if (error instanceof ApiError && (error.status === 400 || error.status === 409)) {
+        setSubmitStatus("validation");
+        setMessage(error.status === 409 ? "This save conflicts with an earlier attempt." : "Check the AI session fields and times.");
+        setFailedAttempt(null);
+        return;
+      }
+      setSubmitStatus("error");
+      setMessage("Could not save AI session. Try again.");
+      setFailedAttempt({ fingerprint, idempotencyKey: key });
+    } finally {
+      submitInFlight.current = false;
+    }
+  }
+
+  async function copyPrompt(kind: AISessionPromptKind) {
+    if (!selected) return;
+    const label = kind === "start" ? "Start collaboration" : kind === "end" ? "End-of-session summary" : "Continue progress";
+    try {
+      await navigator.clipboard.writeText(composeAISessionPrompt(kind, project, selected));
+      if (!activeRef.current) return;
+      setCopyFailed(false);
+      setCopyMessage(`${label} copied.`);
+    } catch {
+      if (!activeRef.current) return;
+      setCopyFailed(true);
+      setCopyMessage(`Could not copy ${label.toLowerCase()}.`);
+    }
+  }
+
+  const latest = sessions[0];
+  return <div className="ai-sessions" aria-label="AI Sessions">
+    <div className="ai-session-heading"><h3>AI Sessions</h3><button className="secondary-button" type="button" onClick={beginCreate}><Plus aria-hidden="true" />New AI session</button></div>
+    {listStatus === "loading" ? <p role="status">Loading AI sessions...</p> : null}
+    {listStatus === "error" ? <div role="alert"><p>Could not load AI sessions.</p><button className="secondary-button" type="button" onClick={() => void loadList()}>Retry sessions</button></div> : null}
+    {listStatus === "ready" && !latest ? <p className="session-empty">No AI sessions yet</p> : null}
+    {latest ? <div className="session-latest"><strong>Latest AI Session</strong><span>{latest.goal}</span><p>{latest.completed_work || latest.next_step || "No summary yet"}</p></div> : null}
+    {sessions.length ? <ul className="session-list" aria-label="Project AI sessions">{sessions.map((item) => <li key={item.id}>
+      <button type="button" onClick={() => void openSession(item.id)} aria-current={selectedId === item.id ? "true" : undefined}>
+        <strong>{item.goal}</strong><time dateTime={item.started_at}>{new Date(item.started_at).toLocaleString()}</time>
+      </button>
+    </li>)}</ul> : null}
+    {mode ? <form className="session-form" onSubmit={(event) => void saveSession(event)}>
+      <h4>{mode === "create" ? "New AI session" : "Edit AI session"}</h4>
+      <label htmlFor="session-goal">Session goal</label><input id="session-goal" value={draft.goal} onChange={(event) => changeDraft("goal", event.target.value)} maxLength={500} required autoFocus />
+      {sessionFields.map(({ key, label, max }) => <div className="session-field" key={key}>
+        <label htmlFor={`session-${key}`}>{label}</label><textarea id={`session-${key}`} value={draft[key]} onChange={(event) => changeDraft(key, event.target.value)} maxLength={max} rows={key === "ai_tool" ? 1 : 2} />
+      </div>)}
+      <div className="session-time-grid"><div><label htmlFor="session-started">Start time</label><input id="session-started" type="datetime-local" step="0.001" value={draft.started_at} onChange={(event) => changeDraft("started_at", event.target.value)} /></div>
+        <div><label htmlFor="session-ended">End time</label><input id="session-ended" type="datetime-local" step="0.001" value={draft.ended_at} onChange={(event) => changeDraft("ended_at", event.target.value)} /></div></div>
+      <div className="session-actions"><button className="primary-button" type="submit" disabled={submitStatus === "submitting"}>{submitStatus === "submitting" ? "Saving..." : submitStatus === "error" ? "Retry save" : "Save AI session"}</button><button className="secondary-button" type="button" disabled={submitStatus === "submitting"} onClick={() => setMode(null)}>Cancel</button></div>
+      {message ? <p role="alert" className="create-message-error">{message}</p> : null}
+    </form> : null}
+    {!mode && detailStatus === "loading" ? <p role="status">Loading AI session...</p> : null}
+    {!mode && detailStatus === "error" ? <div role="alert"><p>Could not load this AI session.</p><button className="secondary-button" type="button" onClick={() => selectedId && void openSession(selectedId)}>Retry session</button></div> : null}
+    {!mode && selected ? <div className="session-detail">
+      <div className="session-detail-heading"><h4>{selected.goal}</h4><button className="secondary-button" type="button" onClick={beginEdit}><Pencil aria-hidden="true" />Edit AI session</button></div>
+      {notice ? <p role="status" className="project-notice">{notice}</p> : null}
+      {sessionFields.map(({ key, label }) => selected[key] ? <div className="session-detail-field" key={key}><strong>{label}</strong><p>{selected[key]}</p></div> : null)}
+      <div className="session-detail-field"><strong>Start time</strong><p>{new Date(selected.started_at).toLocaleString()}</p></div>
+      {selected.ended_at ? <div className="session-detail-field"><strong>End time</strong><p>{new Date(selected.ended_at).toLocaleString()}</p></div> : null}
+      <div className="session-copy-actions">{(["start", "end", "continue"] as const).map((kind) => <button className="secondary-button" type="button" key={kind} onClick={() => void copyPrompt(kind)}><Copy aria-hidden="true" />Copy {kind === "start" ? "start prompt" : kind === "end" ? "end summary prompt" : "continuation prompt"}</button>)}</div>
+      {copyMessage ? <p role={copyFailed ? "alert" : "status"}>{copyMessage}</p> : null}
+      <button className="text-button" type="button" onClick={() => { detailRequestRef.current += 1; setSelectedId(null); setSelected(null); setDetailStatus("idle"); setCopyMessage(null); }}>Back to sessions</button>
+    </div> : null}
+  </div>;
 }
 
 const categoryColors = [
@@ -1834,6 +2119,7 @@ export default function App() {
                       {projectDetail.description ? <div className="project-copy"><h3>Description</h3><p>{projectDetail.description}</p></div> : null}
                       <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
                       <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
+                      <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} />
                     </> : null}
                   </section>
                 ) : null}
