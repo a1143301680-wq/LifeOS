@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 ## Current Phase
 
@@ -107,7 +107,8 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - On 2026-10-09 the user prioritized PC V1 completion ahead of Android. `docs/pc-delivery-plan.md` sequences Project/Goal core, AI Session records, Dashboard/Resume, project depth, Notes, Calendar, and PC acceptance before Android resumes.
 - TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
 - TASK-031 PC Project/Goal core completed in result commit `79be962`; Code Review: PASS; 130 backend tests, 117 Web tests, production build, migration verification, and browser flows passed.
-- TASK-031 Decision Closure Check passed on 2026-10-10. Terminal Closure Commit is authorized for the six documents in the TASK-031 closure record. The configured local PostgreSQL database is still at `20260713_0004`; normal startup/deployment must apply `20261009_0005` before a Project demo against it.
+- TASK-031 Decision Closure Check passed on 2026-10-10; terminal Closure Commit `6acfaaf` was published with remote parity and a clean worktree. Its workflow is closed.
+- TASK-032 PC AI Session records is published as the next PC demonstration slice and awaits Task Review. At the last verified check, the configured local PostgreSQL database still needed migration `20261009_0005` for a Project demo; this does not block TASK-032 publication.
 
 ## Recently Completed
 
@@ -156,7 +157,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-031 Terminal Closure Commit using the exact six-file allowlist in `tasks/TASK-031-pc-project-goal-core.md`. After remote parity is verified, return to Decision to publish TASK-032 AI Session records.
+Follow `handoff/current-task.md` for TASK-032 Task Review routing. If Task Review passes, Git Snapshot establishes the pre-Coding baseline; do not start Coding before that transition.
 
 ## Notes For Windows
 

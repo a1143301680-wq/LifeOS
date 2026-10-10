@@ -1,25 +1,23 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-031
+Task ID: TASK-032
 
-Branch: main
+Branch: pending verification
 
-Base Commit: `da506ae691b822dc022485e1272594534943e1b4`
+Base Commit: pending verification
 
-Working Tree: 10 approved TASK-031 pre-Coding publication/readiness documents committed separately; no business code
+Working Tree: Decision publication documents pending Task Review
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: pending
 
-Snapshot Commit: `8464846013236887e3e477d6ad5ef0db16dabbad`
-
-Reason: approved TASK-031 readiness documents required a durable pre-Coding baseline
+Snapshot Commit: pending
 
 ## Instructions
 
-Run after Task Review `PASS / READY`. Commit only the exact approved publication/readiness files if a snapshot commit is needed; verify remote parity, then synchronize both active task records to `IN_PROGRESS` and route to Coding.
+Run only after TASK-032 Task Review records PASS/READY. Recheck the exact approved publication scope, branch, HEAD, worktree, staged state, diff, and remote parity before recording a baseline and synchronizing both active task records to IN_PROGRESS.

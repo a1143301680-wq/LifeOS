@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 ## Gate Status
 
@@ -10,82 +10,86 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-10-09 19:48 +08:00
+Reviewed at: 2026-10-10 10:14 +08:00
 
-Reviewed task: TASK-031 PC Project/Goal core
+Reviewed task: TASK-032 PC AI Session records
+
+## Previous Review
+
+- Result: REJECT on 2026-10-10 10:04 +08:00.
+- Blocker 1 was ambiguous Create/PATCH mutability and merged timestamp validation.
+- Blocker 2 was an underspecified deterministic contract for the three prompt templates.
+- Decision revised both active task records while keeping TASK-032 `PLANNED` and reset this gate for fresh review.
 
 ## Required Review
 
-- [x] PC-first sequence and TASK-031 boundaries are coherent with MVP and current code.
-- [x] Project schema, API validation, list order, idempotency, no-op update, and migration are executable.
-- [x] Bearer identity isolation and browser state protection are explicit.
-- [x] Test, build, browser, migration, exact-scope, and security checks are sufficient.
+- [x] Goal, one-slice boundary, dependencies, exclusions, and later Dashboard/timeline ownership are coherent.
+- [x] Owner/project isolation, nested routes, list order, idempotency, no-op update, and migration strategy are executable.
+- [x] Create/PATCH mutable fields and timestamp default/edit/clear/resulting-range semantics are explicit and testable.
+- [x] All three prompt templates have exact ordered composition, omission, normalization, and fallback rules.
+- [x] Backend/frontend/migration verification and exact publication scope are sufficient.
 - [x] Branch, HEAD, worktree, staged state, diff check, and Git Snapshot readiness are persisted.
 
 ## Issues
 
-None.
+None. Both prior blocking issues are resolved.
 
 ## Review Evidence
 
 ### Repository State
 
 - Branch: `main`
-- HEAD: `da506ae691b822dc022485e1272594534943e1b4`
-- `origin/main`: `da506ae691b822dc022485e1272594534943e1b4`
-- Remote `refs/heads/main`: `da506ae691b822dc022485e1272594534943e1b4`
-- Dependency check: TASK-030 terminal Closure Commit `da506ae691b822dc022485e1272594534943e1b4` exists and is the aligned local/tracking/remote baseline.
-- Worktree Summary before this review: 8 modified tracked files and 2 untracked publication files. All ten files are TASK-031 Decision publication, PC delivery sequencing, progress/audit routing, and active gate/Git-record reset files.
+- HEAD: `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`
+- `origin/main`: `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`
+- Remote `refs/heads/main`: `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`
+- Dependency check: TASK-031 terminal Closure Commit `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b` exists and is the aligned local/tracking/remote baseline.
+- Worktree Summary before this fresh review: 7 modified tracked files and 1 untracked task archive. All eight paths are TASK-032 Decision publication/revision, PC plan progress, and active gate/Git-record reset files.
 - Staged Changes: None.
 - `git diff --check`: exit code 0. Git emitted LF-to-CRLF working-copy warnings only; no whitespace errors were reported.
 - `git diff --cached --check`: exit code 0.
-- Publication-file whitespace/EOF check: PASS for all ten files, including both untracked files.
-- Issue-log search: no TASK-031 or unresolved blocking entry.
+- Publication-file whitespace/EOF check: PASS for all eight files, including the untracked archive.
+- Issue-log search: no TASK-032 or unresolved blocking entry.
 
 ### Changed Files
 
-- `docs/phase1a-completion-audit.md`
-- `docs/phase1a-progress.md`
+- `docs/pc-delivery-plan.md`
 - `handoff/code-review-gate.md`
 - `handoff/current-task.md`
 - `handoff/git-commit.md`
 - `handoff/git-snapshot.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
-- `docs/pc-delivery-plan.md` (untracked)
-- `tasks/TASK-031-pc-project-goal-core.md` (untracked)
+- `tasks/TASK-032-pc-ai-session-records.md` (untracked)
 
-These ten files form the exact TASK-031 publication/readiness scope. No backend, web, Android, database migration, stable product/API/architecture/data-model document, accepted ADR, completed task archive, implementation code, generated output, credential, machine path, or private fixture is included.
+These eight files form the exact TASK-032 publication/readiness scope. No backend, web, Android, migration, stable product/API/architecture/data-model document, accepted ADR, completed task archive, generated output, credential, private fixture, or machine path is included.
 
-### Routed Contract And Code Review
+### Prior Blocker Resolution
 
-- `docs/mvp.md` defines Projects/Goals, manual progress, next step, focused pinning, and later Dashboard/AI Session work. TASK-031 delivers the independently usable Project/Goal foundation while deferring Dashboard, stages, milestones, Todo links, timeline, and AI Sessions.
-- `docs/requirements.md` confirms the six project types and five statuses used by the task, manual percentage as the default progress mode, and pinned-first selection as a later Dashboard concern.
-- `docs/architecture.md` permits an internal `project` model, requires Project/Goal product wording, and establishes UUID ownership, timestamps, and version conventions.
-- `docs/pc-delivery-plan.md` publishes TASK-031 as the first PC-first slice and explicitly reserves later task IDs without authorizing their implementation. The Android Phase 1A gap remains visible and is not falsely marked complete.
-- Existing backend patterns provide bearer-derived current-user identity, GUID columns, owner-scoped queries, data/list/error envelopes, transactional idempotency records, UUID idempotency-key validation, replay/conflict handling, Alembic registration, and migration downgrade structure.
-- Existing PC code and tests provide authenticated navigation, API helpers, identity switching, stale-request protection patterns, loading/error/retry states, Vitest coverage, production build, and Playwright desktop flow infrastructure.
+- Create and PATCH now have an explicit field table. `goal`, all nullable context fields, `started_at`, and `ended_at` have defined omission, null, replacement, and clear behavior; server-owned and unknown fields are rejected.
+- Both timestamps require timezone-aware RFC 3339 input, normalize to UTC, compare as instants, and validate the complete merged record. Single-field edits cannot violate the stored counterpart; equality is valid; equivalent-offset values are normalized no-ops.
+- Acceptance and verification now explicitly cover omitted/default and supplied timestamps, equivalent offsets, single-field edits, clearing `ended_at`, invalid merged ranges, no-op version/timestamp behavior, and idempotent replay.
+- All three prompt templates now specify exact titles, shared fields, ordered template-specific fields, labels, LF formatting, whitespace normalization, optional-field omission, prohibited hidden fields, and no trailing newline.
+- Continue-progress request precedence is deterministic: normalized `recommended_next_prompt`, then session next step, then project next step, then session goal. The selected request text replaces only the fallback line and never removes the fixed project/session context.
+- Prompt tests can assert exact full and sparse output, every fallback branch, and clipboard success/failure independently. Prompt composition uses saved session/current owned project records only and invokes no provider or external import.
 
 ### Start-Readiness Review
 
-- TASK-031 is one closeable vertical slice: one new user-owned entity, one migration, create/list/detail/update endpoints, and one PC management view. It produces a complete create-to-edit/reopen loop without requiring future modules.
-- Schema decisions are explicit: UUID project and owner IDs; bounded name/description/next-step text; constrained type/status/progress; pin, version, timestamps, defaults, owner foreign key, and owner-scoped indexes. Destructive migration behavior is forbidden.
-- API semantics are deterministic: bearer identity only; no payload `user_id`; pinned-first then `updated_at DESC, id ASC`; missing and cross-user IDs both return `404`; server-owned fields are forbidden; empty PATCH is `400`.
-- Write semantics are executable: create and PATCH require UUID `Idempotency-Key`; the existing request hash, replay, and conflict boundary is reused; entity mutation and idempotency response can be committed together. Replay cannot duplicate a project or increment version twice.
-- Normalized no-op behavior is explicit and testable: a nonempty PATCH whose normalized values equal stored values returns the unchanged record with unchanged version and `updated_at`; replay returns the same response. Effective updates increment version once and update the timestamp.
-- Project writes intentionally do not create `sync_changes`; Android project sync is outside the approved Phase 1A contract. Existing Todo/category/sync/AI behavior is forbidden from modification except regression verification.
-- PC ownership and race boundaries are explicit: project requests use the current bearer identity, identity switching must prevent stale data from rendering, failures are recoverable, and desktop/narrow layouts must avoid overflow or overlap.
-- Verification is executable: focused and full backend tests, focused and full Web tests, production build, desktop/narrow browser flow, disposable migration application or an exact environment limitation, and exact scope/security/artifact scans.
+- TASK-032 is one closeable vertical slice: one additive owner-scoped session entity, nested create/list/detail/update API, Project detail session loop, local prompt composition, and focused/full verification.
+- Nested ownership is fail-closed: project and session must both belong to the bearer user and match each other; missing, cross-user, and wrong-project identifiers all return `404` without existence disclosure.
+- UUID idempotency, canonical request fingerprints, transactional response storage, empty PATCH rejection, normalized no-op preservation, effective version increment, and no `sync_changes` behavior are defined by the task and existing Project patterns.
+- Latest-session behavior is deterministic from `started_at DESC, id ASC`; stale identity/project responses, loading/empty/error/retry states, and desktop/narrow layouts have explicit acceptance coverage.
+- Provider calls, automatic import/scanning, autonomous writes, Dashboard, timeline, `project_logs`, delete/archive, Notes, Calendar, Android, and stable-contract changes remain outside scope.
+- Verification is executable through focused/full backend and Web suites, exact prompt-output tests, production build, disposable migration apply/schema/downgrade checks, browser flows, and scope/security/artifact scans.
 
 ### Artifact And Secret Checks
 
-- All ten publication files passed trailing-whitespace, final-newline, and extra-EOF-blank checks.
-- Pattern scans found no private key, API key value, bearer credential, user-machine path, real private LAN address, generated build output, or private test data. Matches for phrases such as `private data`, `machine paths`, and `generated artifacts` are guardrail text only.
+- All eight publication files passed trailing-whitespace, final-newline, and extra-EOF-blank checks.
+- Pattern scans found no private key, API key value, bearer credential, user-machine path, real private LAN address, generated build output, or private fixture. Security-related phrases are guardrail text only.
 
 ### Git Snapshot Readiness
 
-READY. The next role is Git Snapshot. Its approved pre-Coding scope is exactly the ten files listed under Changed Files, including this Task Review PASS and the synchronized `READY` status updates in `handoff/current-task.md` and `tasks/TASK-031-pc-project-goal-core.md`. Git Snapshot must independently recheck branch, HEAD, staged state, exact scope, whitespace, artifacts, and secrets before creating or recording the baseline.
+READY. The next role is Git Snapshot. Its approved pre-Coding scope is exactly the eight files listed under Changed Files, including this fresh Task Review PASS and the synchronized `READY` updates in `handoff/current-task.md` and `tasks/TASK-032-pc-ai-session-records.md`. Git Snapshot must independently recheck branch, HEAD, staged state, exact scope, whitespace, artifacts, and secrets before creating or recording the baseline.
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-031 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-032 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
