@@ -99,6 +99,14 @@ Report modified files, migration/schema, API behavior, idempotency/no-op rule, i
 
 ## Current Stage
 
-Next role: Decision
+Closure Check: PASS
 
-Required next action: perform Decision Closure Check for TASK-031 using Result Commit `79be9625571714e085fb51fb446653e61213c5f7` and the completion record, then authorize only the exact Closure documents if the check passes.
+Checked at: 2026-10-10 09:55 +08:00
+
+Result commit: `79be9625571714e085fb51fb446653e61213c5f7`
+
+Completion commit: `8c668af61711b698c84a76a15807b180bc65ba72`
+
+Next role: Git Commit (Terminal Closure Commit)
+
+Required next action: commit and push only the six Closure-authorized documents with message `docs(task): close TASK-031`, verify local/tracking/remote parity, and return control to Decision. Do not run another Closure Check.

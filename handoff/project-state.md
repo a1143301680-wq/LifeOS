@@ -107,6 +107,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - On 2026-10-09 the user prioritized PC V1 completion ahead of Android. `docs/pc-delivery-plan.md` sequences Project/Goal core, AI Session records, Dashboard/Resume, project depth, Notes, Calendar, and PC acceptance before Android resumes.
 - TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
 - TASK-031 PC Project/Goal core completed in result commit `79be962`; Code Review: PASS; 130 backend tests, 117 Web tests, production build, migration verification, and browser flows passed.
+- TASK-031 Decision Closure Check passed on 2026-10-10. Terminal Closure Commit is authorized for the six documents in the TASK-031 closure record. The configured local PostgreSQL database is still at `20260713_0004`; normal startup/deployment must apply `20261009_0005` before a Project demo against it.
 
 ## Recently Completed
 
@@ -155,7 +156,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run Decision Closure Check for TASK-031. Live routing and the exact closure boundary are maintained in `handoff/current-task.md`.
+Run the TASK-031 Terminal Closure Commit using the exact six-file allowlist in `tasks/TASK-031-pc-project-goal-core.md`. After remote parity is verified, return to Decision to publish TASK-032 AI Session records.
 
 ## Notes For Windows
 

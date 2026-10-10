@@ -74,7 +74,7 @@ This inserted showcase does not reopen completed PC Web Phase 1A scope and does 
 
 ## Recommended Task Order
 
-1. Complete PC V1 delivery through the ordered slices in `docs/pc-delivery-plan.md`, starting with TASK-031 Project/Goal core.
+1. Complete PC V1 delivery through `docs/pc-delivery-plan.md`; TASK-031 Project/Goal core is published and the next planned slice is TASK-032 AI Session records.
 2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance (currently reserved as TASK-038).
 3. Add Android quick add, edit, and complete writes.
 4. Run PC/Android end-to-end Phase 1A acceptance.

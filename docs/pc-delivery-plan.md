@@ -35,4 +35,4 @@ Task IDs after TASK-031 are reserved for sequencing only. Decision publishes eac
 
 For each task: Task Review PASS, Git Snapshot, Coding, Code Review PASS, Git Commit with remote parity, Decision Closure Check, and terminal Closure Commit. TASK-037 additionally checks a real local PC path across projects, AI Sessions, Dashboard, Notes, and Calendar, and records any external-service limitation honestly.
 
-TASK-031 Code Review passed and the exact scope is awaiting Git Commit publication. This is not yet a shipped or terminally closed task; later rows remain unauthorized.
+TASK-031 result commit `79be962` is published and Decision Closure Check passed on 2026-10-10. Its terminal Closure Commit is pending; TASK-032 has not been published. The configured local PostgreSQL database remains at migration `20260713_0004` and must reach `20261009_0005` through the normal startup/deployment migration before Project endpoints are demonstrated there.

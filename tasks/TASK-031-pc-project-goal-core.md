@@ -120,4 +120,35 @@ A signed-in user can create, list, open, edit, and pin their own Project/Goal wi
 
 ## Closure
 
-Pending.
+Result: PASS
+
+Checked at: 2026-10-10 09:55 +08:00
+
+Result Commit: `79be9625571714e085fb51fb446653e61213c5f7`
+
+Completion Commit: `8c668af61711b698c84a76a15807b180bc65ba72`
+
+Remote Verification: local `HEAD`, `origin/main`, and remote `refs/heads/main` all matched completion commit `8c668af61711b698c84a76a15807b180bc65ba72` before Closure-document edits.
+
+Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked files.
+
+### Independent Verification
+
+- Snapshot `8464846` is an ancestor of result commit `79be962`; result commit is an ancestor of completion commit `8c668af`.
+- The result commit matches the 19-file final Code Review allowlist, and the completion commit contains only four workflow/state files.
+- Focused backend Project API tests: 7 passed independently; final Code Review ran the full backend suite with 130 passed.
+- Focused PC Project component tests: 5 passed independently; final Code Review ran the full Web suite with 117 passed, production build PASS, and standard Playwright 4 passed with one conditional disposable-backend case separately passed by Coding.
+- Alembic has one head `20261009_0005`. The configured PostgreSQL database is at `20260713_0004`. Coding's disposable PostgreSQL upgrade, schema/index/check inspection, and downgrade passed; Decision did not migrate the user's database.
+- Source inspection confirms bearer-scoped list/detail/update, existing idempotency replay/conflict, normalized no-op PATCH preservation, and no Project sync-change writes. PC UI covers create/list/detail/edit/pin and stale-identity suppression.
+- Code Review: PASS; no unresolved TASK-031 blocking issue. Published commits passed whitespace checks and had no Android or future-module files.
+
+### Residual Risk And Next Step
+
+- Before demonstrating Project endpoints against the configured local PostgreSQL database, run the normal startup/deployment migration to `20261009_0005`; the launcher applies pending migrations before serving the UI.
+- After terminal closure, Decision may publish TASK-032 structured AI Session records, followed by the focused Dashboard/Resume slice in `docs/pc-delivery-plan.md`.
+
+### Terminal Closure Authorization
+
+- Approved files: `docs/pc-delivery-plan.md`, `docs/phase1a-progress.md`, `docs/phase1a-completion-audit.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-031-pc-project-goal-core.md`.
+- Recommended commit message: `docs(task): close TASK-031`.
+- After this exact-scope commit is pushed and remote parity is verified, return to Decision without another Closure Check.
