@@ -114,6 +114,14 @@ Report modified files, migration/schema, API behavior, owner isolation, idempote
 
 ## Current Stage
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-032 Decision Closure Check using Result Commit `500d3172a062bbd3c57db8c5af14681e724bbc3b` and the completion record; do not start the next task before closure.
+Checked At: 2026-10-11 00:34 +08:00
+
+Result Commit: `500d3172a062bbd3c57db8c5af14681e724bbc3b`
+
+Completion Commit: `623426e68c91f2b8a629429d90495231fa5631c6`
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only the four Closure-authorized documents listed in `tasks/TASK-032-pc-ai-session-records.md` with message `docs(task): close TASK-032`; verify local/tracking/remote parity and return control to Decision. Do not run another Closure Check or publish TASK-033 here.

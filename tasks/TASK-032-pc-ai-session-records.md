@@ -100,15 +100,15 @@ Snapshot Commit: `e22e94004b645f60acc912090fc9baa8715a8eba`
 
 Snapshot Reason: approved TASK-032 readiness documents required a durable pre-Coding baseline
 
-Target Status: REVIEWING
+Target Status: COMPLETED
 
 Previous Blocking Issues: the 10:04 Task Review rejected ambiguous timestamp mutability/resulting-range semantics and underspecified prompt templates. Decision revised both contracts; the 10:14 fresh review verified both resolutions.
 
 Blocking Issues: None. Full fresh-review evidence and prior REJECT history are retained in `handoff/task-review-gate.md`.
 
-Next Role: Decision
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: perform the Decision Closure Check using Result Commit `500d3172a062bbd3c57db8c5af14681e724bbc3b` and the completion record.
+Required Next Action: commit and push only the four Closure-authorized documents listed below with message `docs(task): close TASK-032`, verify remote parity, and return to Decision. Do not repeat Closure Check.
 
 ## Coding Result
 
@@ -149,5 +149,14 @@ Required Next Action: perform the Decision Closure Check using Result Commit `50
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-10-11 00:34 +08:00
+- Result Commit: `500d3172a062bbd3c57db8c5af14681e724bbc3b`
+- Completion Commit: `623426e68c91f2b8a629429d90495231fa5631c6`
+- Remote Verification: local HEAD, `origin/main`, and remote `refs/heads/main` all matched the Completion Commit before Closure edits.
+- Working Tree Before Closure Docs: clean; branch `main`; no staged or untracked files.
+- Review/Test Evidence: Code Review `PASS / COMPLETED`; reviewed full backend 136 passed, full Web 125 passed, production build PASS, Playwright 6 passed and 2 conditional skips; Coding's disposable PostgreSQL migration/browser evidence passed. Decision independently reran focused backend 6 passed and focused Web 8 passed on this HEAD.
+- Acceptance Criteria Result: all seven task criteria in this archive and all nine detailed criteria in `handoff/current-task.md` are checked and supported by the reviewed evidence. No blocking TASK-032 issue remains.
+- Issue Disposition: the initial Task Review contract rejection was resolved and passed fresh Task Review; Code Review found no blocking issue. `handoff/issue-log.md` has no active TASK-032 issue.
+- Remaining Follow-ups: verify and migrate the configured user PostgreSQL database through `20261010_0006` using normal startup/deployment before using AI Session endpoints there; this is a runtime/demo prerequisite, not a Task-032 code blocker. TASK-033 Dashboard/Resume remains unstarted until terminal closure.
+- Terminal Closure Commit: authorized for exactly `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-032-pc-ai-session-records.md`; recommended message `docs(task): close TASK-032`. No further Closure Check after it is pushed.
