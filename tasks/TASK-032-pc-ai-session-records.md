@@ -1,6 +1,6 @@
 # TASK-032: PC AI Session records
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -106,9 +106,9 @@ Previous Blocking Issues: the 10:04 Task Review rejected ambiguous timestamp mut
 
 Blocking Issues: None. Full fresh-review evidence and prior REJECT history are retained in `handoff/task-review-gate.md`.
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep task status REVIEWING until publication succeeds.
+Required Next Action: perform the Decision Closure Check using Result Commit `500d3172a062bbd3c57db8c5af14681e724bbc3b` and the completion record.
 
 ## Coding Result
 
@@ -136,3 +136,18 @@ Required Next Action: commit and push only the exact scope approved in `handoff/
 - Recommended Commit Message: `feat(ai-session): add project AI Session records`
 - Authorization: Git Commit may commit and push the exact reviewed scope. Keep task status `REVIEWING` until publication succeeds.
 - Next Role: Git Commit.
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `500d3172a062bbd3c57db8c5af14681e724bbc3b`
+- Commit Message: `feat(ai-session): add project AI Session records`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.

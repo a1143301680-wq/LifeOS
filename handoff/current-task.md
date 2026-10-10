@@ -6,7 +6,7 @@ Last updated: 2026-10-10
 
 - Task ID: TASK-032
 - Task Name: PC AI Session records
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-031 terminal Closure Commit `6acfaaf893d2ec6ac85cdfdd4bd9b396ecf63c8b`; existing Project/Goal API, bearer identity, idempotency service, and PC shell
@@ -114,6 +114,6 @@ Report modified files, migration/schema, API behavior, owner isolation, idempote
 
 ## Current Stage
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep both task statuses at REVIEWING until publication succeeds.
+Required Next Action: perform the TASK-032 Decision Closure Check using Result Commit `500d3172a062bbd3c57db8c5af14681e724bbc3b` and the completion record; do not start the next task before closure.

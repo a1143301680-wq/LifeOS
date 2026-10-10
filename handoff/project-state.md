@@ -108,7 +108,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
 - TASK-031 PC Project/Goal core completed in result commit `79be962`; Code Review: PASS; 130 backend tests, 117 Web tests, production build, migration verification, and browser flows passed.
 - TASK-031 Decision Closure Check passed on 2026-10-10; terminal Closure Commit `6acfaaf` was published with remote parity and a clean worktree. Its workflow is closed.
-- TASK-032 PC AI Session records is published as the next PC demonstration slice and awaits Task Review. At the last verified check, the configured local PostgreSQL database still needed migration `20261009_0005` for a Project demo; this does not block TASK-032 publication.
+- TASK-032 PC AI Session records completed in result commit `500d317`; Code Review: PASS; 136 backend tests, 125 Web tests, production build, disposable PostgreSQL migration verification, and browser flows passed. The configured user database still requires revision verification and upgrade through `20261010_0006` before AI Session endpoints are used there.
 
 ## Recently Completed
 
@@ -157,7 +157,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Follow `handoff/current-task.md` for TASK-032 Task Review routing. If Task Review passes, Git Snapshot establishes the pre-Coding baseline; do not start Coding before that transition.
+Decision must perform the TASK-032 Closure Check against result commit `500d3172a062bbd3c57db8c5af14681e724bbc3b` and the completion record. Do not publish the next task before TASK-032 closure.
 
 ## Notes For Windows
 
