@@ -2,6 +2,8 @@ import type {
   AITodayPlan,
   DataEnvelope,
   ListEnvelope,
+  Project,
+  ProjectPayload,
   Todo,
   TodoCreatePayload,
   TodoUpdatePayload,
@@ -70,6 +72,34 @@ export async function getCurrentUser(token: string) {
 export async function getPendingTodos(token: string) {
   const response = await authenticatedRequest<ListEnvelope<Todo>>("/todos", token);
   return response.items;
+}
+
+export async function getProjects(token: string) {
+  const response = await authenticatedRequest<ListEnvelope<Project>>("/projects", token);
+  return response.items;
+}
+
+export async function getProject(token: string, projectId: string) {
+  const response = await authenticatedRequest<DataEnvelope<Project>>(`/projects/${encodeURIComponent(projectId)}`, token);
+  return response.data;
+}
+
+export async function createProject(token: string, idempotencyKey: string, payload: ProjectPayload) {
+  const response = await authenticatedRequest<DataEnvelope<Project>>("/projects", token, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify(payload),
+  });
+  return response.data;
+}
+
+export async function updateProject(token: string, projectId: string, idempotencyKey: string, payload: ProjectPayload) {
+  const response = await authenticatedRequest<DataEnvelope<Project>>(`/projects/${encodeURIComponent(projectId)}`, token, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify(payload),
+  });
+  return response.data;
 }
 
 export async function getTodayTodos(token: string, date: string) {

@@ -4,21 +4,21 @@ Last updated: 2026-10-09
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-031
 
-Branch: Pending
+Branch: main
 
 Base Commit: `da506ae691b822dc022485e1272594534943e1b4`
 
-Working Tree: TASK-031 Decision publication files pending Task Review
+Working Tree: 10 approved TASK-031 pre-Coding publication/readiness documents committed separately; no business code
 
-Snapshot Commit Created: No
+Snapshot Commit Created: Yes
 
-Snapshot Commit: Pending
+Snapshot Commit: `8464846013236887e3e477d6ad5ef0db16dabbad`
 
-Reason: Task Review has not approved TASK-031
+Reason: approved TASK-031 readiness documents required a durable pre-Coding baseline
 
 ## Instructions
 

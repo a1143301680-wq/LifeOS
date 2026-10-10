@@ -22,6 +22,22 @@ export type TodoCategory = {
   updated_at: string;
 };
 
+export type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  type: "development" | "learning" | "life" | "health" | "pet" | "other";
+  status: "planning" | "in_progress" | "paused" | "completed" | "abandoned";
+  manual_progress: number;
+  next_step: string | null;
+  is_pinned: boolean;
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "status" | "manual_progress" | "next_step" | "is_pinned">;
+
 export type Todo = {
   id: string;
   category_id: string | null;

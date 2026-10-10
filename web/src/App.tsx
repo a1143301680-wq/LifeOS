@@ -11,6 +11,7 @@ import {
   KeyRound,
   LogOut,
   Pencil,
+  Pin,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -29,10 +30,14 @@ import {
   deleteTodoCategory,
   getCurrentUser,
   getPendingTodos,
+  getProject,
+  getProjects,
   getSyncChanges,
   getTodayTodos,
   getTodoCategories,
   reopenTodo,
+  createProject,
+  updateProject,
   updateTodo,
   updateTodoCategory,
 } from "./api";
@@ -41,13 +46,13 @@ import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
 import type { SyncEffects } from "./sync-engine";
-import type { AISuggestedTodo, AITodayPlan, Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
+import type { AISuggestedTodo, AITodayPlan, Project, ProjectPayload, Todo, TodoCategory, TodoCreatePayload, TodoUpdatePayload, TodayData, TodaySectionName, UserIdentity } from "./types";
 
 type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
 type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
 type AIPlanStatus = "idle" | "loading" | "ready" | "error";
-type AppView = "today" | "todos" | "categories";
+type AppView = "today" | "todos" | "categories" | "projects";
 type QuickCreateOrigin = "today" | "todos";
 type TodoPriority = Todo["priority"];
 type FailedCreateAttempt = {
@@ -69,6 +74,79 @@ type FailedTodoActionAttempt = {
   todoId: string;
   idempotencyKey: string;
 };
+type ProjectDraft = Omit<ProjectPayload, "manual_progress" | "description" | "next_step"> & {
+  description: string;
+  manual_progress: string;
+  next_step: string;
+};
+
+const projectTypes: Array<{ value: Project["type"]; label: string }> = [
+  { value: "development", label: "Development" },
+  { value: "learning", label: "Learning" },
+  { value: "life", label: "Life" },
+  { value: "health", label: "Health" },
+  { value: "pet", label: "Pet" },
+  { value: "other", label: "Other" },
+];
+const projectStatuses: Array<{ value: Project["status"]; label: string }> = [
+  { value: "planning", label: "Planning" },
+  { value: "in_progress", label: "In progress" },
+  { value: "paused", label: "Paused" },
+  { value: "completed", label: "Completed" },
+  { value: "abandoned", label: "Abandoned" },
+];
+
+function emptyProjectDraft(): ProjectDraft {
+  return { name: "", description: "", type: "other", status: "planning", manual_progress: "0", next_step: "", is_pinned: false };
+}
+
+function draftFromProject(project: Project): ProjectDraft {
+  return {
+    name: project.name,
+    description: project.description ?? "",
+    type: project.type,
+    status: project.status,
+    manual_progress: String(project.manual_progress),
+    next_step: project.next_step ?? "",
+    is_pinned: project.is_pinned,
+  };
+}
+
+function ProjectEditor({ mode, draft, onChange, onSubmit, onCancel, status, message }: {
+  mode: "create" | "edit";
+  draft: ProjectDraft;
+  onChange: (change: Partial<ProjectDraft>) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCancel: () => void;
+  status: CreateStatus;
+  message: string | null;
+}) {
+  const disabled = status === "submitting";
+  return (
+    <section className="project-editor" aria-labelledby="project-form-title">
+      <div className="project-panel-heading"><p className="eyebrow">Project / Goal</p><h2 id="project-form-title">{mode === "create" ? "Create project" : "Edit project"}</h2></div>
+      <form className="project-form" onSubmit={onSubmit}>
+        <label htmlFor="project-name">Project name</label>
+        <input id="project-name" value={draft.name} onChange={(event) => onChange({ name: event.target.value })} maxLength={200} required autoFocus disabled={disabled} />
+        <label htmlFor="project-description">Description</label>
+        <textarea id="project-description" value={draft.description} onChange={(event) => onChange({ description: event.target.value })} maxLength={2000} rows={3} disabled={disabled} />
+        <div className="project-form-grid">
+          <div><label htmlFor="project-type">Type</label><select id="project-type" value={draft.type} onChange={(event) => onChange({ type: event.target.value as Project["type"] })} disabled={disabled}>{projectTypes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div>
+          <div><label htmlFor="project-status">Status</label><select id="project-status" value={draft.status} onChange={(event) => onChange({ status: event.target.value as Project["status"] })} disabled={disabled}>{projectStatuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div>
+          <div><label htmlFor="project-progress">Progress (%)</label><input id="project-progress" type="number" min={0} max={100} step={1} value={draft.manual_progress} onChange={(event) => onChange({ manual_progress: event.target.value })} required disabled={disabled} /></div>
+        </div>
+        <label htmlFor="project-next-step">Next step</label>
+        <textarea id="project-next-step" value={draft.next_step} onChange={(event) => onChange({ next_step: event.target.value })} maxLength={1000} rows={2} disabled={disabled} />
+        <label className="project-pin"><input type="checkbox" checked={draft.is_pinned} onChange={(event) => onChange({ is_pinned: event.target.checked })} disabled={disabled} />Pin project</label>
+        <div className="project-form-actions">
+          <button className="primary-button" type="submit" disabled={disabled}>{disabled ? "Saving..." : status === "error" ? "Retry save" : mode === "create" ? "Create project" : "Save project"}</button>
+          <button className="secondary-button" type="button" onClick={onCancel} disabled={disabled}>Cancel</button>
+        </div>
+      </form>
+      {message ? <p className="create-message create-message-error" role="alert">{message}</p> : null}
+    </section>
+  );
+}
 
 const categoryColors = [
   { name: "Slate", value: "#64748b" },
@@ -352,6 +430,10 @@ export default function App() {
   const aiPlanGenerationRef = useRef(0);
   const aiPlanAbortRef = useRef<AbortController | null>(null);
   const aiPlanInFlight = useRef(false);
+  const projectGenerationRef = useRef(0);
+  const projectListRequestRef = useRef(0);
+  const projectDetailRequestRef = useRef(0);
+  const projectSubmitInFlight = useRef(false);
   const projectionStateRef = useRef({
     selectedDate: "",
     todayStatus: "idle" as LoadStatus,
@@ -371,6 +453,17 @@ export default function App() {
   const [todoStatus, setTodoStatus] = useState<LoadStatus>("idle");
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [categoryStatus, setCategoryStatus] = useState<LoadStatus>("idle");
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectStatus, setProjectStatus] = useState<LoadStatus>("idle");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [projectDetail, setProjectDetail] = useState<Project | null>(null);
+  const [projectDetailStatus, setProjectDetailStatus] = useState<LoadStatus>("idle");
+  const [projectFormMode, setProjectFormMode] = useState<"create" | "edit" | null>(null);
+  const [projectDraft, setProjectDraft] = useState<ProjectDraft>(emptyProjectDraft);
+  const [projectSubmitStatus, setProjectSubmitStatus] = useState<CreateStatus>("idle");
+  const [projectMessage, setProjectMessage] = useState<string | null>(null);
+  const [projectNotice, setProjectNotice] = useState<string | null>(null);
+  const [failedProjectAttempt, setFailedProjectAttempt] = useState<FailedCreateAttempt | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [selectedCategoryColor, setSelectedCategoryColor] = useState("");
   const [createStatus, setCreateStatus] = useState<CreateStatus>("idle");
@@ -433,6 +526,10 @@ export default function App() {
 
   const returnToSetup = useCallback((nextMessage: string | null = null) => {
     invalidateAIPlan();
+    projectGenerationRef.current += 1;
+    projectListRequestRef.current += 1;
+    projectDetailRequestRef.current += 1;
+    projectSubmitInFlight.current = false;
     clearIdentity();
     setActiveToken(null);
     setIdentity(null);
@@ -445,6 +542,17 @@ export default function App() {
     setTodoStatus("idle");
     setCategories([]);
     setCategoryStatus("idle");
+    setProjects([]);
+    setProjectStatus("idle");
+    setSelectedProjectId(null);
+    setProjectDetail(null);
+    setProjectDetailStatus("idle");
+    setProjectFormMode(null);
+    setProjectDraft(emptyProjectDraft());
+    setProjectSubmitStatus("idle");
+    setProjectMessage(null);
+    setProjectNotice(null);
+    setFailedProjectAttempt(null);
     setCategoryName("");
     setSelectedCategoryColor("");
     setCreateStatus("idle");
@@ -542,6 +650,44 @@ export default function App() {
       }
       setCategoryStatus("error");
       return null;
+    }
+  }, [returnToSetup]);
+
+  const loadProjects = useCallback(async (token: string) => {
+    const generation = projectGenerationRef.current;
+    const requestId = ++projectListRequestRef.current;
+    setProjectStatus("loading");
+    try {
+      const loaded = await getProjects(token);
+      if (projectGenerationRef.current !== generation || projectListRequestRef.current !== requestId) return;
+      setProjects(loaded);
+      setProjectStatus("ready");
+    } catch (error) {
+      if (projectGenerationRef.current !== generation || projectListRequestRef.current !== requestId) return;
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      setProjectStatus("error");
+    }
+  }, [returnToSetup]);
+
+  const loadProjectDetail = useCallback(async (token: string, projectId: string) => {
+    const generation = projectGenerationRef.current;
+    const requestId = ++projectDetailRequestRef.current;
+    setProjectDetailStatus("loading");
+    try {
+      const loaded = await getProject(token, projectId);
+      if (projectGenerationRef.current !== generation || projectDetailRequestRef.current !== requestId) return;
+      setProjectDetail(loaded);
+      setProjectDetailStatus("ready");
+    } catch (error) {
+      if (projectGenerationRef.current !== generation || projectDetailRequestRef.current !== requestId) return;
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      setProjectDetailStatus("error");
     }
   }, [returnToSetup]);
 
@@ -697,6 +843,113 @@ export default function App() {
     invalidateAIPlan();
     setView("categories");
     if (activeToken && (categoryStatus === "idle" || categoryStatus === "error")) void loadCategories(activeToken);
+  }
+
+  function openProjects() {
+    dismissTodoNotice();
+    invalidateAIPlan();
+    setView("projects");
+    if (activeToken && (projectStatus === "idle" || projectStatus === "error")) void loadProjects(activeToken);
+  }
+
+  function openProject(projectId: string) {
+    if (!activeToken) return;
+    setSelectedProjectId(projectId);
+    setProjectDetail(null);
+    setProjectFormMode(null);
+    setProjectNotice(null);
+    void loadProjectDetail(activeToken, projectId);
+  }
+
+  function backToProjectList() {
+    projectDetailRequestRef.current += 1;
+    setSelectedProjectId(null);
+    setProjectDetail(null);
+    setProjectDetailStatus("idle");
+    setProjectFormMode(null);
+    setProjectNotice(null);
+  }
+
+  function startProjectCreate() {
+    backToProjectList();
+    setProjectDraft(emptyProjectDraft());
+    setProjectFormMode("create");
+    setProjectSubmitStatus("idle");
+    setProjectMessage(null);
+    setFailedProjectAttempt(null);
+  }
+
+  function startProjectEdit() {
+    if (!projectDetail) return;
+    setProjectDraft(draftFromProject(projectDetail));
+    setProjectFormMode("edit");
+    setProjectSubmitStatus("idle");
+    setProjectMessage(null);
+    setFailedProjectAttempt(null);
+  }
+
+  function changeProjectDraft(change: Partial<ProjectDraft>) {
+    setProjectDraft((current) => ({ ...current, ...change }));
+    setProjectSubmitStatus("idle");
+    setProjectMessage(null);
+  }
+
+  async function submitProject(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeToken || !projectFormMode || projectSubmitInFlight.current) return;
+    const name = projectDraft.name.trim();
+    const description = projectDraft.description.trim();
+    const nextStep = projectDraft.next_step.trim();
+    const progress = Number(projectDraft.manual_progress);
+    if (!name || name.length > 200 || description.length > 2000 || nextStep.length > 1000 ||
+        !/^\d+$/.test(projectDraft.manual_progress) || !Number.isInteger(progress) || progress < 0 || progress > 100) {
+      setProjectSubmitStatus("validation");
+      setProjectMessage("Check the project fields and try again.");
+      return;
+    }
+    const payload: ProjectPayload = {
+      name, description: description || null, type: projectDraft.type, status: projectDraft.status,
+      manual_progress: progress, next_step: nextStep || null, is_pinned: projectDraft.is_pinned,
+    };
+    const projectId = projectFormMode === "edit" ? selectedProjectId : null;
+    if (projectFormMode === "edit" && !projectId) return;
+    const fingerprint = JSON.stringify({ projectId, payload });
+    const idempotencyKey = failedProjectAttempt?.fingerprint === fingerprint ? failedProjectAttempt.idempotencyKey : crypto.randomUUID();
+    const generation = projectGenerationRef.current;
+    projectSubmitInFlight.current = true;
+    setProjectSubmitStatus("submitting");
+    setProjectMessage(null);
+    try {
+      const saved = projectId
+        ? await updateProject(activeToken, projectId, idempotencyKey, payload)
+        : await createProject(activeToken, idempotencyKey, payload);
+      if (projectGenerationRef.current !== generation) return;
+      setSelectedProjectId(saved.id);
+      setProjectDetail(saved);
+      setProjectDetailStatus("ready");
+      setProjectFormMode(null);
+      setProjectSubmitStatus("idle");
+      setProjectNotice(projectId ? "Project saved." : "Project created.");
+      setFailedProjectAttempt(null);
+      await loadProjects(activeToken);
+    } catch (error) {
+      if (projectGenerationRef.current !== generation) return;
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && (error.status === 400 || error.status === 409)) {
+        setProjectSubmitStatus("validation");
+        setProjectMessage(error.status === 409 ? "This request conflicts with an earlier attempt. Review the form and try again." : "Check the project fields and try again.");
+        setFailedProjectAttempt(null);
+        return;
+      }
+      setFailedProjectAttempt({ fingerprint, idempotencyKey });
+      setProjectSubmitStatus("error");
+      setProjectMessage("Could not save project. Try again.");
+    } finally {
+      if (projectGenerationRef.current === generation) projectSubmitInFlight.current = false;
+    }
   }
 
   function openQuickCreate(origin: QuickCreateOrigin, trigger: HTMLButtonElement) {
@@ -1458,7 +1711,7 @@ export default function App() {
       ? todayStatus
       : view === "todos"
         ? todoStatus
-        : categoryStatus;
+        : view === "categories" ? categoryStatus : projectStatus;
     return (
       <main className="workspace-shell">
         <header className="app-header">
@@ -1467,6 +1720,7 @@ export default function App() {
             <button aria-current={view === "today" ? "page" : undefined} onClick={() => { dismissTodoNotice(); setView("today"); }} disabled={todoInteractionActive || todoActionSubmitting}>Today</button>
             <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={todoInteractionActive || todoActionSubmitting}>Todos</button>
             <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive || todoActionSubmitting}>Categories</button>
+            <button aria-current={view === "projects" ? "page" : undefined} onClick={openProjects} disabled={todoInteractionActive || todoActionSubmitting}>Projects</button>
           </nav>
           <div className="identity-control">
             {syncStatus ? (
@@ -1535,6 +1789,55 @@ export default function App() {
               ) : null}
               {todoStatus === "ready" && todos.length === 0 ? <div className="empty-state"><Inbox aria-hidden="true" /><h2>Nothing pending</h2><p>Your open todos will appear here.</p></div> : null}
               {todoStatus === "ready" && todos.length > 0 ? <ul className="todo-list" aria-label="Pending todos">{todos.map((todo) => <TodoRow key={todo.id} todo={todo} timezone={identity.timezone} onEdit={openTodoEditor} onComplete={(todo) => void submitTodoComplete(todo)} actionsDisabled={todoRowActionsDisabled} completePending={completeStatus === "submitting" && completeTarget?.id === todo.id} />)}</ul> : null}
+            </>
+          ) : view === "projects" ? (
+            <>
+              <div className="section-heading">
+                <div><p className="eyebrow">Long-running work</p><h1>Projects / Goals</h1></div>
+                <div className="section-actions">
+                  <button className="primary-button compact" type="button" onClick={startProjectCreate} disabled={projectSubmitStatus === "submitting"}><Plus aria-hidden="true" />New project</button>
+                  <button className="icon-button bordered" type="button" onClick={() => activeToken && void loadProjects(activeToken)} disabled={projectStatus === "loading"} title="Refresh projects" aria-label="Refresh projects"><RefreshCw className={projectStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
+                </div>
+              </div>
+              <div className={`projects-layout${projectFormMode || selectedProjectId ? "" : " projects-layout-single"}`}>
+                <div className="projects-results">
+                  {projectStatus === "loading" ? <div className="list-status" role="status">Loading projects...</div> : null}
+                  {projectStatus === "error" ? <div className="list-status error-state" role="alert"><div><strong>Could not load projects</strong></div><button className="secondary-button" onClick={() => activeToken && void loadProjects(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div> : null}
+                  {projectStatus === "ready" && projects.length === 0 ? <div className="empty-state"><FolderOpen aria-hidden="true" /><h2>No projects yet</h2><p>New projects will appear here.</p></div> : null}
+                  {projectStatus === "ready" && projects.length > 0 ? (
+                    <ul className="project-list" aria-label="Projects / Goals">
+                      {projects.map((project) => <li key={project.id}>
+                        <button type="button" className="project-row" aria-current={selectedProjectId === project.id ? "true" : undefined} onClick={() => openProject(project.id)}>
+                          <span className="project-row-main"><strong>{project.name}</strong><span>{projectTypes.find((item) => item.value === project.type)?.label} · {projectStatuses.find((item) => item.value === project.status)?.label}</span>{project.next_step ? <small>{project.next_step}</small> : null}</span>
+                          <span className="project-row-end">{project.is_pinned ? <Pin aria-label="Pinned" /> : null}<span>{project.manual_progress}%</span></span>
+                        </button>
+                      </li>)}
+                    </ul>
+                  ) : null}
+                </div>
+                {projectFormMode ? (
+                  <ProjectEditor mode={projectFormMode} draft={projectDraft} onChange={changeProjectDraft} onSubmit={(event) => void submitProject(event)} onCancel={() => setProjectFormMode(null)} status={projectSubmitStatus} message={projectMessage} />
+                ) : selectedProjectId ? (
+                  <section className="project-detail" aria-labelledby="project-detail-title">
+                    <button className="text-button project-back" type="button" onClick={backToProjectList}><ChevronLeft aria-hidden="true" />Back to list</button>
+                    {projectDetailStatus === "loading" ? <p role="status">Loading project...</p> : null}
+                    {projectDetailStatus === "error" ? <div role="alert"><p>Could not load this project.</p><button className="secondary-button" onClick={() => activeToken && void loadProjectDetail(activeToken, selectedProjectId)}><RefreshCw aria-hidden="true" /> Retry</button></div> : null}
+                    {projectDetailStatus === "ready" && projectDetail ? <>
+                      <div className="project-panel-heading"><p className="eyebrow">Project / Goal</p><h2 id="project-detail-title">{projectDetail.name}</h2></div>
+                      {projectNotice ? <p className="project-notice" role="status">{projectNotice}</p> : null}
+                      <dl className="project-facts">
+                        <div><dt>Type</dt><dd>{projectTypes.find((item) => item.value === projectDetail.type)?.label}</dd></div>
+                        <div><dt>Status</dt><dd>{projectStatuses.find((item) => item.value === projectDetail.status)?.label}</dd></div>
+                        <div><dt>Progress</dt><dd>{projectDetail.manual_progress}%</dd></div>
+                        <div><dt>Focus</dt><dd>{projectDetail.is_pinned ? "Pinned" : "Not pinned"}</dd></div>
+                      </dl>
+                      {projectDetail.description ? <div className="project-copy"><h3>Description</h3><p>{projectDetail.description}</p></div> : null}
+                      <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
+                      <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
+                    </> : null}
+                  </section>
+                ) : null}
+              </div>
             </>
           ) : (
             <>

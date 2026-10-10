@@ -1,6 +1,6 @@
 # TASK-031: PC Project/Goal core
 
-Status: READY
+Status: REVIEWING
 
 Priority: P1
 
@@ -44,13 +44,13 @@ A signed-in user can create, list, open, edit, and pin their own Project/Goal wi
 
 ## Acceptance Criteria
 
-- [ ] Migration/model and owner-scoped API contract are correct and tested.
-- [ ] Two identities remain isolated across list/detail/create/update.
-- [ ] Idempotency, malformed input, no-op update, version changes, and deterministic order are covered.
-- [ ] PC creates, lists, opens, edits, pins, and reopens a project through the backend.
-- [ ] Loading/empty/error/retry, identity switch, and desktop/narrow use are verified.
-- [ ] Full backend/Web suites, build, migration check, browser flow, diff/security/scope checks pass or report exact limits.
-- [ ] No future-module or Android scope breach occurs.
+- [x] Migration/model and owner-scoped API contract are correct and tested.
+- [x] Two identities remain isolated across list/detail/create/update.
+- [x] Idempotency, malformed input, no-op update, version changes, and deterministic order are covered.
+- [x] PC creates, lists, opens, edits, pins, and reopens a project through the backend.
+- [x] Loading/empty/error/retry, identity switch, and desktop/narrow use are verified.
+- [x] Full backend/Web suites, build, migration check, browser flow, diff/security/scope checks pass or report exact limits.
+- [x] No future-module or Android scope breach occurs.
 
 ## Verification Plan
 
@@ -68,8 +68,41 @@ A signed-in user can create, list, open, edit, and pin their own Project/Goal wi
 
 - Task Review Result: PASS
 - Reviewed At: 2026-10-09 19:48 +08:00
-- Target Status: READY
+- Git Snapshot Status: COMPLETE
+- Branch: `main`
+- Base Commit: `da506ae691b822dc022485e1272594534943e1b4`
+- Snapshot Commit Created: Yes
+- Snapshot Commit: `8464846013236887e3e477d6ad5ef0db16dabbad`
+- Snapshot Reason: approved TASK-031 readiness documents required a durable pre-Coding baseline
+- Target Status: COMPLETED
 - Blocking Issues: None
 - Evidence: `handoff/task-review-gate.md`
-- Next Role: Git Snapshot
-- Required Next Action: establish the pre-Coding Git Snapshot for the exact ten-file TASK-031 publication/readiness scope. Do not start Coding until Git Snapshot completes.
+- Next Role: Git Commit
+- Required Next Action: commit and push the exact Code Review PASS scope, then transition the task to `COMPLETED` only after publication succeeds.
+
+## Coding Result
+
+- Result: PASS; final status `REVIEWING`. No commit, push, or Code Review was performed by Coding.
+- Modified Files: `backend/alembic/env.py`, `backend/alembic/versions/20261009_0005_add_projects.py`, `backend/app/api/v1/router.py`, `backend/app/api/v1/projects.py`, `backend/app/models/__init__.py`, `backend/app/models/project.py`, `backend/app/schemas/project.py`, `backend/tests/test_projects.py`, `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, `web/src/App.projects.test.tsx`, `web/e2e/projects.spec.ts`, `docs/pc-delivery-plan.md`, `handoff/current-task.md`, and this task archive. Pre-Coding `handoff/git-snapshot.md` remains untouched.
+- Implementation Summary: Added owner-scoped Project model/migration with defaults, checks, index, and four authenticated API routes. POST/PATCH reuse canonical request hashing and stored idempotency replay; normalized PATCH no-op preserves version and timestamp. Added PC Project/Goal navigation, list/detail/create/edit/pin, recoverable failures, identity-switch and stale-list request guards. No project sync changes or future-module behavior.
+- Acceptance Criteria Results: All seven criteria above met. Two-user API isolation, payload field restrictions, validation, no-op/replay/conflict, and deterministic list order have focused tests. Browser paths cover desktop and 375px widths; a separate disposable-backend browser test persisted an edit across page reload.
+- Verification Commands and Results: `python -m pytest tests/test_projects.py -q` 7 passed; `python -m pytest -q` 130 passed; `npm test` 117 passed; `npm run build` passed; `npx playwright test` 4 passed, 1 intentionally skipped without a disposable-backend token; the skipped test was run separately with a temporary SQLite-backed FastAPI service and passed (1 passed). PostgreSQL Alembic `upgrade head` from empty schema, project column/index/check inspection, and `downgrade -1` passed in a disposable schema; that schema was cleaned. Temporary SQLite database and API service were also cleaned/stopped.
+- Git Diff Check: `main` HEAD remains snapshot `8464846013236887e3e477d6ad5ef0db16dabbad`; staged diff empty. `git diff --check` passed with LF-to-CRLF working-copy warnings only. Modified/untracked files are within the TASK-031 allowlist; no secret, private key, raw token, machine path, generated build output, or Android/future-module edit was found. The three pre-existing workflow state files were preserved.
+- Unresolved Issues: None in implementation. PostgreSQL Windows service was stopped on the resumed day and this shell could not start it; no repeat live PostgreSQL browser run was made. The PostgreSQL migration had already passed in a disposable schema before that environmental change; real API browser persistence was verified with disposable SQLite.
+- Task-Outside Findings: None requiring an issue-log entry.
+
+## Code Review Result
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-10 09:50 +08:00
+- Blocking Issues: None.
+- Findings: Project migration/model, owner isolation, API envelopes, UUID idempotency, normalized no-op semantics, version increments, deterministic ordering, no-sync boundary, PC create/list/detail/edit/pin flow, stale identity protection, and scope exclusions match the approved contract.
+- Independent Verification: focused backend 7 passed; full backend 130 passed; focused Web 5 passed; full Web 117 passed; production build PASS; Playwright 4 passed / 1 conditional test skipped in the ordinary run; Coding's separately persisted disposable-backend run passed 1/1; `git diff --check` and cached check PASS; staging empty.
+- Migration Evidence: one Alembic head at `20261009_0005`; migration source and registration reviewed. Coding's disposable PostgreSQL upgrade/schema inspection/downgrade passed. The configured local database remains at `20260713_0004` and was not modified by Code Review.
+- Residual Risk: the normal runtime/deployment path must apply migration `20261009_0005` before Project endpoints are used against the configured local PostgreSQL database.
+- Reviewed Scope: the 17 Coding files listed above plus `handoff/code-review-gate.md`.
+- Recommended Commit Message: `feat(project): add Project Goal core`
+- Authorization: Git Commit may commit and push the exact reviewed scope. Keep task status `REVIEWING` until publication succeeds.
+- Next Role: Git Commit.

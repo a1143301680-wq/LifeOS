@@ -6,7 +6,7 @@ Last updated: 2026-10-09
 
 - Task ID: TASK-031
 - Task Name: PC Project/Goal core
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-030 terminal Closure Commit `da506ae691b822dc022485e1272594534943e1b4`; existing bearer identity, API envelope, and PC shell
@@ -99,6 +99,6 @@ Report modified files, migration/schema, API behavior, idempotency/no-op rule, i
 
 ## Current Stage
 
-Next role: Git Snapshot
+Next role: Git Commit
 
-Required next action: establish the pre-Coding Git Snapshot for the exact ten-file TASK-031 publication/readiness scope approved in `handoff/task-review-gate.md`. Do not start Coding until Git Snapshot completes.
+Required next action: commit and push the exact Code Review PASS scope, then mark TASK-031 completed only after publication succeeds.
