@@ -10,6 +10,8 @@ vi.mock("./sync-session", () => ({
   },
 }));
 
+vi.mock("./Dashboard", () => ({ default: () => null }));
+
 import App from "./App";
 
 function jsonResponse(body: unknown, status = 200) {

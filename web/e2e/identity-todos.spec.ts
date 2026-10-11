@@ -79,6 +79,7 @@ for (const viewport of [
     const streamRequests: Array<{ url: string; authorization: string | undefined }> = [];
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route("**/api/v1/me", (route) => route.fulfill({ json: identity }));
+    await page.route("**/api/v1/projects", (route) => route.fulfill({ json: { items: [] } }));
     await page.route("**/api/v1/todos**", async (route) => {
       const request = route.request();
       if (request.method() === "POST" && request.url().endsWith("/complete")) {
@@ -245,6 +246,8 @@ for (const viewport of [
     await page.getByLabel("Identity token").fill("browser-test-token");
     await page.getByRole("button", { name: "Continue" }).click();
 
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await page.getByRole("button", { name: "Today", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
     await expect(page.getByLabel("Selected date")).toBeVisible();
     await expect(page.getByRole("button", { name: "Previous date" })).toBeVisible();

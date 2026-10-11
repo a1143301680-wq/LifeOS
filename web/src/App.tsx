@@ -47,6 +47,7 @@ import {
   updateTodoCategory,
 } from "./api";
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
+import Dashboard from "./Dashboard";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
@@ -96,7 +97,7 @@ type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
 type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
 type AIPlanStatus = "idle" | "loading" | "ready" | "error";
-type AppView = "today" | "todos" | "categories" | "projects";
+type AppView = "dashboard" | "today" | "todos" | "categories" | "projects";
 type QuickCreateOrigin = "today" | "todos";
 type TodoPriority = Todo["priority"];
 type FailedCreateAttempt = {
@@ -217,8 +218,8 @@ function localDateTime(value: string | null) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 23);
 }
 
-function AISessionPanel({ project, token, onUnauthorized }: {
-  project: Project; token: string; onUnauthorized: (message: string | null) => void;
+function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
+  project: Project; token: string; onUnauthorized: (message: string | null) => void; initialSessionId?: string | null;
 }) {
   const activeRef = useRef(false);
   const listRequestRef = useRef(0);
@@ -279,6 +280,10 @@ function AISessionPanel({ project, token, onUnauthorized }: {
       setDetailStatus("error");
     }
   }
+
+  useEffect(() => {
+    if (initialSessionId) void openSession(initialSessionId);
+  }, [initialSessionId]);
 
   function beginCreate() {
     detailRequestRef.current += 1;
@@ -729,7 +734,7 @@ export default function App() {
   const [activeToken, setActiveToken] = useState<string | null>(initialToken);
   const [identity, setIdentity] = useState<UserIdentity | null>(null);
   const [identityStatus, setIdentityStatus] = useState<IdentityStatus>(initialToken ? "checking" : "setup");
-  const [view, setView] = useState<AppView>("today");
+  const [view, setView] = useState<AppView>("dashboard");
   const [todayDate, setTodayDate] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [todayData, setTodayData] = useState<TodayData | null>(null);
@@ -743,6 +748,8 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectDetail, setProjectDetail] = useState<Project | null>(null);
   const [projectDetailStatus, setProjectDetailStatus] = useState<LoadStatus>("idle");
+  const [dashboardOrigin, setDashboardOrigin] = useState(false);
+  const [dashboardSessionId, setDashboardSessionId] = useState<string | null>(null);
   const [projectFormMode, setProjectFormMode] = useState<"create" | "edit" | null>(null);
   const [projectDraft, setProjectDraft] = useState<ProjectDraft>(emptyProjectDraft);
   const [projectSubmitStatus, setProjectSubmitStatus] = useState<CreateStatus>("idle");
@@ -818,7 +825,7 @@ export default function App() {
     clearIdentity();
     setActiveToken(null);
     setIdentity(null);
-    setView("today");
+    setView("dashboard");
     setTodayDate("");
     setSelectedDate("");
     setTodayData(null);
@@ -832,6 +839,8 @@ export default function App() {
     setSelectedProjectId(null);
     setProjectDetail(null);
     setProjectDetailStatus("idle");
+    setDashboardOrigin(false);
+    setDashboardSessionId(null);
     setProjectFormMode(null);
     setProjectDraft(emptyProjectDraft());
     setProjectSubmitStatus("idle");
@@ -1006,10 +1015,9 @@ export default function App() {
       setIdentity(resolvedIdentity);
       setTokenInput("");
       setIdentityStatus("ready");
-      setView("today");
+      setView("dashboard");
       setTodayDate(initialDate);
       setSelectedDate(initialDate);
-      await loadToday(token, initialDate);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("That identity token is not valid. Try another token.");
@@ -1022,7 +1030,7 @@ export default function App() {
       setIdentityStatus("setup");
       setMessage("LifeOS could not connect. Check the service and try again.");
     }
-  }, [loadToday, returnToSetup]);
+  }, [returnToSetup]);
 
   useEffect(() => {
     if (initialToken) void validateIdentity(initialToken, true);
@@ -1116,6 +1124,25 @@ export default function App() {
     void loadToday(activeToken, date);
   }
 
+  function openToday() {
+    dismissTodoNotice();
+    setView("today");
+    if (activeToken && (todayStatus === "idle" || todayStatus === "error")) void loadToday(activeToken, selectedDate);
+  }
+
+  function openDashboard() {
+    dismissTodoNotice();
+    invalidateAIPlan();
+    projectDetailRequestRef.current += 1;
+    setSelectedProjectId(null);
+    setProjectDetail(null);
+    setProjectDetailStatus("idle");
+    setProjectFormMode(null);
+    setDashboardOrigin(false);
+    setDashboardSessionId(null);
+    setView("dashboard");
+  }
+
   function openTodos() {
     dismissTodoNotice();
     invalidateAIPlan();
@@ -1133,12 +1160,20 @@ export default function App() {
   function openProjects() {
     dismissTodoNotice();
     invalidateAIPlan();
+    setDashboardOrigin(false);
+    setDashboardSessionId(null);
     setView("projects");
     if (activeToken && (projectStatus === "idle" || projectStatus === "error")) void loadProjects(activeToken);
   }
 
-  function openProject(projectId: string) {
+  function openProject(projectId: string, fromDashboard = false, sessionId: string | null = null) {
     if (!activeToken) return;
+    setDashboardOrigin(fromDashboard);
+    setDashboardSessionId(sessionId);
+    if (fromDashboard) {
+      setView("projects");
+      void loadProjects(activeToken);
+    }
     setSelectedProjectId(projectId);
     setProjectDetail(null);
     setProjectFormMode(null);
@@ -1153,6 +1188,7 @@ export default function App() {
     setProjectDetailStatus("idle");
     setProjectFormMode(null);
     setProjectNotice(null);
+    setDashboardSessionId(null);
   }
 
   function startProjectCreate() {
@@ -1992,7 +2028,7 @@ export default function App() {
     const todoInteractionActive = quickCreateOrigin !== null || todoEditTarget !== null;
     const todoActionSubmitting = completeStatus === "submitting" || reopenStatus === "submitting";
     const todoRowActionsDisabled = todoInteractionActive || todoActionSubmitting;
-    const currentStatus = view === "today"
+    const currentStatus = view === "dashboard" ? "idle" : view === "today"
       ? todayStatus
       : view === "todos"
         ? todoStatus
@@ -2002,7 +2038,8 @@ export default function App() {
         <header className="app-header">
           <a className="wordmark" href="#main-content" aria-label="LifeOS home">LifeOS</a>
           <nav className="view-switch" aria-label="Workspace views">
-            <button aria-current={view === "today" ? "page" : undefined} onClick={() => { dismissTodoNotice(); setView("today"); }} disabled={todoInteractionActive || todoActionSubmitting}>Today</button>
+            <button aria-current={view === "dashboard" ? "page" : undefined} onClick={openDashboard} disabled={todoInteractionActive || todoActionSubmitting}>Dashboard</button>
+            <button aria-current={view === "today" ? "page" : undefined} onClick={openToday} disabled={todoInteractionActive || todoActionSubmitting}>Today</button>
             <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={todoInteractionActive || todoActionSubmitting}>Todos</button>
             <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive || todoActionSubmitting}>Categories</button>
             <button aria-current={view === "projects" ? "page" : undefined} onClick={openProjects} disabled={todoInteractionActive || todoActionSubmitting}>Projects</button>
@@ -2025,7 +2062,7 @@ export default function App() {
         </header>
 
         <section className={`workspace workspace-${view}`} id="main-content">
-          {view === "today" ? (
+          {view === "dashboard" ? <Dashboard key={`${identity.id}:${activeToken}`} token={activeToken!} identity={identity} onUnauthorized={returnToSetup} onOpenProject={(id) => openProject(id, true)} onOpenSession={(projectId, sessionId) => openProject(projectId, true, sessionId)} onOpenToday={openToday} composeContinuation={(project, session) => composeAISessionPrompt("continue", project, session)} /> : view === "today" ? (
             <>
               <div className="today-heading">
                 <div>
@@ -2104,6 +2141,7 @@ export default function App() {
                   <ProjectEditor mode={projectFormMode} draft={projectDraft} onChange={changeProjectDraft} onSubmit={(event) => void submitProject(event)} onCancel={() => setProjectFormMode(null)} status={projectSubmitStatus} message={projectMessage} />
                 ) : selectedProjectId ? (
                   <section className="project-detail" aria-labelledby="project-detail-title">
+                    {dashboardOrigin ? <button className="text-button project-back" type="button" onClick={openDashboard}><ChevronLeft aria-hidden="true" />Back to Dashboard</button> : null}
                     <button className="text-button project-back" type="button" onClick={backToProjectList}><ChevronLeft aria-hidden="true" />Back to list</button>
                     {projectDetailStatus === "loading" ? <p role="status">Loading project...</p> : null}
                     {projectDetailStatus === "error" ? <div role="alert"><p>Could not load this project.</p><button className="secondary-button" onClick={() => activeToken && void loadProjectDetail(activeToken, selectedProjectId)}><RefreshCw aria-hidden="true" /> Retry</button></div> : null}
@@ -2119,7 +2157,7 @@ export default function App() {
                       {projectDetail.description ? <div className="project-copy"><h3>Description</h3><p>{projectDetail.description}</p></div> : null}
                       <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
                       <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
-                      <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} />
+                      <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={dashboardSessionId} />
                     </> : null}
                   </section>
                 ) : null}

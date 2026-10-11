@@ -6,7 +6,7 @@ Last updated: 2026-10-11
 
 - Task ID: TASK-033
 - Task Name: PC Dashboard and Resume
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-031 Project/Goal core; TASK-032 AI Session records terminal Closure Commit `e8e013f5840a95132f605590d63659e854e65744`; existing Today summary and PC identity shell
@@ -69,15 +69,15 @@ After identity validation, one PC screen shows up to three focused Projects/Goal
 
 ## Acceptance Criteria
 
-- [ ] Dashboard is the default signed-in PC view and existing navigation/workflows remain reachable.
-- [ ] Focused selection follows the exact pinned/status/date/id order, caps at three, and updates after Project changes.
-- [ ] Each focused item uses only its own latest AI Session, shows accurate saved context, and navigates to Project/Session detail and back.
-- [ ] Full and sparse AI Sessions expose saved `modified_files` and `verification_result` or the exact missing-value labels; no session and no automatic change history are represented honestly.
-- [ ] Primary Resume action uses `Continue Development` only for development projects and `Continue Progress` for every other project type, including projects without a session.
-- [ ] Continuation copy reuses the saved-session template with visible success/failure and no provider or write request.
-- [ ] Today counts come from current local day in the identity timezone, independent of the Today view's browsed date, and open Today correctly.
-- [ ] Empty, loading, partial failure/retry, identity switch, stale response, desktop/narrow states are tested without cross-user leakage or layout overflow.
-- [ ] Full Web tests, production build, browser flows, and exact Git/security scans pass or record exact environmental limits; no backend/Android/future-module scope breach occurs.
+- [x] Dashboard is the default signed-in PC view and existing navigation/workflows remain reachable.
+- [x] Focused selection follows the exact pinned/status/date/id order, caps at three, and updates after Project changes.
+- [x] Each focused item uses only its own latest AI Session, shows accurate saved context, and navigates to Project/Session detail and back.
+- [x] Full and sparse AI Sessions expose saved `modified_files` and `verification_result` or the exact missing-value labels; no session and no automatic change history are represented honestly.
+- [x] Primary Resume action uses `Continue Development` only for development projects and `Continue Progress` for every other project type, including projects without a session.
+- [x] Continuation copy reuses the saved-session template with visible success/failure and no provider or write request.
+- [x] Today counts come from current local day in the identity timezone, independent of the Today view's browsed date, and open Today correctly.
+- [x] Empty, loading, partial failure/retry, identity switch, stale response, desktop/narrow states are tested without cross-user leakage or layout overflow.
+- [x] Full Web tests, production build, browser flows, and exact Git/security scans pass or record exact environmental limits; no backend/Android/future-module scope breach occurs.
 
 ## Verification Plan
 
@@ -97,6 +97,6 @@ Report changed files, selection and data-loading behavior, navigation/copy flow,
 
 ## Current Stage
 
-Next Role: Git Snapshot
+Next Role: Git Commit
 
-Required Next Action: Git Snapshot must verify the exact approved eight-file publication/readiness scope and establish the pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both task records to `IN_PROGRESS`.
+Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep both task statuses at REVIEWING until publication succeeds.

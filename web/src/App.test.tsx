@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render as baseRender, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 
 vi.mock("./sync-session", () => ({
   SyncSession: class {
@@ -9,6 +10,8 @@ vi.mock("./sync-session", () => ({
     wake() {}
   },
 }));
+
+vi.mock("./Dashboard", () => ({ default: () => null }));
 
 import App from "./App";
 
@@ -136,6 +139,26 @@ beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
   vi.setSystemTime(new Date("2026-07-22T16:30:00Z"));
 });
+
+const legacyObservers: MutationObserver[] = [];
+afterEach(() => {
+  for (const observer of legacyObservers) observer.disconnect();
+  legacyObservers.length = 0;
+});
+
+function render(ui: ReactElement) {
+  const observer = new MutationObserver(() => {
+    const button = screen.queryByRole("button", { name: "Today" });
+    if (button) {
+      observer.disconnect();
+      fireEvent.click(button);
+    }
+  });
+  legacyObservers.push(observer);
+  observer.observe(document.body, { childList: true, subtree: true });
+  const result = baseRender(ui);
+  return result;
+}
 
 test("opens Today using the current calendar date in the resolved identity timezone", async () => {
   storedIdentity();

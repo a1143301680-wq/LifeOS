@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("./sync-session", () => ({ SyncSession: class { start() {} stop() {} retry() {} wake() {} } }));
+vi.mock("./Dashboard", () => ({ default: () => null }));
 
 import App from "./App";
 

@@ -294,6 +294,24 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: update evidence only; do not change product scope or claim additional verification.
 - Final Verification: records are synchronized and contain no credential, model output, raw provider body, response ID, raw token, or real Todo content.
 
+### CR-TASK-033-001: Dashboard E2E heading assertion is timing-dependent
+
+- Status: verified
+- Severity: P2
+- Found by: Code Review window
+- Found at: 2026-10-11 09:25 +08:00
+- Related task: TASK-033 PC Dashboard and Resume
+- Files: `D:\LifeOS\web\e2e\dashboard.spec.ts:39`, `D:\LifeOS\web\e2e\dashboard.spec.ts:50`
+- Description: both Dashboard assertions use `getByRole("heading", { name: "Dashboard" })`, whose accessible-name match is not exact. After the focused project title `LifeOS dashboard` renders, the locator can resolve to both the page `<h1>` and project `<h3>`, causing Playwright strict-mode failure based on response timing.
+- Impact: the required complete browser suite is nondeterministic. Code Review reproduced 7 passed / 2 skipped / 1 failed even though Coding reported a clean run, so Git publication cannot rely on stable browser evidence.
+- Expected: both assertions identify the Dashboard page heading uniquely, such as an exact accessible name or heading level 1, without changing product behavior.
+- Actual: the full suite's 375px flow failed at line 50 with two locator matches; an immediate focused spec rerun passed 2/2, proving the assertion is timing-dependent.
+- Fix owner/window: Coding window through guarded Code Review rework admission.
+- Fix notes: change only the ambiguous Dashboard E2E locator(s); do not alter Dashboard product behavior or expand task scope.
+- Verification: rerun `npx playwright test e2e/dashboard.spec.ts` and `npx playwright test`; both Dashboard viewports must pass and the complete suite may retain only the two documented conditional live-backend skips.
+- Resolution: Coding added exact accessible-name matching to both Dashboard page-heading assertions without changing product behavior.
+- Final Verification: Code Review independently reran the focused Dashboard spec with 2 passed and the complete Playwright suite with 8 passed, 2 documented conditional skips, and 0 failures on 2026-10-11.
+
 ## Entry Template
 
 ```text

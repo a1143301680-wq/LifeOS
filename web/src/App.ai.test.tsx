@@ -10,6 +10,8 @@ vi.mock("./sync-session", () => ({
   },
 }));
 
+vi.mock("./Dashboard", () => ({ default: () => null }));
+
 import App from "./App";
 
 const meResponse = {
@@ -94,6 +96,7 @@ test("renders a plan and keeps the suggested Todo behind explicit quick-add conf
   });
 
   render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Today" }));
   await userEvent.click(await screen.findByRole("button", { name: "Plan my day" }));
 
   expect(await screen.findByText("Protect one focus block and close the handoff.")).toBeInTheDocument();
@@ -142,6 +145,7 @@ test("prevents duplicate planning requests and supports an explicit retry", asyn
   });
 
   render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Today" }));
   const plan = await screen.findByRole("button", { name: "Plan my day" });
   await userEvent.click(plan);
   expect(screen.getByRole("button", { name: "Planning..." })).toBeDisabled();
@@ -171,6 +175,7 @@ test("ignores an old planning completion after the selected date changes", async
   });
 
   render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Today" }));
   await userEvent.click(await screen.findByRole("button", { name: "Plan my day" }));
   fireEvent.change(screen.getByLabelText("Selected date"), { target: { value: "2026-09-28" } });
   releasePlan(jsonResponse(planResponse));
@@ -194,6 +199,7 @@ test("invalidates a rendered plan before opening refreshed Todo data", async () 
   });
 
   render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Today" }));
   await userEvent.click(await screen.findByRole("button", { name: "Plan my day" }));
   expect(await screen.findByText("Protect one focus block and close the handoff.")).toBeInTheDocument();
 
@@ -217,6 +223,7 @@ test("ignores an old planning completion after switching identity", async () => 
   });
 
   render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Today" }));
   await userEvent.click(await screen.findByRole("button", { name: "Plan my day" }));
   await userEvent.click(screen.getByRole("button", { name: "Switch identity" }));
   releasePlan(jsonResponse(planResponse));

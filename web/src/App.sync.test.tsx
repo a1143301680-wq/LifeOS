@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+vi.mock("./Dashboard", () => ({ default: () => null }));
+
 import App from "./App";
 import { createEmptySyncState, persistSyncState, syncStorageKey } from "./sync-state";
 
@@ -100,6 +102,8 @@ test("applies SSE recovery before refreshing loaded projections and preserves an
   render(<App />);
   expect(await screen.findByText("Live")).toBeInTheDocument();
   await waitFor(() => expect(syncPullCount).toBe(2));
+  await userEvent.click(screen.getByRole("button", { name: "Today" }));
+  await screen.findByText("Nothing scheduled");
   await userEvent.click(screen.getByRole("button", { name: "Categories" }));
   const draft = await screen.findByLabelText("Category name");
   await userEvent.type(draft, "Draft category");
