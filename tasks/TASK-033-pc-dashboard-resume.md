@@ -1,6 +1,6 @@
 # TASK-033: PC Dashboard and Resume
 
-Status: REVIEWING
+Status: COMPLETED
 
 Priority: P1
 
@@ -73,9 +73,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `e8e013f5840a95132f605590d6
 
 Snapshot Reason: approved TASK-033 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep task status REVIEWING until publication succeeds.
+Required Next Action: perform the Decision Closure Check using Result Commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record.
 
 ## Coding Result
 
@@ -126,3 +126,18 @@ Required Next Action: commit and push only the exact scope approved in `handoff/
 - Recommended Commit Message: `feat(dashboard): add PC Resume dashboard`
 - Authorization: Git Commit may commit and push the exact reviewed scope. Keep task status `REVIEWING` until publication succeeds.
 - Next Role: Git Commit.
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `b3007633757193ccded94aceffdf21ed05e4b8d1`
+- Commit Message: `feat(dashboard): add PC Resume dashboard`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review Re-review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.

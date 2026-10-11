@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-10-10
+Last updated: 2026-10-11
 
 ## Current Phase
 
@@ -110,7 +110,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-031 Decision Closure Check passed on 2026-10-10; terminal Closure Commit `6acfaaf` was published with remote parity and a clean worktree. Its workflow is closed.
 - TASK-032 PC AI Session records completed in result commit `500d317`; Code Review: PASS; 136 backend tests, 125 Web tests, production build, disposable PostgreSQL migration verification, and browser flows passed. The configured user database still requires revision verification and upgrade through `20261010_0006` before AI Session endpoints are used there.
 - TASK-032 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `e8e013f` was published with remote parity and a clean worktree. Its workflow is closed.
-- TASK-033 PC Dashboard and Resume is published as the next PC demonstration slice and awaits Task Review. It reuses Project, AI Session, and Today data without new backend contracts.
+- TASK-033 PC Dashboard and Resume completed in result commit `b300763`; Code Review re-review: PASS; 143 Web tests, production build, focused Dashboard browser flow, and full Playwright 8 passed / 2 documented conditional skips. It reuses Project, AI Session, and Today data without new backend contracts.
 
 ## Recently Completed
 
@@ -159,7 +159,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Follow `handoff/current-task.md` for TASK-033 Task Review routing. If Task Review passes, Git Snapshot establishes the pre-Coding baseline; do not start Coding before that transition.
+Decision must perform the TASK-033 Closure Check against result commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record. Do not publish the next task before TASK-033 closure.
 
 ## Notes For Windows
 

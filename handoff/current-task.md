@@ -6,7 +6,7 @@ Last updated: 2026-10-11
 
 - Task ID: TASK-033
 - Task Name: PC Dashboard and Resume
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-031 Project/Goal core; TASK-032 AI Session records terminal Closure Commit `e8e013f5840a95132f605590d63659e854e65744`; existing Today summary and PC identity shell
@@ -97,6 +97,6 @@ Report changed files, selection and data-loading behavior, navigation/copy flow,
 
 ## Current Stage
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: commit and push only the exact scope approved in `handoff/code-review-gate.md`; keep both task statuses at REVIEWING until publication succeeds.
+Required Next Action: perform the TASK-033 Decision Closure Check using Result Commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record; do not start the next task before closure.
