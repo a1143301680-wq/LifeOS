@@ -111,6 +111,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-032 PC AI Session records completed in result commit `500d317`; Code Review: PASS; 136 backend tests, 125 Web tests, production build, disposable PostgreSQL migration verification, and browser flows passed. The configured user database still requires revision verification and upgrade through `20261010_0006` before AI Session endpoints are used there.
 - TASK-032 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `e8e013f` was published with remote parity and a clean worktree. Its workflow is closed.
 - TASK-033 PC Dashboard and Resume completed in result commit `b300763`; Code Review re-review: PASS; 143 Web tests, production build, focused Dashboard browser flow, and full Playwright 8 passed / 2 documented conditional skips. It reuses Project, AI Session, and Today data without new backend contracts.
+- TASK-033 Decision Closure Check passed on 2026-10-11. The exact four-file Terminal Closure Commit is authorized in `tasks/TASK-033-pc-dashboard-resume.md`; TASK-034 must wait until that commit is pushed and remote parity is verified.
 
 ## Recently Completed
 
@@ -159,7 +160,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Decision must perform the TASK-033 Closure Check against result commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record. Do not publish the next task before TASK-033 closure.
+Run the TASK-033 Terminal Closure Commit using the exact four-file allowlist in `tasks/TASK-033-pc-dashboard-resume.md`. After remote parity is verified, return to Decision to choose and publish the next PC task.
 
 ## Notes For Windows
 

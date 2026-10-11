@@ -97,6 +97,14 @@ Report changed files, selection and data-loading behavior, navigation/copy flow,
 
 ## Current Stage
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-033 Decision Closure Check using Result Commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record; do not start the next task before closure.
+Checked At: 2026-10-11 09:35 +08:00
+
+Result Commit: `b3007633757193ccded94aceffdf21ed05e4b8d1`
+
+Completion Commit: `2ffe578239caff67465161cae0b14420c270d402`
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only the four Closure-authorized documents listed in `tasks/TASK-033-pc-dashboard-resume.md` with message `docs(task): close TASK-033`; verify local/tracking/remote parity and return control to Decision. Do not run another Closure Check or publish TASK-034 here.

@@ -73,9 +73,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `e8e013f5840a95132f605590d6
 
 Snapshot Reason: approved TASK-033 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: perform the Decision Closure Check using Result Commit `b3007633757193ccded94aceffdf21ed05e4b8d1` and the completion record.
+Required Next Action: commit and push only the four Closure-authorized documents listed below with message `docs(task): close TASK-033`, verify remote parity, and return to Decision. Do not repeat Closure Check.
 
 ## Coding Result
 
@@ -139,5 +139,14 @@ Required Next Action: perform the Decision Closure Check using Result Commit `b3
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-10-11 09:35 +08:00
+- Result Commit: `b3007633757193ccded94aceffdf21ed05e4b8d1`
+- Completion Commit: `2ffe578239caff67465161cae0b14420c270d402`
+- Remote Verification: local HEAD, `origin/main`, and remote `refs/heads/main` all matched the Completion Commit before Closure edits.
+- Working Tree Before Closure Docs: clean; branch `main`; no staged or untracked files.
+- Review/Test Evidence: final Code Review `PASS / COMPLETED`; independent review recorded full Web 143 passed, build PASS, focused Dashboard Playwright 2 passed at desktop/narrow sizes, and full Playwright 8 passed / 2 documented conditional skips / 0 failed. Decision independently reran the three focused Dashboard test files: 18 passed.
+- Acceptance Criteria Result: all nine criteria in each active TASK-033 record are checked and supported by the reviewed evidence. No backend or Android scope was changed.
+- Issue Disposition: `CR-TASK-033-001` was repaired and is `verified` in `handoff/issue-log.md`; final Code Review found no blocking issues. No other active TASK-033 issue remains.
+- Remaining Follow-ups: verify and upgrade the configured user PostgreSQL database through `20261010_0006` by normal startup/deployment before real local AI Session/Dashboard demonstration. The two optional live-backend browser cases were documented skips; TASK-037 owns full PC acceptance. TASK-034 is not published before terminal closure.
+- Terminal Closure Commit: authorized for exactly `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-033-pc-dashboard-resume.md`; recommended message `docs(task): close TASK-033`. No further Closure Check after it is pushed.
