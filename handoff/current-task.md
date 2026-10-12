@@ -75,14 +75,14 @@ A PC user can open a Project/Goal, see its persisted type-based stage list, add/
 
 ## Acceptance Criteria
 
-- [ ] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
-- [ ] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
-- [ ] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
-- [ ] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
-- [ ] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
-- [ ] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
-- [ ] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
-- [ ] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
+- [x] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
+- [x] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
+- [x] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
+- [x] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
+- [x] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
+- [x] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
+- [x] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
+- [x] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
 
 ## Verification Plan
 
@@ -139,6 +139,16 @@ Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d231
 
 Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-034 Decision Closure Check using Result Commit `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8` and the completion record; do not start the next task before closure.
+Checked At: 2026-10-12 15:00:17 +08:00
+
+Result Commit: `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8`
+
+Completion Commit: `fe010d0e726a5e0ac1c1d67a98114861843b1314`
+
+Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; Code Review PASS; all eight acceptance criteria confirmed. Full verification, residual limits, and the exact four-file allowlist are in `tasks/TASK-034-pc-project-stages.md`.
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-034-pc-project-stages.md` with message `docs(task): close TASK-034`. Verify local/tracking/remote parity and clean worktree, then return to Decision. Do not run another Closure Check or publish the next task from this step.

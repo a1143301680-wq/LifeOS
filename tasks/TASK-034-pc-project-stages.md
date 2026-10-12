@@ -139,9 +139,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d231
 
 Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: perform the Decision Closure Check using Result Commit `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8` and the completion record.
+Required Next Action: commit and push only the four Closure-authorized documents listed below with message `docs(task): close TASK-034`, verify remote parity and clean worktree, then return to Decision. Do not rerun Closure Check.
 
 ## Coding Result
 
@@ -183,5 +183,23 @@ Required Next Action: perform the Decision Closure Check using Result Commit `7f
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-10-12 15:00:17 +08:00
+- Result Commit: `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8`
+- Completion Commit: `fe010d0e726a5e0ac1c1d67a98114861843b1314`
+- Remote Verification: local HEAD, origin/main, and remote refs/heads/main all matched the Completion Commit before Closure edits; branch main. Result parent is snapshot 9a0b781; completion parent is the Result Commit.
+- Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked paths.
+- Review/Test Evidence: Code Review PASS / COMPLETED at 2026-10-12 13:56:49 +08:00. Independent review recorded focused backend 10 passed, full backend 147 passed including disposable PostgreSQL migration/API/concurrency coverage, focused Web 4 passed, full Web 147 passed, production build PASS, Playwright 10 passed / 2 pre-existing conditional skips, and single Alembic head 20261012_0007.
+- Decision Verification: exact Result Commit paths equal the 26-path Reviewed Scope; Completion Commit changes exactly the four Git publication state documents. Both published commits pass git whitespace checks. Contract/API/service/test evidence supports all eight acceptance criteria. Decision did not rerun the already-reviewed test suites or mutate the configured user database.
+- Acceptance Criteria Result: all eight criteria are confirmed in the archive and synchronized in current-task.md. Browser stage flows used API stubs at 1280px and 375px; real persistence, migration, and concurrency were verified separately through FastAPI TestClient on disposable PostgreSQL. Full browser-to-real-backend acceptance remains a later PC acceptance checkpoint, not a claim made here.
+- Issue Disposition: no blocking TASK-034 finding is recorded; existing ISSUE-20261011-001 remains open P3/non-blocking and deferred. Milestones, Todo links, logs/timeline, lifecycle, Notes, Calendar, Android, AI memory, and Agents remain outside this task.
+- Remaining Follow-ups: normal local startup/deployment must verify and apply pending migrations through 20261012_0007 before using stage endpoints against the configured user database; its current revision is not asserted. Retain the two documented conditional browser skips for later PC acceptance. Review-recorded interrupted disposable-cluster directories outside the repo remain routine host-cleanup residue, not commit content.
+- State Synchronization: task Status remains COMPLETED in both active records; current-task.md's unchecked acceptance boxes and the roadmap's stale REVIEWING label were corrected as Closure documentation only.
+- Terminal Closure Commit: authorized for exactly the four files below; recommended message `docs(task): close TASK-034`. Verify that only these paths changed, commit/push once, verify local/tracking/remote parity and a clean worktree, and return control to Decision. Do not run another Closure Check, create further state edits, or publish the next task from the Git window.
+
+### Terminal Closure File Allowlist
+
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-034-pc-project-stages.md`
