@@ -1,6 +1,6 @@
 # LifeOS Phase 1A Progress Tracker
 
-Last updated: 2026-10-09
+Last updated: 2026-10-12
 
 Purpose: give the Decision window a concrete progress map so tasks are selected from Phase 1A scope, not from memory or impulse.
 
@@ -75,7 +75,7 @@ This inserted showcase does not reopen completed PC Web Phase 1A scope and does 
 ## Recommended Task Order
 
 1. Complete PC V1 delivery through `docs/pc-delivery-plan.md`; TASK-031 Project/Goal core is published and the next planned slice is TASK-032 AI Session records.
-2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance (currently reserved as TASK-038).
+2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance; assign its task ID at publication per `docs/pc-delivery-plan.md`.
 3. Add Android quick add, edit, and complete writes.
 4. Run PC/Android end-to-end Phase 1A acceptance.
 

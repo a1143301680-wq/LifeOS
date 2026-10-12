@@ -1,110 +1,140 @@
 # LifeOS Current Task
 
-Last updated: 2026-10-11
+Last updated: 2026-10-12
 
 ## Metadata
 
-- Task ID: TASK-033
-- Task Name: PC Dashboard and Resume
-- Status: COMPLETED
+- Task ID: TASK-034
+- Task Name: PC editable Project/Goal stages
+- Status: READY
 - Priority: P1
-- Parent Task: PC V1 MVP completion
-- Dependencies: TASK-031 Project/Goal core; TASK-032 AI Session records terminal Closure Commit `e8e013f5840a95132f605590d63659e854e65744`; existing Today summary and PC identity shell
+- Parent Task: PC V1 MVP completion / Project depth
+- Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-033 terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; current migration `20261010_0006`
+- Contract: `docs/api-project-stages.md` (proposed, subject to Task Review)
 
 ## Background
 
-PC users can manage Projects/Goals and manually record AI Sessions, but still have to visit separate views to decide what to continue. `docs/pc-delivery-plan.md` makes this the third demonstration slice. Project stages and unified timeline belong to TASK-034; this Dashboard must not invent their data.
+TASK-033 is terminally closed and local HEAD, origin/main, and remote main were verified at its Closure Commit on 2026-10-12. The former Project depth roadmap row covered several distinct behaviors. Decision splits it into stages, milestones, Todo links, logs/timeline, and lifecycle follow-ups so each task has a verifiable product result. User direction remains PC foundations first, Android later; personal memory, self-iteration, and Agent participation are deferred.
 
 ## Goal
 
-After identity validation, one PC screen shows up to three focused Projects/Goals, each one's next step and latest AI Session context, plus today's Todo summary, with direct navigation to the underlying Project/Session and Today views.
+A PC user can open a Project/Goal, see its persisted type-based stage list, add/rename/remove/reorder stages, explicitly select or clear the current stage, save, and reopen without losing edits or changing manual progress.
 
 ## In Scope
 
-- Add a Dashboard view to the existing PC navigation and make it the default signed-in view.
-- Select up to three focused projects using the deterministic selection contract below.
-- Show project state, manual progress, next step, latest AI Session context including manually recorded changed files and verification result, plus a copyable continuation prompt when a session exists.
-- Show current local-day Today summary from the existing API and navigation to Today.
-- Handle partial loading/errors/retry, identity and project switching, desktop/narrow layout, and focused tests/browser verification.
+- User-owned project_stages storage, a forward/backward Alembic migration, existing-project backfill, and transactional template creation for new Projects.
+- Nested GET and atomic PUT collection endpoints with existing identity, envelopes, idempotency, and parent-version behavior.
+- PC Project-detail stage display/editor with durable save/readback and independent failure states.
+- Focused backend, migration, Web, and desktop/narrow browser verification; regression of existing Project, AI Session, and Dashboard flows.
+- Publication housekeeping: synchronize PC roadmap and related Android reservation references, record TASK-033 terminal closure, and preserve the known issue-log entry.
 
 ## Out Of Scope
 
-- New database tables, migrations, API endpoints, backend aggregation, or changes to existing Project/AI Session/Today contracts.
-- Stage generation, project logs/timeline, milestones, linked Todos, Notes, Calendar, statistics, Android, AI provider calls, external chat import, autonomous writes, or a global recommendation engine.
-- Reworking completed task archives or stable product/API/architecture documents.
+- Milestones, Todo links, logs/timeline, Project archive/delete, calculated progress, template reset/global template management, and Dashboard stage integration.
+- Notes, Calendar, Android, reminders, offline writes, Project/stage SSE or sync protocols, account/auth redesign, and infrastructure deployment.
+- AI personal memory, feedback learning, Agent execution, provider changes, language-consistency repair, autonomous writes, and external chat/Git import.
+- Changes to completed task archives or unrelated product/API contracts.
 
 ## Relevant Files
 
-- `docs/pc-delivery-plan.md`: PC-first sequence and TASK-033 checkpoint
-- `docs/requirements.md`: sections 6 and 8 PC Dashboard and Resume
-- `docs/mvp.md`: Phase 2 Dashboard acceptance and Phase 3 AI Session handoff
-- `web/src/App.tsx`: navigation, identity switching, Today/Project/AI Session states, `composeAISessionPrompt`
-- `web/src/api.ts`, `web/src/types.ts`, `web/src/calendar-date.ts`, `web/src/styles.css`
-- `web/src/App.projects.test.tsx`, `web/src/App.ai-sessions.test.tsx`, `web/src/ai-session-prompts.test.ts`, `web/e2e/projects.spec.ts`, `web/e2e/ai-sessions.spec.ts`
-- `backend/app/api/v1/projects.py`, `backend/app/api/v1/ai_sessions.py`, existing Today API: read-only contract reference
+- `docs/api-project-stages.md`: exact storage, six template mappings, endpoint/write/validation rules, migration semantics, and PC behavior.
+- `docs/requirements.md`: section 7 Project/Goal stages and manual progress only.
+- `docs/mvp.md`: Phase 2 editable-stage acceptance; `docs/architecture.md`: sections 4-5 and 9-10 identity, table, and Project boundaries.
+- `docs/pc-delivery-plan.md`: split PC-first sequence and checkpoint.
+- `backend/app/models/project.py`, `backend/app/models/__init__.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/router.py`, `backend/app/schemas/project.py`.
+- `backend/app/services/idempotency.py`, `backend/app/core/errors.py`, `backend/alembic/versions/20261009_0005_add_projects.py`, `backend/alembic/versions/20261010_0006_add_ai_sessions.py`, `backend/tests/test_projects.py`, `backend/tests/test_ai_sessions.py`.
+- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, `web/src/App.projects.test.tsx`, `web/src/App.ai-sessions.test.tsx`, `web/src/App.dashboard.test.tsx`, `web/e2e/projects.spec.ts`.
+- New implementation/test paths listed below are expected outputs, not missing prerequisites. Search `handoff/issue-log.md` for TASK-034 and ISSUE-20261011-001; no full issue history is required.
 
 ## Allowed Files
 
-- `web/src/App.tsx`, `web/src/styles.css`; `web/src/api.ts`, `web/src/types.ts`, `web/src/calendar-date.ts` only if existing helpers/types require narrowly scoped changes
-- New focused Dashboard selector/component helpers and tests under `web/src/**`, plus focused browser tests under `web/e2e/**`
-- Existing `web/src/**` or `web/e2e/**` tests only where Dashboard default/navigation changes require updates
-- `docs/pc-delivery-plan.md` only for verified task progress, not scope changes
-- Active TASK-033 workflow/gate/Git/issue files
+- `backend/app/models/project_stage.py`, `backend/app/models/__init__.py`; `backend/app/models/project.py` only if collection/locking integration requires it.
+- `backend/app/schemas/project_stage.py`, `backend/app/services/project_stages.py`, `backend/app/api/v1/project_stages.py`, `backend/app/api/v1/router.py`, `backend/app/api/v1/projects.py`.
+- `backend/alembic/versions/20261012_0007_add_project_stages.py` only; do not rewrite old migrations.
+- `backend/tests/test_project_stages.py`, `backend/tests/test_project_stage_migration.py`; existing backend test fixtures only for stage-table registration or narrowly required Project regression coverage.
+- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, new `web/src/ProjectStages.tsx` and focused stage tests, new `web/e2e/project-stages.spec.ts`; existing Web/E2E fixtures/tests only for compatibility regression.
+- `docs/api-project-stages.md` header status only for verified implementation progress; contract-body revisions return to Decision. `docs/pc-delivery-plan.md` for verified progress only; active TASK-034 workflow/gate/Git/issue records for role-owned state changes.
+- Other publication documents below belong in the readiness snapshot; their presence is not permission for unrelated Coding edits.
 
 ## Forbidden Files And Changes
 
-- `backend/**`, `android/**`, Alembic migrations, stable API/product/architecture/data-model docs, accepted ADRs, completed task archives, or unrelated Todo/sync/AI Today logic
-- Browser-selected `user_id`, cross-identity data reuse, silent external/provider calls, autonomous Project/Todo writes, secrets, machine paths, private fixtures, or generated output
-- Placeholder stages or fabricated completion/change history; TASK-034 owns stages and timeline
+- `android/**`, existing Alembic revisions, completed task archives, requirements/MVP/architecture/Phase 1A API/data-model contracts, accepted ADRs, dependencies/lockfiles unless a concrete task blocker returns to Decision.
+- Unrelated Todo/sync/provider behavior, AI memory/agents, private data, credentials, generated build/test output, user data seeding or migration as a test shortcut.
+- Inferring stage completion from manual percentage; regenerating defaults on type change/read/startup; silently choosing a current stage.
+- New generic workflow/template engine, global UI refactor, or unapproved endpoints.
 
 ## Implementation Requirements
 
-1. Add `dashboard` to the existing `AppView` navigation. After successful identity validation, show Dashboard by default; switching identity invalidates Dashboard data and all in-flight requests. Today, Todos, Categories, and Projects remain directly accessible and retain existing behavior.
-2. Fetch the signed-in user's existing Project list. Select at most three distinct projects: all pinned projects first, sorted `updated_at DESC, id ASC`, taking at most three; fill remaining slots with unpinned `in_progress`, then unpinned `planning`, then unpinned `paused`, each group sorted `updated_at DESC, id ASC`. Never auto-select unpinned `completed` or `abandoned`; pinned projects of any status still take precedence. A project updated/pinned in the existing view must be reflected on return/refresh, without stale cached ranking.
-3. For each focused project only, use the existing nested AI Session list and take its first item (`started_at DESC, id ASC`) as latest. Do not issue session requests for every project. Show project name/type/status/manual progress/next step and latest session `goal`, `completed_work`, `modified_files`, `verification_result`, `remaining_issues`, `next_step`, and `recommended_next_prompt` when present. `modified_files` is a manually entered record of what changed; `verification_result` is the recorded verification/current-state evidence, not a live Git or test scan. If a session exists but either is null/blank, display `Modified files not recorded` or `Verification not recorded`, respectively, rather than hiding those Resume questions or fabricating answers. If no session exists, display `No AI Session yet` and no session-derived fields or copy action. Other missing optional content may be omitted; stage, linked-Todo, and timeline fields are omitted until TASK-034.
-4. The primary Resume action on every focused project is labeled `Continue Development` when `project.type` is `development`, otherwise `Continue Progress` for `learning`, `life`, `health`, `pet`, and `other`; it opens the existing project detail even when no AI Session exists. A separate session action, when a session exists, opens that project's existing AI Session detail and permits returning to Dashboard. Copy continuation uses the existing `composeAISessionPrompt("continue", project, session)` contract from saved data; surface clipboard success/failure. If no session exists, do not show a copy action. Do not create or update a record from Dashboard.
-5. Get Today summary from existing `GET /api/v1/todos/today` for the authenticated identity's **current date in its configured timezone**, not the date last browsed in the Today view. Display `pending_count`, `completed_count`, and `overdue_count` as returned, plus a direct Today navigation action. Opening Today uses its normal date state; Dashboard does not alter Todo status or the existing selected-date workflow.
-6. Project-list, per-project AI Session, and Today requests have independent loading/error/empty/retry states. A failed Session request cannot hide the project or Today summary; a failed Today request cannot hide projects. Suppress stale responses after identity change, selection change, or navigation away and back. A 401 follows existing identity-expired handling. Keep desktop and narrow viewports usable without horizontal overflow or incoherent overlap.
-7. Derive display data from current API responses without persisting a second Dashboard store or adding a backend endpoint. Display only the saved manual `modified_files` text as change evidence; do not claim an automatically derived change history, project stage, or timeline exists when TASK-034 has not provided those records.
+1. Implement `docs/api-project-stages.md` exactly. Six template mappings, collection payload fields, validation, ownership, idempotency, no-op/version behavior, and type-change preservation are implementation contracts, not choices left to Coding.
+2. Add the normalized stage table and `20261012_0007` migration from `20261010_0006`. Backfill old projects without altering their existing values or selecting a current stage; freeze migration defaults. Register model metadata for the SQLite test setup.
+3. Keep Project POST and its response compatible; create fresh default rows transactionally. Nested stage GET is read-only; PUT fully replaces one owned collection with atomic current selection and parent version update. Preserve existing Project PATCH behavior while serializing shared parent updates where necessary.
+4. Add the Project-detail editor using existing UI conventions. Support add/rename/remove/move/current/clear/Save/Cancel, empty collections, stable draft IDs, bounded validation, independent failure/retry, and current Project readback.
+5. Protect identity/project switching and in-flight writes/reads. Preserve unsaved edits after recoverable failures; do not carry draft state between Projects or identities.
+6. Do not extend Dashboard or saved AI prompt composition. Regress them against Project creation/type changes/stage writes; no synthetic stage history or automatic progress calculation.
+7. Verify migration and real API persistence on disposable PostgreSQL. Do not claim SQLite tests prove migration correctness, or claim the configured user database upgraded without evidence. Normal startup applies pending migrations before using the new endpoints.
 
 ## Acceptance Criteria
 
-- [x] Dashboard is the default signed-in PC view and existing navigation/workflows remain reachable.
-- [x] Focused selection follows the exact pinned/status/date/id order, caps at three, and updates after Project changes.
-- [x] Each focused item uses only its own latest AI Session, shows accurate saved context, and navigates to Project/Session detail and back.
-- [x] Full and sparse AI Sessions expose saved `modified_files` and `verification_result` or the exact missing-value labels; no session and no automatic change history are represented honestly.
-- [x] Primary Resume action uses `Continue Development` only for development projects and `Continue Progress` for every other project type, including projects without a session.
-- [x] Continuation copy reuses the saved-session template with visible success/failure and no provider or write request.
-- [x] Today counts come from current local day in the identity timezone, independent of the Today view's browsed date, and open Today correctly.
-- [x] Empty, loading, partial failure/retry, identity switch, stale response, desktop/narrow states are tested without cross-user leakage or layout overflow.
-- [x] Full Web tests, production build, browser flows, and exact Git/security scans pass or record exact environmental limits; no backend/Android/future-module scope breach occurs.
+- [ ] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
+- [ ] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
+- [ ] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
+- [ ] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
+- [ ] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
+- [ ] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
+- [ ] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
+- [ ] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
 
 ## Verification Plan
 
-- Unit/component tests for selection ties, pinned overflow, excluded terminal projects, full/sparse/no-session change and verification evidence, both Resume label branches across project types, Project/Session navigation, copy feedback, Today date/counts, partial failures, retry, and identity switch races.
-- Full Web test suite and production build; focused desktop/narrow browser flow through Dashboard to Project/Session and Today using an existing/disposable backend as needed. Record conditional skips and runtime limitations honestly.
-- Regress existing Today, Todo, Project, AI Session, and identity flows. Inspect `git diff --check`, exact changed/staged files, credentials/private data, and generated artifacts.
+- Backend tests: all six default lists, create atomicity, no read-time reseed, type-change preservation, empty/max list, trimmed and invalid names, duplicate/foreign IDs, retained IDs, current switch/removal/clear, invalid-request rollback, auth/owner isolation, no-op/effective version/timestamp, and idempotency.
+- Disposable PostgreSQL: start at 0006 with synthetic projects of all types plus an AI Session; upgrade/backfill and verify preserved values; edit and repeat head upgrade without reseeding; downgrade back to 0006 and re-upgrade. Verify same-Project concurrent PUT/PATCH version handling and final current-stage invariant.
+- Web tests: full editor flow, order/current state, Save/Cancel, failures with unchanged/changed retry payloads, stale identity/project responses, loading/empty/error states, and compatibility with existing Project forms/AI Session prompts/Dashboard.
+- Run `python -m pytest` in backend; `npm test -- --run`, `npm run build`, and `npx playwright test` in web. Add focused browser verification at 1280px and 375px; verify persisted save/readback through the real API on a disposable backend. Record pre-existing conditional skips accurately.
+- Inspect tracked/untracked/staged scope, `git diff --check`, cached whitespace, secrets/private fixtures, and generated output. No live provider call is required.
 
 ## Risks
 
-- The PC app currently shares view-level state in one component; Dashboard requests must not resurrect stale identity or project data.
-- Current backend has no stage or automated change-history records. The AI Session's manually entered `modified_files` is available now; present it as recorded context without implying an automatic Git scan. TASK-034 will add stages/timeline.
-- The configured user PostgreSQL database must be verified/upgraded through `20261010_0006` by normal startup before real local AI Session/Dashboard demonstration. Task Review may approve this UI slice using disposable backend evidence; do not mutate user data as a gate shortcut.
+- Full-list PUT uses last-write-wins; the task guarantees transaction integrity, not multi-editor optimistic conflict detection.
+- Migration backfill must not misrepresent current progress. Existing user data must not be used as a disposable test database.
+- Current PC Project state is shared in App.tsx; independent collection state must not leak across identities or resurrect stale responses.
+- The existing language inconsistency is non-blocking and deferred; carrying its log forward authorizes no AI repair.
+
+## Publication And Snapshot Scope
+
+Decision publication base: `main` at `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; local HEAD, origin/main, and remote main matched before edits. The only pre-existing edit was Decision's authorized ISSUE-20261011-001 in issue-log.md. It is preserved unchanged and explicitly carried as documentation housekeeping, not business implementation.
+
+The exact proposed pre-Coding snapshot scope is these 12 documents, including Task Review's subsequent gate and READY synchronization:
+
+- `docs/api-project-stages.md`
+- `docs/pc-delivery-plan.md`
+- `docs/phase1a-progress.md`
+- `docs/phase1a-completion-audit.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `handoff/task-review-gate.md`
+- `handoff/code-review-gate.md`
+- `handoff/git-snapshot.md`
+- `handoff/git-commit.md`
+- `handoff/issue-log.md`
+- `tasks/TASK-034-pc-project-stages.md`
+
+Task Review must approve this exact document scope or report discrepancies. No other pre-existing business changes were found. This list is not an implementation Review PASS.
+
+## Decision Record
+
+- 2026-10-12: confirmed TASK-033 terminal Closure Commit and remote parity; no repeated Closure Check.
+- 2026-10-12: published this bounded Project-stage slice; remaining Project depth features stay in the roadmap and future IDs are assigned at publication rather than repeatedly renumbered.
+- 2026-10-12: user deferred AI memory/self-iteration/Agent participation until after foundations; ISSUE-20261011-001 remains P3, non-blocking.
+- 2026-10-12: a read-only configured-database revision probe did not complete and was stopped. No user DB migration or mutation occurred; current deployed revision is not asserted by this publication.
 
 ## Coding Output Requirements
 
-Report changed files, selection and data-loading behavior, navigation/copy flow, timezone handling, independent state/error behavior, tests/build/browser evidence, exact scope/security scans, limitations, and next role.
+Report changed paths, schema/migration evidence, exact API/default/write semantics, PC persistence flow, ownership/race handling, all acceptance results, tests/build/browser evidence, exact Git/security checks, limitations, and the next role.
 
 ## Current Stage
 
-Closure Check: PASS
+Task Review: PASS at 2026-10-12 13:21 +08:00. Full evidence and the exact approved 12-file scope are in `handoff/task-review-gate.md`.
 
-Checked At: 2026-10-11 09:35 +08:00
+Next Role: Git Snapshot
 
-Result Commit: `b3007633757193ccded94aceffdf21ed05e4b8d1`
-
-Completion Commit: `2ffe578239caff67465161cae0b14420c270d402`
-
-Next Role: Git Commit (Terminal Closure Commit)
-
-Required Next Action: commit and push only the four Closure-authorized documents listed in `tasks/TASK-033-pc-dashboard-resume.md` with message `docs(task): close TASK-033`; verify local/tracking/remote parity and return control to Decision. Do not run another Closure Check or publish TASK-034 here.
+Required Next Action: Git Snapshot must independently verify and establish the exact approved 12-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.

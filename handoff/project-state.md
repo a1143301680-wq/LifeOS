@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-10-11
+Last updated: 2026-10-12
 
 ## Current Phase
 
@@ -105,13 +105,16 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-030 Decision Closure Check passed on 2026-10-09; terminal Closure Commit is authorized for the exact five state/progress documents listed in the task record.
 - TASK-030 terminal Closure Commit `da506ae` was published and the task workflow ended.
 - On 2026-10-09 the user prioritized PC V1 completion ahead of Android. `docs/pc-delivery-plan.md` sequences Project/Goal core, AI Session records, Dashboard/Resume, project depth, Notes, Calendar, and PC acceptance before Android resumes.
-- TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice is reserved as TASK-038 in the current plan; future IDs remain sequencing reservations until Decision publishes them.
+- TASK-031 PC Project/Goal core was published as the first PC slice. The Android authoritative REST bootstrap/reconciliation and Today/Todo read slice follows PC acceptance; consult the current delivery plan rather than historical future-ID reservations.
 - TASK-031 PC Project/Goal core completed in result commit `79be962`; Code Review: PASS; 130 backend tests, 117 Web tests, production build, migration verification, and browser flows passed.
 - TASK-031 Decision Closure Check passed on 2026-10-10; terminal Closure Commit `6acfaaf` was published with remote parity and a clean worktree. Its workflow is closed.
-- TASK-032 PC AI Session records completed in result commit `500d317`; Code Review: PASS; 136 backend tests, 125 Web tests, production build, disposable PostgreSQL migration verification, and browser flows passed. The configured user database still requires revision verification and upgrade through `20261010_0006` before AI Session endpoints are used there.
+- TASK-032 PC AI Session records completed in result commit `500d317`; Code Review: PASS; 136 backend tests, 125 Web tests, production build, disposable PostgreSQL migration verification, and browser flows passed. That disposable migration evidence does not establish the configured user database's current revision; normal startup/deployment must verify and apply pending migrations before using the affected endpoints.
 - TASK-032 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `e8e013f` was published with remote parity and a clean worktree. Its workflow is closed.
 - TASK-033 PC Dashboard and Resume completed in result commit `b300763`; Code Review re-review: PASS; 143 Web tests, production build, focused Dashboard browser flow, and full Playwright 8 passed / 2 documented conditional skips. It reuses Project, AI Session, and Today data without new backend contracts.
-- TASK-033 Decision Closure Check passed on 2026-10-11. The exact four-file Terminal Closure Commit is authorized in `tasks/TASK-033-pc-dashboard-resume.md`; TASK-034 must wait until that commit is pushed and remote parity is verified.
+- TASK-033 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15` is published. Decision verified local/tracking/remote parity on 2026-10-12; its workflow has ended.
+- Decision split the former Project depth row into stage, milestone, Todo-link, logs/timeline, and lifecycle slices. TASK-034 is the bounded editable-stage slice; live routing remains in current-task.md.
+- User direction on 2026-10-12: complete foundation features before adding personal AI memory, self-iteration, or Agent participation. Those ideas are deferred and do not expand this sequence.
+- ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its existing issue-log edit is explicitly carried in TASK-034 publication scope, without a feature repair.
 
 ## Recently Completed
 
@@ -160,7 +163,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Run the TASK-033 Terminal Closure Commit using the exact four-file allowlist in `tasks/TASK-033-pc-dashboard-resume.md`. After remote parity is verified, return to Decision to choose and publish the next PC task.
+Continue PC Project foundations with editable stages, then milestones, Todo links, logs/timeline, and controlled lifecycle before Notes, Calendar, and PC acceptance. Follow `docs/pc-delivery-plan.md`; TASK-033 terminal closure is complete. Active task state and the authorized next role are only in `handoff/current-task.md`.
 
 ## Notes For Windows
 

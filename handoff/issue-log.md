@@ -312,6 +312,22 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Resolution: Coding added exact accessible-name matching to both Dashboard page-heading assertions without changing product behavior.
 - Final Verification: Code Review independently reran the focused Dashboard spec with 2 passed and the complete Playwright suite with 8 passed, 2 documented conditional skips, and 0 failures on 2026-10-11.
 
+### ISSUE-20261011-001: AI Plan my day output language varies
+
+- Status: open
+- Severity: P3 (non-blocking)
+- Found by: User report
+- Found at: 2026-10-11 10:06 +08:00
+- Related task: TASK-030 PC AI Today planning agent with DeepSeek
+- Files: `D:\LifeOS\backend\app\services\ai_today_provider.py`, `D:\LifeOS\web\src\App.tsx`
+- Description: The PC "Plan my day" suggestions sometimes appear in Chinese and sometimes in English across runs. The cause has not been diagnosed.
+- Impact: inconsistent presentation; planning remains usable. Do not block the current PC delivery sequence or interrupt the next task for this issue alone.
+- Expected: after a language policy is chosen, user-facing plan and suggestion text consistently follows it.
+- Actual: mixed Chinese and English output reported by the user; not independently reproduced in this Decision turn.
+- Fix owner/window: Decision to schedule a later bounded task; Coding to implement after normal task gates.
+- Fix notes: decide the language policy first, then inspect provider instructions and UI rendering. Preserve current validation and explicit Save for suggested Todos; no fix in this turn.
+- Verification: add deterministic language-policy coverage and perform a bounded live check when the later task is implemented.
+
 ## Entry Template
 
 ```text

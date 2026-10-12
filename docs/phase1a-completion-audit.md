@@ -57,7 +57,7 @@ Baseline: `315888094d2a3328f03019ecac6cf4ea68bb0fb5`
 ## Recommended Sequence
 
 1. Complete PC V1 delivery under `docs/pc-delivery-plan.md`; TASK-031 Project/Goal core is published and the next planned slice is TASK-032 AI Session records. This changes sequencing, not the Phase 1A completion verdict.
-2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance (currently reserved as TASK-038).
+2. Resume authoritative REST bootstrap/reconciliation and Android Today/Todo reads after PC acceptance; assign its task ID at publication per `docs/pc-delivery-plan.md`.
 3. Android quick add, edit, and complete writes.
 4. PC/Android end-to-end Phase 1A acceptance.
 

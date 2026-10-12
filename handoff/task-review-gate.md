@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-10-11
+Last updated: 2026-10-12
 
 ## Gate Status
 
@@ -10,66 +10,77 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-10-11 00:46 +08:00
+Reviewed at: 2026-10-12 13:21 +08:00
 
-Reviewed task: TASK-033 PC Dashboard and Resume
+Reviewed task: TASK-034 PC editable Project/Goal stages
 
-## Previous Review
+## Required Review
 
-- Result: REJECT on 2026-10-11 00:43 +08:00. Branch `main`, HEAD/tracking/remote `e8e013f5840a95132f605590d63659e854e65744`; publication worktree was seven modified files and one untracked task archive, with no staged changes. `git diff --check` passed with informational LF/CRLF warnings.
-- Sole blocker: Dashboard/Resume requirements omitted saved `modified_files` and `verification_result` display, and the project-type action labels `Continue Development` / `Continue Progress`.
-- Decision revision: both task records now specify saved/manual evidence, exact missing-value labels, the two type branches, and focused full/sparse/no-session tests. This is a proposed resolution, not Task Review PASS.
+- [x] Stage storage, templates, ownership, collection payload, validation, ordering, current selection, and no-op rules are explicit.
+- [x] Nested GET/full-list PUT and the Project-detail editor form one bounded vertical slice.
+- [x] Migration upgrade, backfill, downgrade/re-upgrade, frozen defaults, empty-list preservation, and no read-time reseed are testable.
+- [x] Parent version/timestamp, idempotency response, stage rows, and current selection have one atomic transaction boundary.
+- [x] Same-Project stage PUT and Project PATCH serialization is required and has PostgreSQL concurrency verification.
+- [x] The exact 12-file Snapshot range matches the complete worktree and contains no business implementation.
 
-## Fresh Review Evidence
+## Blocking Issues
+
+None.
+
+## Review Evidence
 
 ### Repository State
 
 - Branch: `main`
-- HEAD: `e8e013f5840a95132f605590d63659e854e65744`
-- `origin/main`: `e8e013f5840a95132f605590d63659e854e65744`
-- Remote `refs/heads/main`: `e8e013f5840a95132f605590d63659e854e65744`
-- Dependency check: TASK-032 terminal Closure Commit `e8e013f5840a95132f605590d63659e854e65744` exists, is the aligned local/tracking/remote baseline, and has subject `docs(task): close TASK-032`.
-- Worktree Summary before this PASS persistence: 7 modified tracked files and 1 untracked TASK-033 task archive.
+- HEAD: `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`
+- `origin/main`: `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`
+- Remote `refs/heads/main`: `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`
+- Dependency check: TASK-033 terminal Closure Commit is the aligned baseline. Existing migration head before TASK-034 is `20261010_0006`.
+- Worktree Summary before PASS persistence: 10 modified tracked documents and 2 untracked documents; all 12 match the proposed publication scope exactly.
 - Staged Changes: None.
 - `git diff --check`: exit code 0; informational LF-to-CRLF warnings only.
 - `git diff --cached --check`: exit code 0.
-- Publication-file whitespace/EOF check: all eight files have a final newline and no extra EOF blank line.
-- Issue-log search: no TASK-033 or unresolved blocking entry.
+- Whitespace/EOF: all 12 files have a final newline and no extra EOF blank line.
+- Issue scan: `ISSUE-20261011-001` is an open P3 TASK-030 language-consistency report. It remains non-blocking and is carried only as publication housekeeping; TASK-034 does not authorize its repair.
 
-### Changed Files
+### Approved Snapshot Scope
 
+- `docs/api-project-stages.md`
 - `docs/pc-delivery-plan.md`
-- `handoff/code-review-gate.md`
+- `docs/phase1a-progress.md`
+- `docs/phase1a-completion-audit.md`
 - `handoff/current-task.md`
-- `handoff/git-commit.md`
-- `handoff/git-snapshot.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
-- `tasks/TASK-033-pc-dashboard-resume.md` (untracked)
+- `handoff/code-review-gate.md`
+- `handoff/git-snapshot.md`
+- `handoff/git-commit.md`
+- `handoff/issue-log.md`
+- `tasks/TASK-034-pc-project-stages.md`
 
-These eight paths are the exact TASK-033 Decision publication/readiness scope. No backend, Web implementation, Android, migration, stable product/API/architecture/data-model document, accepted ADR, completed task archive, generated output, credential, private fixture, or user-machine path is included. Targeted secret/path scans found guardrail text only.
+This is the complete worktree scope. No backend/Web implementation, Android file, migration implementation, dependency/lockfile, completed task archive, generated output, credential, private fixture, or unrelated product contract is present. Targeted scans found no secret value or user-machine path.
 
-### Prior Blocker Resolution
+### Contract And Migration Review
 
-- Both active task records now require the latest saved AI Session's `modified_files` and `verification_result` to be displayed as manual change and verification/current-state evidence.
-- Sparse sessions have exact, testable labels: `Modified files not recorded` and `Verification not recorded`. A no-session project has the distinct `No AI Session yet` state and no session-derived fields or copy action.
-- Both records now map `development` to `Continue Development` and every other supported Project type (`learning`, `life`, `health`, `pet`, `other`) to `Continue Progress`, including projects without a session.
-- The six type values exactly match the existing backend Project schema/constraint and Web type. Both AI Session evidence fields already exist in backend model/schema and Web types; no backend contract change is required.
-- Acceptance and verification now cover full, sparse, and no-session evidence states plus both Resume label branches. The revision preserves the ban on fabricated automatic Git/test history, stages, and timeline data.
-- The revised rules satisfy the stable Resume questions in `docs/requirements.md` and the type-specific wording in `docs/mvp.md`. The previous sole blocker is closed.
+- Storage is normalized and owner-scoped. Payloads cannot select owner/project/order/timestamps. Name bounds, 20-row cap, UUID validity/collision, foreign IDs, current membership, null/omitted/unknown fields, and contiguous order have deterministic behavior.
+- GET is read-only and never seeds. PUT atomically replaces the full collection, preserves retained IDs, accepts unused client UUIDs, removes omitted rows, supports an explicitly empty list, and fails closed for missing/cross-owner parents.
+- Identical normalized PUT is a no-op. Effective PUT increments the parent version once and updates its timestamp while preserving status, progress, next step, and all other parent fields.
+- Parent-row serialization is required for stage PUT and existing Project PATCH where needed. Stage rows, current selection, parent metadata, and successful idempotency response share one transaction; invalid writes roll back all effects.
+- `20261012_0007` is a single forward migration from `20261010_0006`; prior migrations remain immutable. Frozen type templates backfill existing Projects with no current stage while preserving Project values, AI Sessions, and ownership.
+- Downgrade removes only stage data. Re-upgrade seeds defaults again; repeated head upgrade preserves edits. Empty collections, reads, restarts, and type changes never reseed.
+- Disposable PostgreSQL verification starts at 0006, includes all types and an AI Session, and covers upgrade/edit/repeated-head/downgrade/re-upgrade plus concurrent PUT/PATCH. SQLite tests are not treated as migration proof, and no configured-user-database revision is asserted.
 
-### Start-Readiness Review
+### Scope And Acceptance Review
 
-- TASK-033 remains one closeable PC Web slice: default Dashboard, deterministic maximum-three focus selection, focused-project Session reads, Today summary, Resume navigation/copy actions, and focused/full verification.
-- Ranking, latest-session ordering, Today timezone semantics, independent loading/error/retry states, return navigation, and stale identity/project response suppression are explicit and testable.
-- Existing owner-scoped Project and nested AI Session reads, Today API, Web identity shell, Project/Session views, and continuation-prompt composer provide the required baseline.
-- Backend, Android, migrations, new APIs, stages, timeline, linked Todos, Notes, Calendar, provider calls, autonomous writes, and stable contract changes remain excluded.
-- Verification is executable through selector/component tests, full Web tests, production build, desktop/narrow browser flow, regressions, and exact scope/security/artifact checks.
+- TASK-034 is one closeable slice: persisted editable stages, nested collection API, Project-detail editor, and focused/full verification. Milestones, Todo links, logs/timeline, lifecycle, Dashboard stage integration, Android, sync/SSE, AI memory/agents, and provider changes remain excluded.
+- The PC contract covers add/rename/remove/reorder/current/clear, empty state, stable draft UUIDs, Save/Cancel, ambiguous retry key reuse, changed-payload new keys, independent errors, preserved drafts, and stale identity/project suppression.
+- Acceptance covers six templates, migration preservation, owner isolation, validation/rollback, durable readback, parent-field preservation, idempotency/no-op/effective writes, concurrency, responsive UI, and regressions for Projects, AI Sessions, Dashboard, Today/Todo, and identity.
+- Verification is executable through focused/full backend and Web tests, production build, desktop/narrow Playwright flow, disposable PostgreSQL migration/API checks, and exact Git/security/artifact checks.
 
 ### Git Snapshot Readiness
 
-READY. The next role is Git Snapshot. Its approved pre-Coding scope is exactly the eight files listed under Changed Files, including this PASS and the synchronized `READY` updates. Git Snapshot must independently recheck branch, HEAD, staged state, exact scope, whitespace, artifacts, secrets, and remote parity before establishing the baseline.
+READY. Git Snapshot may establish the pre-Coding baseline using exactly the 12 files above. It must independently recheck branch, HEAD, remote parity, complete tracked/untracked scope, staged state, full/cached whitespace, secrets, private fixtures, and generated artifacts. Coding remains unauthorized until Snapshot completes and synchronizes both task records to `IN_PROGRESS`.
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-033 publication/readiness scope. Do not start Coding until Git Snapshot completes and synchronizes both active task records to `IN_PROGRESS`.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-034 publication/readiness scope. Do not start Coding, stage implementation, commit implementation, or push implementation before the Snapshot transition completes.
