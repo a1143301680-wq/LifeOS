@@ -38,6 +38,17 @@ export type Project = {
 
 export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "status" | "manual_progress" | "next_step" | "is_pinned">;
 
+export type ProjectStage = { id: string; name: string; sort_order: number };
+export type ProjectStageCollection = {
+  stages: ProjectStage[];
+  current_stage_id: string | null;
+  project_version: number;
+};
+export type ProjectStagePayload = {
+  stages: Array<Pick<ProjectStage, "id" | "name">>;
+  current_stage_id: string | null;
+};
+
 export type AISession = {
   id: string;
   goal: string;

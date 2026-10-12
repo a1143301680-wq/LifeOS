@@ -6,11 +6,11 @@ Last updated: 2026-10-12
 
 - Task ID: TASK-034
 - Task Name: PC editable Project/Goal stages
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-033 terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; current migration `20261010_0006`
-- Contract: `docs/api-project-stages.md` (proposed, subject to Task Review)
+- Contract: `docs/api-project-stages.md` (Task Review-approved)
 
 ## Background
 
@@ -135,6 +135,10 @@ Report changed paths, schema/migration evidence, exact API/default/write semanti
 
 Task Review: PASS at 2026-10-12 13:21 +08:00. Full evidence and the exact approved 12-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; snapshot commit `9a0b781fc7874c75d5a4f12544d1fd27773448c6`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved 12-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-034 implementation and the Coding evidence in `tasks/TASK-034-pc-project-stages.md`; do not commit or push before Code Review PASS.

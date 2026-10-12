@@ -14,19 +14,13 @@ from app.models.project import Project
 from app.models.user import User
 from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
 from app.services.idempotency import get_idempotency_context, store_idempotency_response
+from app.services.project_stages import get_owned_project, seed_project_stages
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 def project_to_dict(project: Project) -> dict:
     return ProjectRead.model_validate(project).model_dump(mode="json")
-
-
-def get_owned_project(db: Session, user_id: UUID, project_id: UUID) -> Project:
-    project = db.execute(select(Project).where(Project.id == project_id, Project.user_id == user_id)).scalar_one_or_none()
-    if project is None:
-        raise ApiError(404, "not_found", "project not found")
-    return project
 
 
 @router.get("")
@@ -56,6 +50,7 @@ async def create_project(
         project = Project(user_id=current_user.id, **payload.model_dump())
         db.add(project)
         db.flush()
+        seed_project_stages(db, project)
         body = data_envelope(project_to_dict(project))
         store_idempotency_response(
             db, user_id=current_user.id, key=key, method=request.method, path=request.url.path,
@@ -92,7 +87,7 @@ async def update_project(
         raise ApiError(400, "validation_error", "at least one project field is required")
 
     try:
-        project = get_owned_project(db, current_user.id, project_id)
+        project = get_owned_project(db, current_user.id, project_id, lock=True)
         effective = {name: value for name, value in changes.items() if getattr(project, name) != value}
         if effective:
             for name, value in effective.items():

@@ -617,6 +617,23 @@ h1, h2, p { margin-top: 0; }
 .project-copy p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
 .project-notice { color: var(--green); font-size: 12px; }
 
+.project-stages { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.project-stages-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.project-stages-heading h3 { margin: 0; font-size: 16px; }
+.project-stages-current { margin: 16px 0 10px; font-size: 13px; color: var(--muted); }
+.project-stages-list { margin: 0; padding-left: 24px; font-size: 13px; line-height: 1.8; }
+.project-stages-list li[aria-current="step"] { color: var(--green); font-weight: 800; }
+.project-stages-editor { display: grid; gap: 12px; margin-top: 16px; }
+.project-stages-editor > label { font-size: 12px; font-weight: 700; }
+.project-stages-editor select, .project-stages-edit-list input { width: 100%; min-width: 0; }
+.project-stages-edit-list { display: grid; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.project-stages-edit-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.project-stages-tools { display: flex; align-items: center; gap: 2px; }
+.project-stages-tools .icon-button { width: 32px; height: 32px; }
+.project-stages-tools svg { width: 16px; height: 16px; }
+.project-stages-message, .project-stages-error { color: #9a3529; font-size: 12px; }
+.project-stages-error { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
 .dashboard { min-width: 0; }
 .dashboard-heading { margin-bottom: 38px; }
 .dashboard-focus, .dashboard-today { border-top: 1px solid var(--line); padding-top: 20px; }

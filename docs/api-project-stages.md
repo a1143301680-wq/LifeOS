@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-12
 Delivery task: TASK-034
-Status: proposed for Task Review; not an implemented API
+Status: implemented in TASK-034; pending Code Review
 
 ## Ownership And Storage
 

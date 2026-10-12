@@ -6,11 +6,11 @@ Last updated: 2026-10-12
 
 - Task ID: TASK-034
 - Task Name: PC editable Project/Goal stages
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-033 terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; current migration `20261010_0006`
-- Contract: `docs/api-project-stages.md` (proposed, subject to Task Review)
+- Contract: `docs/api-project-stages.md` (Task Review-approved)
 
 ## Background
 
@@ -75,14 +75,14 @@ A PC user can open a Project/Goal, see its persisted type-based stage list, add/
 
 ## Acceptance Criteria
 
-- [ ] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
-- [ ] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
-- [ ] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
-- [ ] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
-- [ ] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
-- [ ] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
-- [ ] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
-- [ ] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
+- [x] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
+- [x] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
+- [x] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
+- [x] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
+- [x] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
+- [x] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
+- [x] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
+- [x] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
 
 ## Verification Plan
 
@@ -135,6 +135,38 @@ Report changed paths, schema/migration evidence, exact API/default/write semanti
 
 Task Review: PASS at 2026-10-12 13:21 +08:00. Full evidence and the exact approved 12-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; snapshot commit `9a0b781fc7874c75d5a4f12544d1fd27773448c6`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved 12-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-034 implementation and the Coding evidence below; do not commit or push before Code Review PASS.
+
+## Coding Result
+
+- Result: PASS; final status: REVIEWING. No stage, commit, or push.
+- Modified Files: new stage model, schema, service, nested API router, `20261012_0007` migration, backend stage/API/migration tests; scoped edits to Project POST/PATCH, model registration, and API router; new `ProjectStages` component, types, API client, focused component/browser tests, scoped Project detail/styles, and compatibility updates to existing Project, AI Session, and Dashboard E2E route stubs; approved contract header, PC roadmap, and active task state files. The pre-existing `handoff/git-snapshot.md` modification was preserved unchanged.
+- Implementation Summary: Project POST now creates type-specific persisted stage rows in its transaction without changing its DTO. The new owner-scoped nested GET reads without seeding; keyed PUT validates and replaces the full ordered collection, preserving retained IDs, allowing an empty list, explicitly selecting or clearing current, and returning a replayable response. Parent-row locking serializes stage PUT with Project PATCH; effective writes increment parent version once, normalized no-ops do not. The PC detail editor supports add/rename/remove/reorder/current/clear, Save/Cancel, stable draft UUIDs and retry keys, independent loading/error states, and parent readback without changing Dashboard or AI prompt contracts.
+- Acceptance Criteria Results: All eight criteria are covered by focused tests and the verification below. SQLite covers API semantics; disposable PostgreSQL separately covers backfill, preserved Project/AI Session values, repeated-head empty-list preservation, downgrade/re-upgrade, database single-current uniqueness, fresh Project API seeding, and concurrent PUT/PATCH version preservation.
+- Verification Commands And Results: `D:\LifeOS\backend`: `$env:LIFEOS_TEST_PG_BIN='D:\PostgreSQL\18\bin'; python -m pytest` -> 147 passed, 0 warnings, including one disposable PostgreSQL migration/API/concurrency test. `D:\LifeOS\web`: `npm test -- --run` -> 17 files / 147 passed; `npm run build` -> PASS; `npx playwright test` -> 10 passed, 2 conditional disposable-backend cases skipped. Stage editor browser flows passed at 1280px and 375px with API stubs; real persistence was verified separately through FastAPI TestClient against the disposable PostgreSQL instance. Playwright emitted only the existing `NO_COLOR`/`FORCE_COLOR` environment warning.
+- Git Diff Check: Tracked/untracked/staged scope, `git diff --stat`, `git diff --check`, and cached whitespace were inspected; changed paths are within the TASK-034 allowlist, staging is empty, and no secret/generated artifact appears in Git status. `git diff --check` exits 0 with informational LF-to-CRLF warnings.
+- Unresolved Issues: The configured PostgreSQL Windows service is stopped and could not be started with current permissions; the configured user database was not accessed or upgraded. Normal startup must apply `20261012_0007` before real local use. The two pre-existing optional browser cases remain skipped. Two interrupted disposable-cluster directories remain outside the repository under system Temp after cleanup was refused by the host policy; no PostgreSQL test process remains running.
+- Task-Outside Findings: None; existing `ISSUE-20261011-001` remains P3 and unchanged.
+
+## Code Review
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-12 13:56:49 +08:00
+- Branch: `main`
+- HEAD: `9a0b781fc7874c75d5a4f12544d1fd27773448c6`
+- Snapshot Commit: `9a0b781fc7874c75d5a4f12544d1fd27773448c6`
+- Blocking Issues: None.
+- Non-blocking Suggestions: the configured PostgreSQL service/database revision remains unverified and normal startup must apply `20261012_0007`; two optional live-backend Playwright cases remain conditionally skipped but their persistence/concurrency boundaries are covered by the disposable PostgreSQL backend suite; two interrupted disposable-cluster directories remain outside the repository with no PostgreSQL process running.
+- Verification: focused backend `10 passed`; full backend with `LIFEOS_TEST_PG_BIN=D:\PostgreSQL\18\bin` `147 passed`; focused Web `4 passed`; full Web `147 passed`; production build PASS; Playwright `10 passed / 2 conditional skipped`; Alembic head `20261012_0007`; worktree and cached whitespace checks PASS.
+- Scope Conclusion: the exact reviewed publish scope is 26 files: the 25 pre-review TASK-034 paths plus `handoff/code-review-gate.md`. All 26 are authorized implementation or workflow records. No Android, Todo-stage link, milestone, log/timeline, Dashboard-stage integration, provider, dependency, generated artifact, secret, stage, commit, or push was introduced by Code Review.
+- Final Task Status: `REVIEWING`; Git Commit owns transition to `COMPLETED` after successful publication.
+- Recommended Commit Message: `feat(project): add editable project stages`
+- Next Role: Git Commit

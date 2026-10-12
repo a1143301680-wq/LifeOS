@@ -35,6 +35,10 @@ for (const viewport of [
     await page.route("**/api/v1/projects**", async (route) => {
       const request = route.request();
       const url = request.url();
+      if (url.endsWith("/stages")) {
+        await route.fulfill({ json: { data: { stages: [], current_stage_id: null, project_version: project.version } } });
+        return;
+      }
       if (url.includes("/ai-sessions")) {
         if (request.method() === "POST" || request.method() === "PATCH") {
           const body = request.postDataJSON() as Record<string, unknown>;

@@ -6,6 +6,8 @@ import type {
   ListEnvelope,
   Project,
   ProjectPayload,
+  ProjectStageCollection,
+  ProjectStagePayload,
   Todo,
   TodoCreatePayload,
   TodoUpdatePayload,
@@ -101,6 +103,22 @@ export async function updateProject(token: string, projectId: string, idempotenc
     headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload),
   });
+  return response.data;
+}
+
+export async function getProjectStages(token: string, projectId: string) {
+  const response = await authenticatedRequest<DataEnvelope<ProjectStageCollection>>(
+    `/projects/${encodeURIComponent(projectId)}/stages`, token,
+  );
+  if (!Array.isArray(response.data?.stages)) throw new ApiError(0);
+  return response.data;
+}
+
+export async function putProjectStages(token: string, projectId: string, idempotencyKey: string, payload: ProjectStagePayload) {
+  const response = await authenticatedRequest<DataEnvelope<ProjectStageCollection>>(
+    `/projects/${encodeURIComponent(projectId)}/stages`, token,
+    { method: "PUT", headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey }, body: JSON.stringify(payload) },
+  );
   return response.data;
 }
 

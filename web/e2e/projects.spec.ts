@@ -36,6 +36,10 @@ for (const viewport of [
     await page.route("**/api/v1/sync/events", (route) => route.fulfill({ status: 200, contentType: "text/event-stream", body: ": keepalive\n\n" }));
     await page.route("**/api/v1/projects**", async (route) => {
       const request = route.request();
+      if (request.url().endsWith("/stages")) {
+        await route.fulfill({ json: { data: { stages: [], current_stage_id: null, project_version: project?.version ?? 1 } } });
+        return;
+      }
       if (request.url().includes("/ai-sessions")) {
         await route.fulfill({ json: { items: [], next_cursor: null, server_time: "2026-10-09T12:00:00Z" } });
         return;
