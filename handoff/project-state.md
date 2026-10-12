@@ -112,7 +112,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-032 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `e8e013f` was published with remote parity and a clean worktree. Its workflow is closed.
 - TASK-033 PC Dashboard and Resume completed in result commit `b300763`; Code Review re-review: PASS; 143 Web tests, production build, focused Dashboard browser flow, and full Playwright 8 passed / 2 documented conditional skips. It reuses Project, AI Session, and Today data without new backend contracts.
 - TASK-033 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15` is published. Decision verified local/tracking/remote parity on 2026-10-12; its workflow has ended.
-- Decision split the former Project depth row into stage, milestone, Todo-link, logs/timeline, and lifecycle slices. TASK-034 is the bounded editable-stage slice; live routing remains in current-task.md.
+- Decision split the former Project depth row into stage, milestone, Todo-link, logs/timeline, and lifecycle slices. TASK-034 editable Project stages completed in result commit `7fa8153`; Code Review: PASS; 147 backend tests, 147 Web tests, production build, Playwright 10 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/concurrency verification passed.
 - User direction on 2026-10-12: complete foundation features before adding personal AI memory, self-iteration, or Agent participation. Those ideas are deferred and do not expand this sequence.
 - ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its existing issue-log edit is explicitly carried in TASK-034 publication scope, without a feature repair.
 
@@ -163,7 +163,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Continue PC Project foundations with editable stages, then milestones, Todo links, logs/timeline, and controlled lifecycle before Notes, Calendar, and PC acceptance. Follow `docs/pc-delivery-plan.md`; TASK-033 terminal closure is complete. Active task state and the authorized next role are only in `handoff/current-task.md`.
+Decision must perform the TASK-034 Closure Check against result commit `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8` and the completion record. Do not publish the next task before TASK-034 closure.
 
 ## Notes For Windows
 

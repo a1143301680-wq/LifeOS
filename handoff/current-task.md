@@ -6,7 +6,7 @@ Last updated: 2026-10-12
 
 - Task ID: TASK-034
 - Task Name: PC editable Project/Goal stages
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-033 terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; current migration `20261010_0006`
@@ -139,6 +139,6 @@ Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d231
 
 Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Decision
 
-Required Next Action: independently review TASK-034 implementation and the Coding evidence in `tasks/TASK-034-pc-project-stages.md`; do not commit or push before Code Review PASS.
+Required Next Action: perform the TASK-034 Decision Closure Check using Result Commit `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8` and the completion record; do not start the next task before closure.
