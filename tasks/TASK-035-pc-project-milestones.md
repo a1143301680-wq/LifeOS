@@ -6,11 +6,11 @@ Last updated: 2026-10-14
 
 - Task ID: TASK-035
 - Task Name: PC lightweight Project/Goal milestones
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-034 terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; current migration `20261012_0007`
-- Contract: `docs/api-project-milestones.md` (proposed for Task Review)
+- Contract: `docs/api-project-milestones.md` (Task Review-approved)
 
 ## Background
 
@@ -76,14 +76,14 @@ A PC user can define a Project/Goal's ordered milestones, edit their titles and 
 
 ## Acceptance Criteria
 
-- [ ] Existing/new Projects have an empty collection without automatic seeding; type changes preserve milestones.
-- [ ] Migration upgrade/downgrade/re-upgrade preserves old Project/stage/current/AI Session/user data and enforces the new table's constraints.
-- [ ] GET/PUT enforce ownership, exact fields, valid calendar dates/null, all three explicit statuses, 0-50 bounds, unique/available IDs, and atomic validation rollback.
-- [ ] Add/title/date/status/reorder/remove and clear-all persist across readback/reopen; soft-deleted IDs cannot be reused/restored and canceled rows remain visible.
-- [ ] Normalized no-op/replay/conflict behavior preserves correct versions/timestamps; effective row and parent changes increment once at their respective boundaries, including serialized Project PATCH/stage PUT/milestone PUT concurrency.
-- [ ] PC supports explicit Save/Cancel, date clearing, stable IDs/retry keys, independent loading/error/refresh states, and safe identity/Project switching through reads and writes.
-- [ ] Manual Project progress/status/next-step, stages, AI Sessions/prompts, Dashboard, and Today/Todo contracts regress without scope expansion.
-- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
+- [x] Existing/new Projects have an empty collection without automatic seeding; type changes preserve milestones.
+- [x] Migration upgrade/downgrade/re-upgrade preserves old Project/stage/current/AI Session/user data and enforces the new table's constraints.
+- [x] GET/PUT enforce ownership, exact fields, valid calendar dates/null, all three explicit statuses, 0-50 bounds, unique/available IDs, and atomic validation rollback.
+- [x] Add/title/date/status/reorder/remove and clear-all persist across readback/reopen; soft-deleted IDs cannot be reused/restored and canceled rows remain visible.
+- [x] Normalized no-op/replay/conflict behavior preserves correct versions/timestamps; effective row and parent changes increment once at their respective boundaries, including serialized Project PATCH/stage PUT/milestone PUT concurrency.
+- [x] PC supports explicit Save/Cancel, date clearing, stable IDs/retry keys, independent loading/error/refresh states, and safe identity/Project switching through reads and writes.
+- [x] Manual Project progress/status/next-step, stages, AI Sessions/prompts, Dashboard, and Today/Todo contracts regress without scope expansion.
+- [x] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
@@ -134,6 +134,84 @@ Report changed files, schema/migration and tombstone policy, exact date/status/v
 
 Task Review: PASS at 2026-10-14 09:30 +08:00. Full evidence and the exact approved 10-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; snapshot commit `e5c975b1af3106e88d24d85d262ef4373d66a27c`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved 10-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-035 implementation and the Coding Result in its task archive. Git publication awaits Code Review PASS.
+
+## Coding Result
+
+- Result: PASS; final status: REVIEWING. No stage, commit, push, or Code Review performed.
+- Implementation Summary: Added empty-by-default owner-scoped milestones and migration 0008. Nested GET returns active rows; whole-collection PUT validates all IDs/fields before mutating, updates retained rows, soft-deletes omissions, rejects foreign/tombstone IDs, and commits rows, parent metadata, and idempotency response together. Parent locking reuses the existing Project PATCH/stage PUT boundary. Dates are strict valid YYYY-MM-DD strings/null; all three statuses are explicit. No-op preserves every timestamp/version; effective rows and parent increment once at their respective boundaries. PC editing supports add/title/date/status/reorder/remove/clear, stable draft IDs, Save/Cancel, retry keys, canonical readback and separate refresh-only failures. Identity/project changes remount the section and suppress pending reads/writes/readback; parent metadata refresh also checks the current identity generation and detail request.
+- Acceptance Criteria Results: All eight criteria satisfied by the focused/full verification below. No defaults, computed progress, Todo/stage links, sync/SSE, provider call, Dashboard integration, or saved-prompt change was added.
+- Pre-existing State Preserved: The Snapshot trio was present at admission. The Snapshot file was left byte-for-byte unchanged; both active task records retain their Snapshot evidence and now route to Code Review.
+- Git Diff Check: Exact tracked/untracked scope is the 25 paths listed below, including the pre-existing Snapshot file. Staging is empty. Full tracked diff, new-file content/trailing-whitespace scans, git diff --check, and cached whitespace passed; Git emits informational LF-to-CRLF notices only. No .env, real credential, private fixture, database file, debug code, dependency, generated output, old migration, completed archive, or unrelated business file is included.
+- Unresolved Issues: Configured-user PostgreSQL was not accessed/migrated, and its deployed revision is not asserted. Normal startup/deployment must apply 0008 before local milestone use. Two existing optional browser-to-disposable-backend cases remain skipped. Milestone browser checks use stubs; real persistence is separately verified by TestClient against a disposable PostgreSQL cluster. No new temporary-cluster residue or PostgreSQL test process remains; the two old TASK-034 Temp directories observed at admission were left untouched.
+- Task-Outside Findings: None. Deferred ISSUE-20261011-001 remains unchanged.
+- Preview Environment: Optional persistent frontend preview launch was refused by host automatic approval with `blocked by policy`. No preview service was left running. Playwright started/stopped its own Vite server successfully for the recorded browser checks.
+- Next Role: Code Review.
+
+### Modified Files
+
+Exact worktree scope (25 files; includes the preserved pre-existing Snapshot state):
+
+- `backend/alembic/versions/20261014_0008_add_project_milestones.py`
+- `backend/app/api/v1/project_milestones.py`
+- `backend/app/api/v1/router.py`
+- `backend/app/models/__init__.py`
+- `backend/app/models/milestone.py`
+- `backend/app/schemas/milestone.py`
+- `backend/app/services/project_milestones.py`
+- `backend/tests/test_project_milestone_migration.py`
+- `backend/tests/test_project_milestones.py`
+- `docs/api-project-milestones.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-035-pc-project-milestones.md`
+- `web/e2e/ai-sessions.spec.ts`
+- `web/e2e/dashboard.spec.ts`
+- `web/e2e/project-milestones.spec.ts`
+- `web/e2e/project-stages.spec.ts`
+- `web/e2e/projects.spec.ts`
+- `web/src/App.tsx`
+- `web/src/ProjectMilestones.test.tsx`
+- `web/src/ProjectMilestones.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
+- `web/src/types.ts`
+
+### Verification Commands And Results
+
+| Directory | Complete command | Result |
+| --- | --- | --- |
+| backend | `python -m pytest tests/test_project_milestones.py -q --tb=short` | 25 passed; includes final parent timestamp no-op assertion |
+| backend | `$env:LIFEOS_TEST_PG_BIN='D:\PostgreSQL\18\bin'; python -m pytest` | 173 passed; includes both disposable PostgreSQL tests; no warnings |
+| backend | `python -m alembic heads` | sole head: `20261014_0008` |
+| web | `npm test -- --run` | 18 files / 159 passed; no warnings |
+| web | `npm run build` | PASS after final CSS change |
+| web | `npx playwright test` | 12 passed / 2 existing conditional skips; no page errors in milestone flows |
+| web | `npx playwright test e2e/project-milestones.spec.ts` | final 1280px/375px flows: 2 passed; saved/editor screenshots inspected; no horizontal overflow |
+| root | `git status --short --untracked-files=all`, `git diff --stat`, `git diff`, `git diff --check`, `git diff --cached`, `git diff --cached --check` | scoped to the exact list above, whitespace PASS, staged empty |
+
+Playwright warnings: existing NO_COLOR/FORCE_COLOR environment notice only. Browser milestone flows are stubbed; PostgreSQL API checks are real in-process HTTP routing backed by disposable SQL storage. The PostgreSQL test starts at 0007 with synthetic legacy data/current stage/AI Session, verifies no seed and preserved values, keyed writes/readback/status/date clearing/tombstones, schema constraints, three concurrent parent/stage/milestone writes, repeated-head preservation, downgrade/re-upgrade, and cleanup. No live provider call or configured-user DB migration was run, as excluded by this task. An initial constraint-test expectation was corrected to accept PostgreSQL DataError for VARCHAR overflow; final suites pass. An Alembic heads probe run from the root lacked config, then succeeded from backend as recorded above.
+
+## Code Review
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-14 10:41:48 +08:00
+- Branch: `main`
+- HEAD: `e5c975b1af3106e88d24d85d262ef4373d66a27c`
+- Snapshot Commit: `e5c975b1af3106e88d24d85d262ef4373d66a27c`
+- Blocking Issues: None.
+- Non-blocking Suggestions: the configured user PostgreSQL revision remains unverified and normal startup/deployment must apply `20261014_0008`; milestone browser flows use stubs while real persistence/migration/concurrency are covered through TestClient on disposable PostgreSQL; two existing optional live-backend browser cases remain conditionally skipped.
+- Verification: focused backend `25 passed`; full backend with `LIFEOS_TEST_PG_BIN=D:\PostgreSQL\18\bin` `173 passed`; focused Web `12 passed`; full Web `159 passed`; production build PASS; Playwright `12 passed / 2 conditional skipped`; Alembic sole head `20261014_0008`; desktop/narrow screenshots inspected; whitespace, scope, staging, security, artifact, and process checks PASS.
+- Scope Conclusion: exact reviewed publish scope is 26 files, comprising the 25 Coding paths plus `handoff/code-review-gate.md`. No scope drift or unreviewed path is authorized.
+- Final Task Status: `REVIEWING`; Git Commit owns transition to `COMPLETED` after successful publication.
+- Recommended Commit Message: `feat(project): add lightweight milestones`
+- Next Role: Git Commit

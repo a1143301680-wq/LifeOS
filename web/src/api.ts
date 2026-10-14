@@ -8,6 +8,8 @@ import type {
   ProjectPayload,
   ProjectStageCollection,
   ProjectStagePayload,
+  MilestoneCollection,
+  MilestonePayload,
   Todo,
   TodoCreatePayload,
   TodoUpdatePayload,
@@ -111,6 +113,23 @@ export async function getProjectStages(token: string, projectId: string) {
     `/projects/${encodeURIComponent(projectId)}/stages`, token,
   );
   if (!Array.isArray(response.data?.stages)) throw new ApiError(0);
+  return response.data;
+}
+
+export async function getProjectMilestones(token: string, projectId: string) {
+  const response = await authenticatedRequest<DataEnvelope<MilestoneCollection>>(
+    `/projects/${encodeURIComponent(projectId)}/milestones`, token,
+  );
+  if (!Array.isArray(response.data?.milestones)) throw new ApiError(0);
+  return response.data;
+}
+
+export async function putProjectMilestones(token: string, projectId: string, key: string, milestones: MilestonePayload[]) {
+  const response = await authenticatedRequest<DataEnvelope<MilestoneCollection>>(
+    `/projects/${encodeURIComponent(projectId)}/milestones`, token,
+    { method: "PUT", headers: { "Content-Type": "application/json", "Idempotency-Key": key }, body: JSON.stringify({ milestones }) },
+  );
+  if (!Array.isArray(response.data?.milestones)) throw new ApiError(0);
   return response.data;
 }
 

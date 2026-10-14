@@ -6,11 +6,11 @@ Last updated: 2026-10-14
 
 - Task ID: TASK-035
 - Task Name: PC lightweight Project/Goal milestones
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-034 terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; current migration `20261012_0007`
-- Contract: `docs/api-project-milestones.md` (proposed for Task Review)
+- Contract: `docs/api-project-milestones.md` (Task Review-approved)
 
 ## Background
 
@@ -76,14 +76,14 @@ A PC user can define a Project/Goal's ordered milestones, edit their titles and 
 
 ## Acceptance Criteria
 
-- [ ] Existing/new Projects have an empty collection without automatic seeding; type changes preserve milestones.
-- [ ] Migration upgrade/downgrade/re-upgrade preserves old Project/stage/current/AI Session/user data and enforces the new table's constraints.
-- [ ] GET/PUT enforce ownership, exact fields, valid calendar dates/null, all three explicit statuses, 0-50 bounds, unique/available IDs, and atomic validation rollback.
-- [ ] Add/title/date/status/reorder/remove and clear-all persist across readback/reopen; soft-deleted IDs cannot be reused/restored and canceled rows remain visible.
-- [ ] Normalized no-op/replay/conflict behavior preserves correct versions/timestamps; effective row and parent changes increment once at their respective boundaries, including serialized Project PATCH/stage PUT/milestone PUT concurrency.
-- [ ] PC supports explicit Save/Cancel, date clearing, stable IDs/retry keys, independent loading/error/refresh states, and safe identity/Project switching through reads and writes.
-- [ ] Manual Project progress/status/next-step, stages, AI Sessions/prompts, Dashboard, and Today/Todo contracts regress without scope expansion.
-- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
+- [x] Existing/new Projects have an empty collection without automatic seeding; type changes preserve milestones.
+- [x] Migration upgrade/downgrade/re-upgrade preserves old Project/stage/current/AI Session/user data and enforces the new table's constraints.
+- [x] GET/PUT enforce ownership, exact fields, valid calendar dates/null, all three explicit statuses, 0-50 bounds, unique/available IDs, and atomic validation rollback.
+- [x] Add/title/date/status/reorder/remove and clear-all persist across readback/reopen; soft-deleted IDs cannot be reused/restored and canceled rows remain visible.
+- [x] Normalized no-op/replay/conflict behavior preserves correct versions/timestamps; effective row and parent changes increment once at their respective boundaries, including serialized Project PATCH/stage PUT/milestone PUT concurrency.
+- [x] PC supports explicit Save/Cancel, date clearing, stable IDs/retry keys, independent loading/error/refresh states, and safe identity/Project switching through reads and writes.
+- [x] Manual Project progress/status/next-step, stages, AI Sessions/prompts, Dashboard, and Today/Todo contracts regress without scope expansion.
+- [x] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
@@ -134,6 +134,10 @@ Report changed files, schema/migration and tombstone policy, exact date/status/v
 
 Task Review: PASS at 2026-10-14 09:30 +08:00. Full evidence and the exact approved 10-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; snapshot commit `e5c975b1af3106e88d24d85d262ef4373d66a27c`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved 10-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-035 implementation and the Coding Result in its task archive. Git publication awaits Code Review PASS.

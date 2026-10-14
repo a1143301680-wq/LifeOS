@@ -38,6 +38,11 @@ export type Project = {
 
 export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "status" | "manual_progress" | "next_step" | "is_pinned">;
 
+export type MilestoneStatus = "pending" | "completed" | "canceled";
+export type MilestonePayload = { id: string; title: string; target_date: string | null; status: MilestoneStatus };
+export type Milestone = MilestonePayload & { sort_order: number; version: number; created_at: string; updated_at: string };
+export type MilestoneCollection = { milestones: Milestone[]; project_version: number };
+
 export type ProjectStage = { id: string; name: string; sort_order: number };
 export type ProjectStageCollection = {
   stages: ProjectStage[];

@@ -49,6 +49,7 @@ import {
 import { calendarDateLabel, dateInTimeZone, shiftCalendarDate } from "./calendar-date";
 import Dashboard from "./Dashboard";
 import ProjectStages from "./ProjectStages";
+import ProjectMilestones from "./ProjectMilestones";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
@@ -2159,6 +2160,15 @@ export default function App() {
                       <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
                       <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
                       <ProjectStages key={`stages:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={() => { void loadProjectDetail(activeToken!, projectDetail.id); void loadProjects(activeToken!); }} />
+                      <ProjectMilestones key={`milestones:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={async () => {
+                        const generation = projectGenerationRef.current;
+                        const requestId = projectDetailRequestRef.current;
+                        const [detail, list] = await Promise.all([getProject(activeToken!, projectDetail.id), getProjects(activeToken!)]);
+                        if (generation !== projectGenerationRef.current || requestId !== projectDetailRequestRef.current) return;
+                        setProjectDetail(detail);
+                        setProjects(list);
+                        setProjectStatus("ready");
+                      }} />
                       <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={dashboardSessionId} />
                     </> : null}
                   </section>

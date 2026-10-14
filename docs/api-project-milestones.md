@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-14
 Delivery task: TASK-035
-Status: proposed for Task Review; not an implemented API
+Status: implemented in TASK-035; pending Code Review
 
 ## Purpose And Storage
 

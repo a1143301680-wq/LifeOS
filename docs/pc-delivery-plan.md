@@ -16,7 +16,7 @@ Projects, AI Session records, and Dashboard/Resume are published. Complete the r
 | 2 | TASK-032 AI Session records (closed) | Structured Session records and copyable continuation prompts | Save and resume an AI work session |
 | 3 | TASK-033 PC Dashboard and Resume (closed) | Up to three focused projects, latest Session, next step, and Today summary | Decide what to continue from one screen |
 | 4 | TASK-034 Editable Project stages (closed) | Persisted type-based defaults, add/rename/remove/reorder, explicit current selection | Save and reopen a customized stage list |
-| 5 | TASK-035 Project milestones (PLANNED) | Lightweight title/date/status/order per Project | Track the next meaningful target |
+| 5 | TASK-035 Project milestones (REVIEWING) | Lightweight title/date/status/order per Project | Track the next meaningful target |
 | 6 | Unpublished: Project Todo links | Owner-scoped links to existing Todos and source navigation | Turn project work into actionable Todos |
 | 7 | Unpublished: Project logs and timeline | Manual logs and a unified view of available source events | Recover project history without fabricated events |
 | 8 | Unpublished: Project lifecycle | Controlled archive/delete with explicit dependent-record policy | Remove/archive projects predictably |
@@ -43,4 +43,4 @@ TASK-031 terminal Closure Commit `6acfaaf`, TASK-032 `e8e013f`, and TASK-033 `c7
 
 TASK-034 Code Review verified 147 backend tests including disposable PostgreSQL migration/API/concurrency checks, 147 Web tests, production build, and Playwright 10 passed / 2 documented conditional skips. Browser stage flows used API stubs; real persistence was checked separately on disposable PostgreSQL. Normal startup/deployment must verify and apply revision 20261012_0007 before using stage endpoints against the configured user database; no current deployed revision is claimed. Later PC acceptance owns the full browser-to-real-backend cross-module path.
 
-TASK-035 is proposed under docs/api-project-milestones.md and has no implementation approval yet. It adds the next migration, 20261014_0008, after Task Review/Snapshot/Coding; configured-database readiness must be verified by normal startup/deployment before local milestone use.
+TASK-035 implementation is ready for Code Review under docs/api-project-milestones.md. Coding verified 173 backend tests including disposable PostgreSQL migration/API/concurrency checks, 159 Web tests, production build, and Playwright 12 passed / 2 existing conditional skips. Milestone browser flows at 1280px/375px used API stubs; real API persistence was verified separately through FastAPI TestClient against disposable PostgreSQL. Migration 20261014_0008 is the sole head; normal startup/deployment must verify and apply it before configured-database milestone use. No current deployed revision is claimed.

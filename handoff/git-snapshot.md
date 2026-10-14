@@ -4,7 +4,7 @@ Last updated: 2026-10-14
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-035
 
@@ -12,13 +12,13 @@ Branch: main
 
 Base Commit: 9030c7d2c8d3896fcb3d65ea454547844949858c
 
-Working Tree: proposed 10-file Decision publication scope; no prior worktree changes or business implementation.
+Working Tree: 10 approved TASK-035 pre-Coding publication/readiness documents committed separately; no business implementation
 
-Snapshot Commit Created: Pending
+Snapshot Commit Created: Yes
 
-Snapshot Commit: Pending
+Snapshot Commit: e5c975b1af3106e88d24d85d262ef4373d66a27c
 
-Reason: wait for Task Review PASS and both active task records READY.
+Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
 
 ## Instructions
 
