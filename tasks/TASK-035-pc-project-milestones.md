@@ -6,7 +6,7 @@ Last updated: 2026-10-14
 
 - Task ID: TASK-035
 - Task Name: PC lightweight Project/Goal milestones
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-034 terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; current migration `20261012_0007`
@@ -215,3 +215,18 @@ Playwright warnings: existing NO_COLOR/FORCE_COLOR environment notice only. Brow
 - Final Task Status: `REVIEWING`; Git Commit owns transition to `COMPLETED` after successful publication.
 - Recommended Commit Message: `feat(project): add lightweight milestones`
 - Next Role: Git Commit
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `cbe65ec32501dd7954c525cb2d403e8922a49edb`
+- Commit Message: `feat(project): add lightweight milestones`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.

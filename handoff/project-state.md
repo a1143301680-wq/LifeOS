@@ -115,6 +115,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - Decision split the former Project depth row into stage, milestone, Todo-link, logs/timeline, and lifecycle slices. TASK-034 editable Project stages completed in result commit `7fa8153`; Code Review: PASS; 147 backend tests, 147 Web tests, production build, Playwright 10 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/concurrency verification passed.
 - TASK-034 completion commit `fe010d0e726a5e0ac1c1d67a98114861843b1314` and terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c` are published. Decision verified local/tracking/remote parity and a clean worktree on 2026-10-14; its workflow is closed.
 - Decision published TASK-035 lightweight Project milestones as the next PC foundation slice: title, optional target date, explicit status, order, and owner-scoped persisted editing. The proposed contract is docs/api-project-milestones.md; live task state/routing remains in current-task.md.
+- TASK-035 lightweight Project milestones completed in result commit `cbe65ec32501dd7954c525cb2d403e8922a49edb`; Code Review: PASS; 173 backend tests, 159 Web tests, production build, Playwright 12 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/concurrency verification passed. Decision Closure Check is the required next step.
 - User direction on 2026-10-12: complete foundation features before adding personal AI memory, self-iteration, or Agent participation. Those ideas are deferred and do not expand this sequence.
 - ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its issue-log entry was persisted in the TASK-034 snapshot; it remains deferred without a feature repair.
 
@@ -165,7 +166,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Continue lightweight Project milestones, then Todo links, logs/timeline, controlled lifecycle, Notes, Calendar, and PC acceptance in `docs/pc-delivery-plan.md`. Android follows PC acceptance; AI memory/self-iteration/Agent participation remain deferred. Active Status and the authorized next role remain only in `handoff/current-task.md`.
+Perform the TASK-035 Decision Closure Check against result commit `cbe65ec32501dd7954c525cb2d403e8922a49edb`. Do not publish the next task before terminal closure. The later sequence remains Todo links, logs/timeline, controlled lifecycle, Notes, Calendar, and PC acceptance in `docs/pc-delivery-plan.md`; Android follows PC acceptance, while AI memory/self-iteration/Agent participation remain deferred.
 
 ## Notes For Windows
 

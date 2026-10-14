@@ -6,7 +6,7 @@ Last updated: 2026-10-14
 
 - Task ID: TASK-035
 - Task Name: PC lightweight Project/Goal milestones
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-034 terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; current migration `20261012_0007`
@@ -138,6 +138,6 @@ Git Snapshot: COMPLETE on branch `main`; base commit `9030c7d2c8d3896fcb3d65ea45
 
 Snapshot Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Decision
 
-Required Next Action: independently review TASK-035 implementation and the Coding Result in its task archive. Git publication awaits Code Review PASS.
+Required Next Action: perform the TASK-035 Decision Closure Check against Result Commit `cbe65ec32501dd7954c525cb2d403e8922a49edb` and this completion record. Do not publish the next task before closure.
