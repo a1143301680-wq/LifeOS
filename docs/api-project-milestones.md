@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-14
 Delivery task: TASK-035
-Status: implemented in TASK-035; pending Code Review
+Status: implemented; TASK-035 Code Review PASS; result published in cbe65ec
 
 ## Purpose And Storage
 

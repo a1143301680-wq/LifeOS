@@ -138,6 +138,16 @@ Git Snapshot: COMPLETE on branch `main`; base commit `9030c7d2c8d3896fcb3d65ea45
 
 Snapshot Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-035 Decision Closure Check against Result Commit `cbe65ec32501dd7954c525cb2d403e8922a49edb` and this completion record. Do not publish the next task before closure.
+Checked At: 2026-10-14 19:33:48 +08:00
+
+Result Commit: `cbe65ec32501dd7954c525cb2d403e8922a49edb`
+
+Completion Commit: `d3c668b34701ceb165b960582a7f62f9ff08d744`
+
+Closure Evidence: clean pre-Closure worktree; three-way remote parity; Code Review PASS; all eight criteria confirmed; exact 26-file reviewed result and four-file completion metadata. Full verification, limits, and the five-file terminal allowlist are in `tasks/TASK-035-pc-project-milestones.md`.
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only `docs/api-project-milestones.md`, `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-035-pc-project-milestones.md` with message `docs(task): close TASK-035`. Verify local/tracking/remote parity and clean worktree, then return to Decision. Do not run another Closure Check or publish the next task from this step.

@@ -138,9 +138,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `9030c7d2c8d3896fcb3d65ea45
 
 Snapshot Reason: approved TASK-035 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: independently review TASK-035 implementation and the Coding Result in its task archive. Git publication awaits Code Review PASS.
+Required Next Action: commit and push only the five Closure-authorized documents below with message `docs(task): close TASK-035`; verify remote parity and clean worktree, then return to Decision. Do not rerun Closure Check.
 
 ## Coding Result
 
@@ -228,5 +228,24 @@ Playwright warnings: existing NO_COLOR/FORCE_COLOR environment notice only. Brow
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-10-14 19:33:48 +08:00
+- Result Commit: `cbe65ec32501dd7954c525cb2d403e8922a49edb`
+- Completion Commit: `d3c668b34701ceb165b960582a7f62f9ff08d744`
+- Remote Verification: before Closure edits, local HEAD, origin/main, and remote refs/heads/main all matched the Completion Commit on main. Result parent is snapshot e5c975b; Completion Commit parent is the Result Commit.
+- Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked paths.
+- Review/Test Evidence: Code Review PASS / COMPLETED at 2026-10-14 10:41:48 +08:00. Independent review recorded focused backend 25 passed; full backend 173 passed including disposable PostgreSQL migration/API/constraints/concurrency; focused Web 12 passed; full Web 159 passed; production build PASS; Playwright 12 passed / 2 existing conditional skips; sole Alembic head 20261014_0008; 1280px/375px screenshots inspected.
+- Decision Verification: exact Result Commit paths equal the 26-file Reviewed Scope. Completion Commit contains only the four Git result/status documents. Both published commits pass git whitespace checks. Published owner-scoped API/schema and recorded verification support the approved date/status/collection contract. Decision did not rerun the already-reviewed test suites, migrate the configured user database, or change business code.
+- Acceptance Criteria Result: all eight criteria are checked in both active records and supported by Code Review evidence. Browser milestone flows used API stubs; real persistence/constraints/migration/three-way parent concurrency were verified separately by FastAPI TestClient on disposable PostgreSQL. Full browser-to-real-backend cross-module acceptance remains a later PC checkpoint.
+- Issue Disposition: no blocking TASK-035 issue is recorded. ISSUE-20261011-001 remains open P3/non-blocking and deferred. Todo links, logs/timeline, lifecycle, Calendar/Dashboard milestone integration, Android, and AI memory/Agent work remain outside this task.
+- Remaining Follow-ups: normal startup/deployment must verify and apply pending migrations through 20261014_0008 before configured-database milestone use; no current deployed revision is asserted. Preserve the two conditional browser skips for later PC acceptance. Older TASK-034 Temp directories outside the repository remain reported host-cleanup residue, not commit content.
+- State Synchronization: both records remain COMPLETED; archived Current Stage now routes to terminal Git rather than stale Code Review. The roadmap and milestone API header were updated from pending-Review wording to verified published-result state; contract body is unchanged.
+- Terminal Closure Commit: authorized only for the five documents below with message `docs(task): close TASK-035`. Commit/push once, verify local/tracking/remote parity and a clean worktree, then return control to Decision. Do not run another Closure Check, create further uncommitted state files, or publish the next task from the Git window.
+
+### Terminal Closure File Allowlist
+
+- `docs/api-project-milestones.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-035-pc-project-milestones.md`
