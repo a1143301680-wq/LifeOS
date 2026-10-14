@@ -1,154 +1,139 @@
 # LifeOS Current Task
 
-Last updated: 2026-10-12
+Last updated: 2026-10-14
 
 ## Metadata
 
-- Task ID: TASK-034
-- Task Name: PC editable Project/Goal stages
-- Status: COMPLETED
+- Task ID: TASK-035
+- Task Name: PC lightweight Project/Goal milestones
+- Status: READY
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
-- Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-033 terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; current migration `20261010_0006`
-- Contract: `docs/api-project-stages.md` (Task Review-approved)
+- Dependencies: TASK-031 Project core; TASK-032 AI Sessions; TASK-034 terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c`; current migration `20261012_0007`
+- Contract: `docs/api-project-milestones.md` (proposed for Task Review)
 
 ## Background
 
-TASK-033 is terminally closed and local HEAD, origin/main, and remote main were verified at its Closure Commit on 2026-10-12. The former Project depth roadmap row covered several distinct behaviors. Decision splits it into stages, milestones, Todo links, logs/timeline, and lifecycle follow-ups so each task has a verifiable product result. User direction remains PC foundations first, Android later; personal memory, self-iteration, and Agent participation are deferred.
+TASK-034 is terminally closed. Decision verified local HEAD, origin/main, and remote main at its terminal Closure Commit on 2026-10-14 with a clean worktree. The roadmap next calls for lightweight milestones before Todo links, logs/timeline, lifecycle, Notes, Calendar, and PC acceptance. PC foundations remain ahead of Android; AI memory, self-iteration, and Agents stay deferred.
 
 ## Goal
 
-A PC user can open a Project/Goal, see its persisted type-based stage list, add/rename/remove/reorder stages, explicitly select or clear the current stage, save, and reopen without losing edits or changing manual progress.
+A PC user can define a Project/Goal's ordered milestones, edit their titles and optional target dates, explicitly change status, remove items, save, and reopen the persisted result without modifying stages or manual Project progress.
 
 ## In Scope
 
-- User-owned project_stages storage, a forward/backward Alembic migration, existing-project backfill, and transactional template creation for new Projects.
-- Nested GET and atomic PUT collection endpoints with existing identity, envelopes, idempotency, and parent-version behavior.
-- PC Project-detail stage display/editor with durable save/readback and independent failure states.
-- Focused backend, migration, Web, and desktop/narrow browser verification; regression of existing Project, AI Session, and Dashboard flows.
-- Publication housekeeping: synchronize PC roadmap and related Android reservation references, record TASK-033 terminal closure, and preserve the known issue-log entry.
+- Normalized user-owned milestones, soft removal, one forward/backward migration, and unchanged empty defaults for existing/new Projects.
+- Nested GET and atomic whole-collection PUT with bounded payloads, exact date/status/ID rules, idempotency, and shared parent version/locking behavior.
+- PC Project-detail milestone display/editor with add/edit/reorder/remove, explicit status/date clear, Save/Cancel, durable readback, and independent failure states.
+- Backend/API/constraint/migration/concurrency tests, Web tests, browser verification, and Project/stage/AI Session/Dashboard regressions.
+- Publication housekeeping: record TASK-034 terminal closure in live milestone/plan documents and correct its stale API header only; preserve its completed archive.
 
 ## Out Of Scope
 
-- Milestones, Todo links, logs/timeline, Project archive/delete, calculated progress, template reset/global template management, and Dashboard stage integration.
-- Notes, Calendar, Android, reminders, offline writes, Project/stage SSE or sync protocols, account/auth redesign, and infrastructure deployment.
-- AI personal memory, feedback learning, Agent execution, provider changes, language-consistency repair, autonomous writes, and external chat/Git import.
-- Changes to completed task archives or unrelated product/API contracts.
+- Todo/stage links, milestone dependencies, automatic Project progress, reminders, recurring goals, timeline/history generation, archive/Project deletion, Trash/restore, or hard-delete cleanup.
+- Notes, Calendar UI/aggregation, Dashboard milestone integration, statistics, Android, offline/sync/SSE protocols, identity redesign, deployment or user-data seeding.
+- AI provider/language changes, personal memory, learning/Agents/autonomous writes, external imports, and generic collection-editor/workflow refactors.
+- Completed task archive or unrelated stable product/API/architecture contract changes.
 
 ## Relevant Files
 
-- `docs/api-project-stages.md`: exact storage, six template mappings, endpoint/write/validation rules, migration semantics, and PC behavior.
-- `docs/requirements.md`: section 7 Project/Goal stages and manual progress only.
-- `docs/mvp.md`: Phase 2 editable-stage acceptance; `docs/architecture.md`: sections 4-5 and 9-10 identity, table, and Project boundaries.
-- `docs/pc-delivery-plan.md`: split PC-first sequence and checkpoint.
-- `backend/app/models/project.py`, `backend/app/models/__init__.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/router.py`, `backend/app/schemas/project.py`.
-- `backend/app/services/idempotency.py`, `backend/app/core/errors.py`, `backend/alembic/versions/20261009_0005_add_projects.py`, `backend/alembic/versions/20261010_0006_add_ai_sessions.py`, `backend/tests/test_projects.py`, `backend/tests/test_ai_sessions.py`.
-- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, `web/src/App.projects.test.tsx`, `web/src/App.ai-sessions.test.tsx`, `web/src/App.dashboard.test.tsx`, `web/e2e/projects.spec.ts`.
-- New implementation/test paths listed below are expected outputs, not missing prerequisites. Search `handoff/issue-log.md` for TASK-034 and ISSUE-20261011-001; no full issue history is required.
+- `docs/api-project-milestones.md`: exact storage/read/write/date/status/no-op/soft-deletion/UI contract.
+- `docs/requirements.md`: section 7 milestones and manual progress; section 13 source-based Calendar boundary only.
+- `docs/mvp.md`: Phase 2 milestone scope; `docs/architecture.md`: sections 4-5 and 9-10 ownership and entity boundaries.
+- `docs/api-project-stages.md`: existing stage PUT/parent lock contract; `docs/pc-delivery-plan.md`: PC-first sequence.
+- `backend/app/models/project.py`, `backend/app/models/project_stage.py`, `backend/app/models/__init__.py`, `backend/app/services/project_stages.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/project_stages.py`, `backend/app/api/v1/router.py`, `backend/app/services/idempotency.py`, `backend/app/core/errors.py`.
+- `backend/alembic/versions/20261012_0007_add_project_stages.py`, `backend/tests/test_project_stages.py`, `backend/tests/test_project_stage_migration.py`, `backend/tests/test_projects.py`.
+- `web/src/App.tsx`, `web/src/ProjectStages.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, `web/src/ProjectStages.test.tsx`, existing Project/AI Session/Dashboard tests and `web/e2e/project-stages.spec.ts`.
+- New paths below are expected outputs. Search issue-log.md by TASK-035 and the existing deferred ISSUE-20261011-001; full issue history is not required.
 
 ## Allowed Files
 
-- `backend/app/models/project_stage.py`, `backend/app/models/__init__.py`; `backend/app/models/project.py` only if collection/locking integration requires it.
-- `backend/app/schemas/project_stage.py`, `backend/app/services/project_stages.py`, `backend/app/api/v1/project_stages.py`, `backend/app/api/v1/router.py`, `backend/app/api/v1/projects.py`.
-- `backend/alembic/versions/20261012_0007_add_project_stages.py` only; do not rewrite old migrations.
-- `backend/tests/test_project_stages.py`, `backend/tests/test_project_stage_migration.py`; existing backend test fixtures only for stage-table registration or narrowly required Project regression coverage.
-- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, new `web/src/ProjectStages.tsx` and focused stage tests, new `web/e2e/project-stages.spec.ts`; existing Web/E2E fixtures/tests only for compatibility regression.
-- `docs/api-project-stages.md` header status only for verified implementation progress; contract-body revisions return to Decision. `docs/pc-delivery-plan.md` for verified progress only; active TASK-034 workflow/gate/Git/issue records for role-owned state changes.
-- Other publication documents below belong in the readiness snapshot; their presence is not permission for unrelated Coding edits.
+- New `backend/app/models/milestone.py`, `backend/app/schemas/milestone.py`, `backend/app/services/project_milestones.py`, `backend/app/api/v1/project_milestones.py`; model registration and `backend/app/api/v1/router.py`.
+- New `backend/alembic/versions/20261014_0008_add_project_milestones.py` only; no changes to old revisions.
+- New `backend/tests/test_project_milestones.py`, `backend/tests/test_project_milestone_migration.py`. Existing backend tests only for focused compatibility/fixture changes; a small shared disposable-PostgreSQL test helper or `backend/tests/conftest.py` is allowed if needed to reuse current fixture behavior without broad test refactoring.
+- `backend/app/services/project_stages.py` and `backend/app/api/v1/projects.py` only if a narrowly scoped shared owned-parent/locking helper is necessary; no stage/Project contract changes.
+- New `web/src/ProjectMilestones.tsx`, `web/src/ProjectMilestones.test.tsx`, `web/e2e/project-milestones.spec.ts`; scoped `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`.
+- Existing Web/E2E tests and fixtures only for new nested milestone reads or focused Project/stage/AI Session/Dashboard regressions.
+- `docs/api-project-milestones.md` header status only for verified implementation progress; contract-body changes return to Decision. `docs/pc-delivery-plan.md` for verified progress; role-owned active TASK-035 workflow/gate/Git/issue records.
+- The stage-contract header update is already publication housekeeping, not permission for Coding to alter that contract.
 
 ## Forbidden Files And Changes
 
-- `android/**`, existing Alembic revisions, completed task archives, requirements/MVP/architecture/Phase 1A API/data-model contracts, accepted ADRs, dependencies/lockfiles unless a concrete task blocker returns to Decision.
-- Unrelated Todo/sync/provider behavior, AI memory/agents, private data, credentials, generated build/test output, user data seeding or migration as a test shortcut.
-- Inferring stage completion from manual percentage; regenerating defaults on type change/read/startup; silently choosing a current stage.
-- New generic workflow/template engine, global UI refactor, or unapproved endpoints.
+- `android/**`, existing migrations, completed task archives, requirements/MVP/architecture/Phase 1A API/data-model contracts, accepted ADRs, dependencies or lockfiles without a concrete blocker returned to Decision.
+- Todo/sync/provider behavior, stage templates/current selection, Project/AI Session DTOs or saved AI prompts, machine-specific fixtures, credentials, private user data, generated output.
+- Implicit status/date inference, calculated Project progress, milestone defaults on Project creation/read, restoring deleted IDs, or physical milestone deletion.
+- New independent row CRUD/move endpoints, automatic writes outside explicit user save, or unrelated UI restructuring.
 
 ## Implementation Requirements
 
-1. Implement `docs/api-project-stages.md` exactly. Six template mappings, collection payload fields, validation, ownership, idempotency, no-op/version behavior, and type-change preservation are implementation contracts, not choices left to Coding.
-2. Add the normalized stage table and `20261012_0007` migration from `20261010_0006`. Backfill old projects without altering their existing values or selecting a current stage; freeze migration defaults. Register model metadata for the SQLite test setup.
-3. Keep Project POST and its response compatible; create fresh default rows transactionally. Nested stage GET is read-only; PUT fully replaces one owned collection with atomic current selection and parent version update. Preserve existing Project PATCH behavior while serializing shared parent updates where necessary.
-4. Add the Project-detail editor using existing UI conventions. Support add/rename/remove/move/current/clear/Save/Cancel, empty collections, stable draft IDs, bounded validation, independent failure/retry, and current Project readback.
-5. Protect identity/project switching and in-flight writes/reads. Preserve unsaved edits after recoverable failures; do not carry draft state between Projects or identities.
-6. Do not extend Dashboard or saved AI prompt composition. Regress them against Project creation/type changes/stage writes; no synthetic stage history or automatic progress calculation.
-7. Verify migration and real API persistence on disposable PostgreSQL. Do not claim SQLite tests prove migration correctness, or claim the configured user database upgraded without evidence. Normal startup applies pending migrations before using the new endpoints.
+1. Implement `docs/api-project-milestones.md` exactly: every writable field, date/null/status transition, ordered list bound, row/parent version rule, tombstone collision behavior, and UI save/readback rule is settled for this slice.
+2. Add the empty normalized table and migration from 0007 to 0008 with model registration for SQLite tests. Preserve old Project/stage/current/Session/user data during upgrade/downgrade; no user database mutation as a verification shortcut.
+3. Implement owner-scoped nested GET and full-list PUT only. Share the existing parent Project lock boundary with Project PATCH/stage PUT; transact row edits/removals, parent version/timestamp, and idempotency response together.
+4. Implement explicit milestone editing on Project detail using existing conventions. Preserve date strings, stable draft UUIDs, Save/Cancel, same-payload retry keys, and independent errors/readback; no automatic Project status/progress change.
+5. Suppress stale GET/PUT/readback after Project or identity switches; reset drafts and never use a previous write result for a newly mounted section. On successful save refresh canonical collection and parent data, preserving existing stage/Session navigation.
+6. Verify real PostgreSQL migration/API persistence/concurrent writes on a disposable cluster. Browser tests must cover desktop/narrow interaction; distinguish real browser/backend coverage from stubbed browser/API-only checks and record any conditional skips honestly.
+7. Retain existing Project, stage, AI Session, Dashboard/Resume, Today/Todo and identity behavior. No live AI provider call or configured-user database migration is required to develop/review this task.
 
 ## Acceptance Criteria
 
-- [x] Each of six Project types gets the exact persisted defaults on create; no current stage is inferred; later type changes preserve edits.
-- [x] Migration backfills existing projects, preserves their prior data and AI Sessions, and survives downgrade/upgrade and repeated head upgrade without silent reseeding.
-- [x] Nested GET/PUT enforce owner isolation, exact payload bounds, ID membership/collision rules, and transaction rollback for invalid requests.
-- [x] Add/rename/remove/reorder/current selection/clear/empty collection persist across readback and page reopening without changing manual progress/status/next step.
-- [x] Idempotency replay/conflict and normalized no-op behavior are correct; effective writes increment parent version once, and concurrent parent/stage writes preserve the counter and single-current invariant.
-- [x] PC editor has explicit Save/Cancel, recoverable failure/retry, stable IDs/keys, independent loading states, and no stale data after identity/project changes.
-- [x] Existing Projects, AI Sessions, Dashboard/Resume, Today/Todo, and identity flows retain their contracts.
-- [x] Backend/Web tests, production build, desktop/narrow browser flow, disposable PostgreSQL migration/API checks, and Git scope/whitespace checks pass or state concrete limitations for Code Review.
+- [ ] Existing/new Projects have an empty collection without automatic seeding; type changes preserve milestones.
+- [ ] Migration upgrade/downgrade/re-upgrade preserves old Project/stage/current/AI Session/user data and enforces the new table's constraints.
+- [ ] GET/PUT enforce ownership, exact fields, valid calendar dates/null, all three explicit statuses, 0-50 bounds, unique/available IDs, and atomic validation rollback.
+- [ ] Add/title/date/status/reorder/remove and clear-all persist across readback/reopen; soft-deleted IDs cannot be reused/restored and canceled rows remain visible.
+- [ ] Normalized no-op/replay/conflict behavior preserves correct versions/timestamps; effective row and parent changes increment once at their respective boundaries, including serialized Project PATCH/stage PUT/milestone PUT concurrency.
+- [ ] PC supports explicit Save/Cancel, date clearing, stable IDs/retry keys, independent loading/error/refresh states, and safe identity/Project switching through reads and writes.
+- [ ] Manual Project progress/status/next-step, stages, AI Sessions/prompts, Dashboard, and Today/Todo contracts regress without scope expansion.
+- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
-- Backend tests: all six default lists, create atomicity, no read-time reseed, type-change preservation, empty/max list, trimmed and invalid names, duplicate/foreign IDs, retained IDs, current switch/removal/clear, invalid-request rollback, auth/owner isolation, no-op/effective version/timestamp, and idempotency.
-- Disposable PostgreSQL: start at 0006 with synthetic projects of all types plus an AI Session; upgrade/backfill and verify preserved values; edit and repeat head upgrade without reseeding; downgrade back to 0006 and re-upgrade. Verify same-Project concurrent PUT/PATCH version handling and final current-stage invariant.
-- Web tests: full editor flow, order/current state, Save/Cancel, failures with unchanged/changed retry payloads, stale identity/project responses, loading/empty/error states, and compatibility with existing Project forms/AI Session prompts/Dashboard.
-- Run `python -m pytest` in backend; `npm test -- --run`, `npm run build`, and `npx playwright test` in web. Add focused browser verification at 1280px and 375px; verify persisted save/readback through the real API on a disposable backend. Record pre-existing conditional skips accurately.
-- Inspect tracked/untracked/staged scope, `git diff --check`, cached whitespace, secrets/private fixtures, and generated output. No live provider call is required.
+- Backend: empty/no-seed behavior; field/type/size/name/date/leap-day/status bounds; duplicate/foreign/deleted IDs; ownership/auth; retained/new/order/status/date changes; soft deletion and empty/no-op; idempotency replay/conflict; invalid rollback; row and parent version/timestamp preservation.
+- Disposable PostgreSQL: create synthetic users, Projects, stages/current selections, and AI Sessions at 0007; upgrade to 0008 with no seed; exercise keyed API save/readback, status/date clear/removal/tombstone rules, and interleaved Project PATCH/stage PUT/milestone PUT without lost parent increments. Verify unchanged data across repeated-head and downgrade/re-upgrade, and the single Alembic head.
+- Web: empty/full/editor validation, date strings without timezone drift, all statuses, reorder/clear/remove/Cancel, ambiguous retry keys versus changed payload, failed post-save readback as refresh-only error, and delayed read/write responses across identity/Project switches.
+- Run backend `python -m pytest` (including disposable PostgreSQL tests via the existing test-bin configuration), Web `npm test -- --run`, `npm run build`, and `npx playwright test`. Add focused 1280px/375px milestone browser flows and demonstrate persistence through a real disposable API; state exactly whether browser flows are stubbed or directly attached.
+- Inspect `git diff --check`, cached whitespace, exact changed/untracked/staged sets, secrets/private fixtures, and generated output. Use synthetic data; stop disposable test services and report cleanup residue accurately.
 
 ## Risks
 
-- Full-list PUT uses last-write-wins; the task guarantees transaction integrity, not multi-editor optimistic conflict detection.
-- Migration backfill must not misrepresent current progress. Existing user data must not be used as a disposable test database.
-- Current PC Project state is shared in App.tsx; independent collection state must not leak across identities or resurrect stale responses.
-- The existing language inconsistency is non-blocking and deferred; carrying its log forward authorizes no AI repair.
+- Full-list PUT remains last-write-wins. Parent locking preserves data/version transaction integrity, not multi-editor optimistic conflict detection.
+- Date conversion through JavaScript UTC would change calendar meaning; retain the date string at the API boundary.
+- Milestone removal is soft but no restore UI exists; do not label it as permanent erasure or invent history from tombstones.
+- PC detail now has independent stage and milestone requests; read/write responses must remain tied to the original identity/Project.
+- Prior review's configured-user database deployment limit remains distinct from disposable-test evidence. Normal startup must apply the implemented head before real local use; this publication asserts no live database revision.
 
 ## Publication And Snapshot Scope
 
-Decision publication base: `main` at `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; local HEAD, origin/main, and remote main matched before edits. The only pre-existing edit was Decision's authorized ISSUE-20261011-001 in issue-log.md. It is preserved unchanged and explicitly carried as documentation housekeeping, not business implementation.
+Base: branch main at `9030c7d2c8d3896fcb3d65ea454547844949858c`; local HEAD, origin/main, and remote main matched and the worktree was clean before publication. TASK-034 terminal commit changed exactly its four authorized Closure documents and passed whitespace checks. No repeated Closure Check or completed-archive edit is needed.
 
-The exact proposed pre-Coding snapshot scope is these 12 documents, including Task Review's subsequent gate and READY synchronization:
+Proposed pre-Coding snapshot scope, including Task Review's READY/gate persistence, is exactly these 10 documents:
 
+- `docs/api-project-milestones.md`
 - `docs/api-project-stages.md`
 - `docs/pc-delivery-plan.md`
-- `docs/phase1a-progress.md`
-- `docs/phase1a-completion-audit.md`
 - `handoff/current-task.md`
 - `handoff/project-state.md`
 - `handoff/task-review-gate.md`
 - `handoff/code-review-gate.md`
 - `handoff/git-snapshot.md`
 - `handoff/git-commit.md`
-- `handoff/issue-log.md`
-- `tasks/TASK-034-pc-project-stages.md`
+- `tasks/TASK-035-pc-project-milestones.md`
 
-Task Review must approve this exact document scope or report discrepancies. No other pre-existing business changes were found. This list is not an implementation Review PASS.
+The stage API file changes only its stale pending-Code-Review header. No business implementation or issue-log edit is part of publication. Task Review must independently approve the exact set before Git Snapshot.
 
 ## Decision Record
 
-- 2026-10-12: confirmed TASK-033 terminal Closure Commit and remote parity; no repeated Closure Check.
-- 2026-10-12: published this bounded Project-stage slice; remaining Project depth features stay in the roadmap and future IDs are assigned at publication rather than repeatedly renumbered.
-- 2026-10-12: user deferred AI memory/self-iteration/Agent participation until after foundations; ISSUE-20261011-001 remains P3, non-blocking.
-- 2026-10-12: a read-only configured-database revision probe did not complete and was stopped. No user DB migration or mutation occurred; current deployed revision is not asserted by this publication.
+- 2026-10-14: verified TASK-034 terminal closure 9030c7d, three-way remote parity, and a clean worktree.
+- 2026-10-14: published the next bounded PC foundation slice, milestones; Todo links and other future rows remain unpublished.
+- 2026-10-14: deferred ISSUE-20261011-001 and AI memory/self-iteration/Agent capabilities remain outside this task.
 
 ## Coding Output Requirements
 
-Report changed paths, schema/migration evidence, exact API/default/write semantics, PC persistence flow, ownership/race handling, all acceptance results, tests/build/browser evidence, exact Git/security checks, limitations, and the next role.
+Report changed files, schema/migration and tombstone policy, exact date/status/version/idempotency behavior, PC save/readback/switching, all acceptance results, test/build/browser/PostgreSQL evidence, exact diff/security checks, limitations, and next role.
 
 ## Current Stage
 
-Task Review: PASS at 2026-10-12 13:21 +08:00. Full evidence and the exact approved 12-file scope are in `handoff/task-review-gate.md`.
+Task Review: PASS at 2026-10-14 09:30 +08:00. Full evidence and the exact approved 10-file scope are in `handoff/task-review-gate.md`.
 
-Git Snapshot: COMPLETE on branch `main`; base commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15`; snapshot commit `9a0b781fc7874c75d5a4f12544d1fd27773448c6`.
+Next Role: Git Snapshot
 
-Snapshot Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
-
-Closure Check: PASS
-
-Checked At: 2026-10-12 15:00:17 +08:00
-
-Result Commit: `7fa8153c7c0ba6a0ef6ed8a2e05b7a17936fcbe8`
-
-Completion Commit: `fe010d0e726a5e0ac1c1d67a98114861843b1314`
-
-Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; Code Review PASS; all eight acceptance criteria confirmed. Full verification, residual limits, and the exact four-file allowlist are in `tasks/TASK-034-pc-project-stages.md`.
-
-Next Role: Git Commit (Terminal Closure Commit)
-
-Required Next Action: commit and push only `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-034-pc-project-stages.md` with message `docs(task): close TASK-034`. Verify local/tracking/remote parity and clean worktree, then return to Decision. Do not run another Closure Check or publish the next task from this step.
+Required Next Action: Git Snapshot must independently verify and establish the exact approved 10-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.

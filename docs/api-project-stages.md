@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-12
 Delivery task: TASK-034
-Status: implemented in TASK-034; pending Code Review
+Status: implemented; TASK-034 Code Review PASS and terminal Closure Commit 9030c7d published
 
 ## Ownership And Storage
 

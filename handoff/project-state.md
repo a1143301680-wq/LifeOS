@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-10-12
+Last updated: 2026-10-14
 
 ## Current Phase
 
@@ -113,9 +113,10 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - TASK-033 PC Dashboard and Resume completed in result commit `b300763`; Code Review re-review: PASS; 143 Web tests, production build, focused Dashboard browser flow, and full Playwright 8 passed / 2 documented conditional skips. It reuses Project, AI Session, and Today data without new backend contracts.
 - TASK-033 Decision Closure Check passed on 2026-10-11; terminal Closure Commit `c78e6a2563a7033f7fb3f6d2317c767bc3fbda15` is published. Decision verified local/tracking/remote parity on 2026-10-12; its workflow has ended.
 - Decision split the former Project depth row into stage, milestone, Todo-link, logs/timeline, and lifecycle slices. TASK-034 editable Project stages completed in result commit `7fa8153`; Code Review: PASS; 147 backend tests, 147 Web tests, production build, Playwright 10 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/concurrency verification passed.
-- TASK-034 completion commit `fe010d0e726a5e0ac1c1d67a98114861843b1314` is published with local/tracking/remote parity. Decision Closure Check passed on 2026-10-12; exact four-file terminal Closure Commit authorization is in its archive. The task is not terminally closed until that commit is pushed.
+- TASK-034 completion commit `fe010d0e726a5e0ac1c1d67a98114861843b1314` and terminal Closure Commit `9030c7d2c8d3896fcb3d65ea454547844949858c` are published. Decision verified local/tracking/remote parity and a clean worktree on 2026-10-14; its workflow is closed.
+- Decision published TASK-035 lightweight Project milestones as the next PC foundation slice: title, optional target date, explicit status, order, and owner-scoped persisted editing. The proposed contract is docs/api-project-milestones.md; live task state/routing remains in current-task.md.
 - User direction on 2026-10-12: complete foundation features before adding personal AI memory, self-iteration, or Agent participation. Those ideas are deferred and do not expand this sequence.
-- ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its existing issue-log edit is explicitly carried in TASK-034 publication scope, without a feature repair.
+- ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its issue-log entry was persisted in the TASK-034 snapshot; it remains deferred without a feature repair.
 
 ## Recently Completed
 
@@ -164,7 +165,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-After TASK-034 terminal closure succeeds, the next business slice is lightweight Project milestones, followed by the remaining PC foundations in `docs/pc-delivery-plan.md`. No next task is published here; active Status and the authorized next role remain only in `handoff/current-task.md`.
+Continue lightweight Project milestones, then Todo links, logs/timeline, controlled lifecycle, Notes, Calendar, and PC acceptance in `docs/pc-delivery-plan.md`. Android follows PC acceptance; AI memory/self-iteration/Agent participation remain deferred. Active Status and the authorized next role remain only in `handoff/current-task.md`.
 
 ## Notes For Windows
 

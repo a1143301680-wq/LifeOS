@@ -1,25 +1,25 @@
 # LifeOS Git Snapshot
 
-Last updated: 2026-10-12
+Last updated: 2026-10-14
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-034
+Task ID: TASK-035
 
 Branch: main
 
-Base Commit: c78e6a2563a7033f7fb3f6d2317c767bc3fbda15
+Base Commit: 9030c7d2c8d3896fcb3d65ea454547844949858c
 
-Working Tree: 12 approved TASK-034 pre-Coding publication/readiness documents committed separately, including the reviewed P3 issue-log carry-forward; no business implementation
+Working Tree: proposed 10-file Decision publication scope; no prior worktree changes or business implementation.
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: 9a0b781fc7874c75d5a4f12544d1fd27773448c6
+Snapshot Commit: Pending
 
-Reason: approved TASK-034 readiness documents required a durable pre-Coding baseline.
+Reason: wait for Task Review PASS and both active task records READY.
 
 ## Instructions
 
-Independently verify branch/HEAD/worktree/staging/diff/remote parity and the exact Task Review-approved scope. Snapshot only the approved readiness documents, including the reviewed known issue-log carry-forward. After snapshot publication, synchronize both task records to IN_PROGRESS and route to Coding. Do not create a baseline or start Coding from this PENDING state.
+Recheck branch/HEAD/worktree/staging/diff/remote parity and the exact Task Review-approved 10-document scope. Snapshot only approved readiness documents. After snapshot publication, synchronize both active records to IN_PROGRESS and route to Coding. No snapshot or Coding admission is authorized from this PENDING state.
