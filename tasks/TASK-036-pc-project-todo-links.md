@@ -141,9 +141,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f13
 
 Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: independently review TASK-036 implementation and verification evidence. Git publication remains blocked until Code Review PASS.
+Required Next Action: commit and push only the five Closure-authorized documents below with message `docs(task): close TASK-036`; verify remote parity and clean worktree, then return to Decision. Do not rerun Closure Check.
 
 ## Coding Result
 
@@ -274,5 +274,24 @@ None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-10-15 10:07:41 +08:00
+- Result Commit: `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce`
+- Completion Commit: `5a02dcd5b9a48f7a376b312d2b2081acc75a4e4e`
+- Remote Verification: before Closure documentation edits, local HEAD, origin/main, and remote refs/heads/main all matched the Completion Commit on main. Result parent is snapshot 39872aa; Completion Commit parent is the Result Commit.
+- Working Tree Before Closure Docs: clean; no staged, unstaged, or untracked paths.
+- Review/Test Evidence: Code Review PASS / COMPLETED at 2026-10-15 09:57:58 +08:00. Independent review recorded focused backend 12 passed, focused disposable PostgreSQL 1 passed, full backend 186 passed, focused Web 21 passed, full Web 180 passed, production build PASS, Playwright 14 passed / 2 existing conditional skips, sole Alembic head 20261015_0009, and inspected 1280px/375px screenshots.
+- Decision Verification: Result Commit exactly matches the 30-file Reviewed Scope; Completion Commit changes only the four result/status documents. Both published commits pass git whitespace checks. Published API/service evidence confirms owned-parent resolution, deterministic Todo locking, source owner/deletion filtering, and link-only writes; recorded tests support the complete contract. Decision did not rerun the already-reviewed suites, change business code, or migrate the configured database.
+- Acceptance Criteria Result: all eight criteria are checked in both active records and supported by independent Code Review. Many-to-many link persistence, unavailable retention, candidate pagination/source navigation, no Todo/sync mutation, and Project/Todo concurrency are dispositioned PASS. Browser flows used API stubs; actual persistence/migration/locking/source-delete serial outcomes and cursor integrity were tested through FastAPI TestClient on disposable PostgreSQL. Full browser-to-real-backend cross-module acceptance remains a later PC checkpoint.
+- Issue Disposition: no blocking TASK-036 issue is recorded. Existing ISSUE-20261011-001 remains open P3/non-blocking and deferred. Logs/timeline, lifecycle, Notes, Calendar/Dashboard integration, Android, AI memory/self-iteration/Agent behavior remain outside this task.
+- Remaining Follow-ups: the configured user database was previously verified only through 20261014_0008. Normal startup/deployment must apply 20261015_0009 before link use; this Closure does not assert that it has been applied. Retain two documented conditional browser skips for later PC acceptance. Existing host PostgreSQL services were not changed by Closure.
+- State Synchronization: both active records remain COMPLETED; archive Current Stage now routes to terminal Git instead of stale Code Review. The roadmap and API header were synchronized from pending-Review wording to the published reviewed result. API contract body is unchanged.
+- Terminal Closure Commit: authorized only for the five documents below with message `docs(task): close TASK-036`. Commit/push once, verify local/tracking/remote parity and a clean worktree, then return to Decision. Do not run another Closure Check, create further uncommitted state files, or publish the next task from the Git window.
+
+### Terminal Closure File Allowlist
+
+- `docs/api-project-todo-links.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-036-pc-project-todo-links.md`

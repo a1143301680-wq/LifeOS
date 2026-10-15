@@ -141,6 +141,16 @@ Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f13
 
 Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-036 Decision Closure Check against Result Commit `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce` and this completion record. Do not publish the next task before closure.
+Checked At: 2026-10-15 10:07:41 +08:00
+
+Result Commit: `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce`
+
+Completion Commit: `5a02dcd5b9a48f7a376b312d2b2081acc75a4e4e`
+
+Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; Code Review PASS; eight acceptance criteria confirmed; exact 30-file result scope and four-file completion metadata. Full evidence, limits, and five-file terminal allowlist are in `tasks/TASK-036-pc-project-todo-links.md`.
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only `docs/api-project-todo-links.md`, `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-036-pc-project-todo-links.md` with message `docs(task): close TASK-036`. Verify local/tracking/remote parity and clean worktree, then return to Decision. Do not run another Closure Check or publish the next task from this step.

@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-15
 Delivery task: TASK-036
-Status: implemented in TASK-036; pending independent Code Review
+Status: implemented; TASK-036 Code Review PASS; result published in 54500cc
 
 ## Relationship And Storage
 
