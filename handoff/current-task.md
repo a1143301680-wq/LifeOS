@@ -6,11 +6,11 @@ Last updated: 2026-10-15
 
 - Task ID: TASK-036
 - Task Name: PC Project/Goal Todo links
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-034 editable stages; TASK-035 terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea`; existing Todo list/detail and identity isolation; migration `20261014_0008`
-- Contract: `docs/api-project-todo-links.md` (proposed for Task Review)
+- Contract: `docs/api-project-todo-links.md` (Task Review-approved)
 
 ## Background
 
@@ -77,14 +77,14 @@ A PC user can explicitly associate existing owned Todos with a Project, reorder/
 
 ## Acceptance Criteria
 
-- [ ] Existing/new Projects have no inferred links; one owned Todo can link to multiple Projects without copied or mutated source data.
-- [ ] Migration and constraints preserve existing Project/stage/milestone/Session/Todo/user data and sync cursors across upgrade/repeated-head/downgrade/re-upgrade.
-- [ ] GET/PUT enforce ownership, UUID/field/0-50/duplicate bounds, ordered membership, unavailable-source rules, and atomic invalid-request rollback.
-- [ ] Link/reorder/unlink/clear persist with no source mutation; Todo edits/status/deletion are reflected by current source projections and safe placeholders, without losing retained selections.
-- [ ] Idempotency/no-op/parent version/timestamp semantics are correct and concurrency with Project/stage/milestone writes plus Todo deletion respects the defined lock/visibility boundary.
-- [ ] PC handles paginated all-status candidates beyond the first page, explicit Save/Cancel, independent refresh/errors, stable retry payload/keys, and safe identity/Project switching across reads and writes.
-- [ ] Source detail reads the real Todo, handles unavailable/expired/error states, restores Project context/focus, and introduces no Todo mutation; existing feature/sync contracts regress.
-- [ ] Backend/Web tests, production build, desktop/narrow browser flows, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [x] Existing/new Projects have no inferred links; one owned Todo can link to multiple Projects without copied or mutated source data.
+- [x] Migration and constraints preserve existing Project/stage/milestone/Session/Todo/user data and sync cursors across upgrade/repeated-head/downgrade/re-upgrade.
+- [x] GET/PUT enforce ownership, UUID/field/0-50/duplicate bounds, ordered membership, unavailable-source rules, and atomic invalid-request rollback.
+- [x] Link/reorder/unlink/clear persist with no source mutation; Todo edits/status/deletion are reflected by current source projections and safe placeholders, without losing retained selections.
+- [x] Idempotency/no-op/parent version/timestamp semantics are correct and concurrency with Project/stage/milestone writes plus Todo deletion respects the defined lock/visibility boundary.
+- [x] PC handles paginated all-status candidates beyond the first page, explicit Save/Cancel, independent refresh/errors, stable retry payload/keys, and safe identity/Project switching across reads and writes.
+- [x] Source detail reads the real Todo, handles unavailable/expired/error states, restores Project context/focus, and introduces no Todo mutation; existing feature/sync contracts regress.
+- [x] Backend/Web tests, production build, desktop/narrow browser flows, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
 
 ## Verification Plan
 
@@ -137,6 +137,10 @@ Report changed paths, schema/migration and cardinality/deletion policy, API/lock
 
 Task Review: PASS at 2026-10-15 09:21 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f1361add0c05969ea`; snapshot commit `39872aa423abfa03092593797bb5e1f7630f4b89`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved nine-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-036 implementation and verification evidence. Git publication remains blocked until Code Review PASS.

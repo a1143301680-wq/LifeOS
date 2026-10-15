@@ -4,7 +4,7 @@ Last updated: 2026-10-15
 
 ## Snapshot Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-036
 
@@ -12,13 +12,13 @@ Branch: main
 
 Base Commit: 702c6759b82185a112607c3f1361add0c05969ea
 
-Working Tree: proposed nine-document Decision publication; no pre-existing worktree change or business implementation.
+Working Tree: 9 approved TASK-036 pre-Coding publication/readiness documents committed separately; no business implementation
 
-Snapshot Commit Created: Pending
+Snapshot Commit Created: Yes
 
-Snapshot Commit: Pending
+Snapshot Commit: 39872aa423abfa03092593797bb5e1f7630f4b89
 
-Reason: wait for Task Review PASS and both active task records READY.
+Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
 
 ## Instructions
 

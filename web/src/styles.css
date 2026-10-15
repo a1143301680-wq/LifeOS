@@ -618,6 +618,28 @@ h1, h2, p { margin-top: 0; }
 .project-notice { color: var(--green); font-size: 12px; }
 
 .project-stages { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.project-todo-links { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.linked-todos-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.linked-todos-heading h3, .linked-todos-heading h4 { margin: 0; font-size: 16px; }
+.linked-todo-tools { display: flex; gap: 3px; align-items: center; }
+.linked-todo-tools .icon-button, .linked-todo-list > li > .icon-button { width: 30px; height: 32px; flex-shrink: 0; }
+.linked-todo-tools svg, .linked-todo-list svg { width: 16px; height: 16px; }
+.linked-todo-list { list-style: none; margin: 16px 0; padding: 0; display: grid; gap: 10px; }
+.linked-todo-list > li { min-width: 0; display: flex; align-items: center; gap: 8px; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.linked-todo-summary { min-width: 0; display: grid; gap: 5px; overflow-wrap: anywhere; font-size: 13px; }
+.linked-todo-summary span, .linked-todo-summary small, .linked-todo-count { color: var(--muted); font-size: 11px; }
+.linked-todo-selected { max-height: 340px; overflow-y: auto; }
+.linked-todo-editor > h4 { margin: 18px 0 10px; font-size: 13px; }
+.linked-todo-candidates { max-height: 260px; overflow-y: auto; margin-bottom: 12px; }
+.linked-todo-candidates label { display: flex; align-items: start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.linked-todo-candidates input { accent-color: var(--green); flex-shrink: 0; }
+.linked-todo-candidates label > span { min-width: 0; display: grid; gap: 5px; overflow-wrap: anywhere; }
+.linked-todo-candidates small { color: var(--muted); font-size: 11px; }
+.linked-todo-editor .project-form-actions { margin-top: 16px; }
+.linked-todo-error { font-size: 12px; color: #9a3529; }
+.project-todo-source { margin-top: 20px; padding: 16px 0; border-top: 1px solid var(--line); min-width: 0; }
+.project-todo-source h5 { font-size: 15px; margin: 20px 0 12px; overflow-wrap: anywhere; }
+.linked-todo-note { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.6; }
 .project-milestones { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
 .project-milestones-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .project-milestones-heading h3 { margin: 0; font-size: 16px; }

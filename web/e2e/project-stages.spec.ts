@@ -23,6 +23,7 @@ for (const width of [1280, 375]) {
     await page.route("**/api/v1/projects**", (route) => {
       const request = route.request();
       const url = request.url();
+      if (url.endsWith("/todo-links")) return route.fulfill({ json: { data: { links: [], project_version: project.version } } });
       if (url.endsWith("/milestones")) return route.fulfill({ json: { data: { milestones: [], project_version: project.version } } });
       if (url.endsWith(`/projects/${projectId}/stages`)) {
         if (request.method() === "PUT") {

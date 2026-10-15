@@ -100,6 +100,11 @@ export type TodoCreatePayload = {
   planned_date?: string;
 };
 
+export type LinkedTodo = Pick<Todo, "id" | "title" | "status" | "priority" | "planned_date" | "due_at" | "version">;
+export type ProjectTodoLink = { todo_id: string; sort_order: number; unavailable: boolean; todo: LinkedTodo | null };
+export type ProjectTodoLinkCollection = { links: ProjectTodoLink[]; project_version: number };
+export type TodoCandidatePage = { items: Todo[]; next_cursor: string | null };
+
 export type TodoUpdatePayload = {
   title: string;
   category_id: string;

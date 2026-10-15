@@ -27,6 +27,7 @@ for (const width of [1280, 375]) {
     } } }));
     await page.route("**/api/v1/projects**", (route) => {
       const url = route.request().url();
+      if (url.endsWith("/todo-links")) return route.fulfill({ json: { data: { links: [], project_version: project.version } } });
       if (url.endsWith("/milestones")) return route.fulfill({ json: { data: { milestones: [], project_version: project.version } } });
       if (url.endsWith("/stages")) return route.fulfill({ json: { data: { stages: [], current_stage_id: null, project_version: project.version } } });
       if (url.endsWith(`/ai-sessions/${sessionId}`)) return route.fulfill({ json: { data: session } });

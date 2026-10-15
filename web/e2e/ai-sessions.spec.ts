@@ -35,6 +35,7 @@ for (const viewport of [
     await page.route("**/api/v1/projects**", async (route) => {
       const request = route.request();
       const url = request.url();
+      if (url.endsWith("/todo-links")) return route.fulfill({ json: { data: { links: [], project_version: project.version } } });
       if (url.endsWith("/milestones")) return route.fulfill({ json: { data: { milestones: [], project_version: project.version } } });
       if (url.endsWith("/stages")) {
         await route.fulfill({ json: { data: { stages: [], current_stage_id: null, project_version: project.version } } });

@@ -17,7 +17,7 @@ Projects, AI Session records, and Dashboard/Resume are published. Complete the r
 | 3 | TASK-033 PC Dashboard and Resume (closed) | Up to three focused projects, latest Session, next step, and Today summary | Decide what to continue from one screen |
 | 4 | TASK-034 Editable Project stages (closed) | Persisted type-based defaults, add/rename/remove/reorder, explicit current selection | Save and reopen a customized stage list |
 | 5 | TASK-035 Project milestones (closed) | Lightweight title/date/status/order per Project | Track the next meaningful target |
-| 6 | TASK-036 Project Todo links (PLANNED) | Owner-scoped links to existing Todos and source navigation | Turn project work into actionable Todos |
+| 6 | TASK-036 Project Todo links (REVIEWING) | Owner-scoped links to existing Todos and source navigation | Turn project work into actionable Todos |
 | 7 | Unpublished: Project logs and timeline | Manual logs and a unified view of available source events | Recover project history without fabricated events |
 | 8 | Unpublished: Project lifecycle | Controlled archive/delete with explicit dependent-record policy | Remove/archive projects predictably |
 | 9 | Unpublished: PC Notes | Lightweight contextual notes and external knowledge links | Capture and retrieve a note in context |
@@ -25,7 +25,7 @@ Projects, AI Session records, and Dashboard/Resume are published. Complete the r
 | 11 | Unpublished: PC acceptance and demo | Cross-module regression, two-user isolation, real local backend, browser checks, demo runbook | Demonstrate the PC MVP end to end |
 | 12 | Unpublished: Android REST bootstrap and reads | Authoritative category/Todo reconciliation and Today/Todo reads | Resume Android Phase 1A delivery |
 
-The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 and TASK-035 are terminally closed; TASK-036 Project Todo links is published for Task Review. Earlier future-ID reservations (TASK-035 through TASK-038) are superseded; assign each next ID when Decision publishes it. Future rows may be split further after inspection/Task Review and are not READY or authorized for Coding.
+The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 and TASK-035 are terminally closed; TASK-036 Project Todo links is implemented and awaiting Code Review. Earlier future-ID reservations (TASK-035 through TASK-038) are superseded; assign each next ID when Decision publishes it. Future rows may be split further after inspection/Task Review and are not READY or authorized for Coding.
 
 ## Boundaries
 
@@ -45,8 +45,8 @@ TASK-034 Code Review verified 147 backend tests including disposable PostgreSQL 
 
 TASK-035 result `cbe65ec32501dd7954c525cb2d403e8922a49edb` and completion `d3c668b34701ceb165b960582a7f62f9ff08d744` are published. Decision verified local HEAD/origin/main/remote parity and a clean worktree on 2026-10-14; Closure Check passed. The exact five-file terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea` is published. Decision verified clean local HEAD/origin/main/remote parity on 2026-10-15; its workflow has ended. Code Review independently verified 173 backend tests including disposable PostgreSQL migration/API/concurrency checks, 159 Web tests, production build, and Playwright 12 passed / 2 existing conditional skips. Milestone browser flows at 1280px/375px used API stubs; real API persistence was verified separately through FastAPI TestClient against disposable PostgreSQL. Migration 20261014_0008 is the sole head; normal startup/deployment must verify and apply it before configured-database milestone use. No current deployed revision is claimed.
 
-TASK-036 Project Todo links is now published under docs/api-project-todo-links.md, with no implementation approval yet. It preserves existing Todo APIs/sync DTOs via same-owner many-to-many references; the proposed next migration is 20261015_0009. Logs/timeline is the next business slice after this task terminally closes.
+TASK-036 Project Todo links is implemented under docs/api-project-todo-links.md and awaiting independent Code Review. Coding verified 186 backend tests, 180 Web tests, production build, and Playwright 14 passed / 2 existing conditional skips. Desktop/narrow browser flows use API stubs; actual migration/API persistence and concurrency use FastAPI TestClient against disposable PostgreSQL. Association writes preserve Todo data and sync rows/cursors. Migration 20261015_0009 is the sole head. Logs/timeline is the next business slice after this task terminally closes.
 
 ## Configured Local Database Checkpoint
 
-On 2026-10-15, user-authorized normal startup applied 20261012_0007 and 20261014_0008; a separate query confirmed the configured user database at 20261014_0008, and PC/API HTTP checks returned 200. This supersedes the earlier unverified deployment notes above for those revisions only; prior review's disposable tests and conditional browser skips remain separate evidence. TASK-036's proposed 0009 is not yet implemented or applied; normal startup/deployment must apply the implemented head before later link use.
+On 2026-10-15, user-authorized normal startup applied 20261012_0007 and 20261014_0008; a separate query confirmed the configured user database at 20261014_0008, and PC/API HTTP checks returned 200. This supersedes the earlier unverified deployment notes above for those revisions only; prior review's disposable tests and conditional browser skips remain separate evidence. TASK-036 implements 0009 pending Code Review; Coding did not upgrade or re-query the configured user database. Normal startup/deployment must apply the implemented head before later link use.

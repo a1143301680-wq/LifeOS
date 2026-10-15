@@ -6,11 +6,11 @@ Last updated: 2026-10-15
 
 - Task ID: TASK-036
 - Task Name: PC Project/Goal Todo links
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-034 editable stages; TASK-035 terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea`; existing Todo list/detail and identity isolation; migration `20261014_0008`
-- Contract: `docs/api-project-todo-links.md` (proposed for Task Review)
+- Contract: `docs/api-project-todo-links.md` (Task Review-approved)
 
 ## Background
 
@@ -77,14 +77,14 @@ A PC user can explicitly associate existing owned Todos with a Project, reorder/
 
 ## Acceptance Criteria
 
-- [ ] Existing/new Projects have no inferred links; one owned Todo can link to multiple Projects without copied or mutated source data.
-- [ ] Migration and constraints preserve existing Project/stage/milestone/Session/Todo/user data and sync cursors across upgrade/repeated-head/downgrade/re-upgrade.
-- [ ] GET/PUT enforce ownership, UUID/field/0-50/duplicate bounds, ordered membership, unavailable-source rules, and atomic invalid-request rollback.
-- [ ] Link/reorder/unlink/clear persist with no source mutation; Todo edits/status/deletion are reflected by current source projections and safe placeholders, without losing retained selections.
-- [ ] Idempotency/no-op/parent version/timestamp semantics are correct and concurrency with Project/stage/milestone writes plus Todo deletion respects the defined lock/visibility boundary.
-- [ ] PC handles paginated all-status candidates beyond the first page, explicit Save/Cancel, independent refresh/errors, stable retry payload/keys, and safe identity/Project switching across reads and writes.
-- [ ] Source detail reads the real Todo, handles unavailable/expired/error states, restores Project context/focus, and introduces no Todo mutation; existing feature/sync contracts regress.
-- [ ] Backend/Web tests, production build, desktop/narrow browser flows, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [x] Existing/new Projects have no inferred links; one owned Todo can link to multiple Projects without copied or mutated source data.
+- [x] Migration and constraints preserve existing Project/stage/milestone/Session/Todo/user data and sync cursors across upgrade/repeated-head/downgrade/re-upgrade.
+- [x] GET/PUT enforce ownership, UUID/field/0-50/duplicate bounds, ordered membership, unavailable-source rules, and atomic invalid-request rollback.
+- [x] Link/reorder/unlink/clear persist with no source mutation; Todo edits/status/deletion are reflected by current source projections and safe placeholders, without losing retained selections.
+- [x] Idempotency/no-op/parent version/timestamp semantics are correct and concurrency with Project/stage/milestone writes plus Todo deletion respects the defined lock/visibility boundary.
+- [x] PC handles paginated all-status candidates beyond the first page, explicit Save/Cancel, independent refresh/errors, stable retry payload/keys, and safe identity/Project switching across reads and writes.
+- [x] Source detail reads the real Todo, handles unavailable/expired/error states, restores Project context/focus, and introduces no Todo mutation; existing feature/sync contracts regress.
+- [x] Backend/Web tests, production build, desktop/narrow browser flows, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
 
 ## Verification Plan
 
@@ -137,6 +137,127 @@ Report changed paths, schema/migration and cardinality/deletion policy, API/lock
 
 Task Review: PASS at 2026-10-15 09:21 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f1361add0c05969ea`; snapshot commit `39872aa423abfa03092593797bb5e1f7630f4b89`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved nine-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-036 implementation and verification evidence. Git publication remains blocked until Code Review PASS.
+
+## Coding Result
+
+- Result: PASS (Coding verification; not Code Review approval)
+- Task ID: TASK-036
+- Final Status: REVIEWING
+- Branch: main
+- HEAD / Snapshot: `39872aa423abfa03092593797bb5e1f7630f4b89` (unchanged)
+- Next Role: Code Review
+
+### Modified Files
+
+Exact working-tree scope, including the three pre-existing state files. `handoff/git-snapshot.md` is preserved unchanged by Coding; the other two state files retain their existing snapshot evidence and receive the completion handoff below.
+
+- `backend/alembic/versions/20261015_0009_add_project_todo_links.py`
+- `backend/app/api/v1/project_todo_links.py`
+- `backend/app/api/v1/router.py`
+- `backend/app/models/__init__.py`
+- `backend/app/models/project_todo_link.py`
+- `backend/app/schemas/project_todo_link.py`
+- `backend/app/services/project_todo_links.py`
+- `backend/tests/test_project_milestone_migration.py`
+- `backend/tests/test_project_todo_link_migration.py`
+- `backend/tests/test_project_todo_links.py`
+- `docs/api-project-todo-links.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-036-pc-project-todo-links.md`
+- `web/e2e/ai-sessions.spec.ts`
+- `web/e2e/dashboard.spec.ts`
+- `web/e2e/project-milestones.spec.ts`
+- `web/e2e/project-stages.spec.ts`
+- `web/e2e/project-todo-links.spec.ts`
+- `web/e2e/projects.spec.ts`
+- `web/src/App.tsx`
+- `web/src/ProjectTodoDetail.test.tsx`
+- `web/src/ProjectTodoDetail.tsx`
+- `web/src/ProjectTodoLinks.test.tsx`
+- `web/src/ProjectTodoLinks.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
+- `web/src/types.ts`
+
+### Implementation Summary
+
+- Empty normalized many-to-many association table, composite Project/Todo key, cascading foreign keys, nonnegative order constraint and owner/Project/order index; migration 0009 follows 0008 without inferred links. Existing milestone migration test changes only its expected head.
+- Owner-scoped nested GET/full-list PUT, maximum 50 distinct UUIDs, forbidden extra fields, current seven-field source projection and unavailable placeholders. Retained unavailable references survive saves; new inaccessible/deleted references fail atomically.
+- Reuses shared owned-Project lock and canonical idempotency hashing/replay. Locks submitted owned Todos in UUID order. Effective membership/order changes increment parent version/timestamp once; no-op preserves parent state and retained link creation times. Idempotency persistence failure rolls back the whole write.
+- No Todo model/schema/write endpoint or sync behavior changes. Tests compare complete Todo rows, sync rows and sequence values before/after link writes. Unlink removes only the association.
+- PC ordered editor uses all-status opaque cursor pagination, deduplication, off-page/unavailable selection retention, explicit Save/Cancel, stable unchanged-payload retry keys, canonical GET and parent refresh. Post-save readback failures retry refresh, not PUT.
+- Read-only source detail uses existing Todo GET, live note/category/status/priority/date metadata, unavailable/auth/retry states, collection refresh on manual source refresh and close, and post-render focus restoration. Identity/Project changes suppress stale collection/page/write/detail/readback results.
+- Contract body remains unchanged; header and delivery-plan progress updated only. Existing E2E files only add nested empty-link read stubs.
+
+### Acceptance Criteria Results
+
+1. PASS: empty new/existing Project state and many-to-many references covered; no source copying/mutation.
+2. PASS: disposable PostgreSQL preserves synthetic legacy users/Projects/stages/milestones/Sessions/Todos and sync data/sequence across upgrade, repeated head, downgrade and re-upgrade; PK/FK/order constraints exercised.
+3. PASS: auth/owner, missing/deleted parent/source, UUID/extra/null/duplicate/max validation, exact projection, retained unavailable references and rollback covered.
+4. PASS: keyed save/readback, reorder/unlink/clear/relink, live source edits/deletion and safe inaccessible placeholders covered.
+5. PASS: replay/conflict/no-op/version/timestamp and rollback covered. Real PostgreSQL concurrent Project PATCH/stage PUT/milestone PUT/link PUT preserves four parent increments. Deterministic barriers exercise both link-first and delete-first source lock outcomes.
+6. PASS: beyond-50 candidate paging, opaque cursor/filter preservation, deduplication, selection cap, Cancel, retry/readback failures and identity/Project race matrix covered.
+7. PASS: source GET-only behavior, live/deleted category metadata, 401/404/410/network retry, manual/close collection refresh and focus return covered; full existing regressions pass.
+8. PASS with documented coverage limits below: backend/Web/build and desktop/narrow browser checks pass, disposable PostgreSQL runs, exact scope/security/whitespace checks pass.
+
+### Verification Commands And Results
+
+Executed on 2026-10-15. Backend commands run from `D:\LifeOS\backend`; Web commands from `D:\LifeOS\web`.
+
+- `python -m pytest tests/test_project_todo_links.py -q --tb=short`: 12 passed.
+- `$env:LIFEOS_TEST_PG_BIN='D:\PostgreSQL\18\bin'` then `python -m pytest tests/test_project_todo_link_migration.py -q --tb=short`: 1 passed; real disposable PostgreSQL migration/API/concurrency evidence.
+- With the same PostgreSQL-bin environment, `python -m pytest`: 186 passed, no warnings; includes existing migration regressions and the new PostgreSQL test.
+- `python -m alembic heads`: sole `20261015_0009 (head)`.
+- `npm test -- --run src/ProjectTodoLinks.test.tsx src/ProjectTodoDetail.test.tsx`: 21 passed.
+- `npm test -- --run`: 20 files, 180 passed.
+- `npm run build`: PASS.
+- `npx playwright test e2e/project-todo-links.spec.ts`: 2 passed (1280px/375px).
+- `npx playwright test`: 14 passed / 2 skipped. Existing optional Project/AI Session direct-backend browser cases remain conditional skips; no new link test skipped.
+- Desktop/narrow editor and saved-list screenshots visually inspected; no horizontal overflow or overlapping controls. Candidate selection assertions wait for selected-list state because selection intentionally removes a candidate from that list.
+- No final test/build warnings observed. Git reports informational LF-to-CRLF conversion notices only.
+
+### Git Diff Check
+
+- Inspected `git status --short --untracked-files=all`, `git diff --stat`, `git diff`, `git diff --check`, and `git diff --cached`; exact 29-path scope above includes new files and preserved workflow state.
+- `git diff --check` and `git diff --cached --check`: PASS; staging remains empty. New source/test files also checked for trailing whitespace and credential patterns, no matches.
+- No secrets, tokens, `.env`, local databases, caches, screenshots or build/test artifacts in changed/untracked scope; no debug code, dependency churn or broad formatting.
+- Three pre-existing state files preserved: current-task and task archive retain snapshot/decision records; git-snapshot content untouched by Coding. No stage, commit, push, destructive Git operation or Code Review performed.
+- Disposable test clusters cleaned up by fixture. Pre-existing PostgreSQL services and old temporary directories were not stopped/deleted.
+
+### Unresolved Issues And Coverage Limits
+
+- No unresolved TASK-036 implementation blocker identified by Coding; independent Code Review remains required.
+- Browser checks use synthetic API stubs. Actual API persistence/locking/migration evidence is FastAPI TestClient against disposable PostgreSQL, not a direct browser-to-real-backend acceptance claim.
+- Configured user database was previously verified at 0008. Coding did not upgrade or re-query it; normal startup/deployment must apply 0009 before configured-database link use.
+- Whole-list writes retain the approved last-write-wins policy. No optimistic multi-editor conflict protocol or link sync/SSE added.
+- No live AI call, Android run or full PC cross-module real-backend acceptance executed: outside this slice.
+
+### Task-Outside Findings
+
+None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
+
+## Code Review
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-15 09:57:58 +08:00
+- Branch: `main`
+- HEAD: `39872aa423abfa03092593797bb5e1f7630f4b89`
+- Snapshot Commit: `39872aa423abfa03092593797bb5e1f7630f4b89`
+- Blocking Issues: None.
+- Non-blocking Suggestions: the configured user PostgreSQL revision is verified only through `20261014_0008`, so normal startup/deployment must apply `20261015_0009`; link browser flows use stubs while real persistence/migration/locking/delete serialization are covered through TestClient on disposable PostgreSQL; two existing optional live-backend browser cases remain conditionally skipped.
+- Verification: focused backend `12 passed`; focused disposable PostgreSQL `1 passed`; full backend `186 passed`; focused Web `21 passed`; full Web `180 passed`; production build PASS; Playwright `14 passed / 2 conditional skipped`; Alembic sole head `20261015_0009`; desktop/narrow screenshots inspected; whitespace, scope, staging, security, and repository-artifact checks PASS. Pre-existing host PostgreSQL services were observed but not altered.
+- Scope Conclusion: exact reviewed publish scope is 30 files, comprising the 29 Coding paths plus `handoff/code-review-gate.md`. No scope drift or unreviewed path is authorized.
+- Final Task Status: `REVIEWING`; Git Commit owns transition to `COMPLETED` after successful publication.
+- Recommended Commit Message: `feat(project): link todos to projects`
+- Next Role: Git Commit

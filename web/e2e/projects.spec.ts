@@ -36,6 +36,7 @@ for (const viewport of [
     await page.route("**/api/v1/sync/events", (route) => route.fulfill({ status: 200, contentType: "text/event-stream", body: ": keepalive\n\n" }));
     await page.route("**/api/v1/projects**", async (route) => {
       const request = route.request();
+      if (request.url().endsWith("/todo-links")) return route.fulfill({ json: { data: { links: [], project_version: project?.version ?? 1 } } });
       if (request.url().endsWith("/milestones")) return route.fulfill({ json: { data: { milestones: [], project_version: project?.version ?? 1 } } });
       if (request.url().endsWith("/stages")) {
         await route.fulfill({ json: { data: { stages: [], current_stage_id: null, project_version: project?.version ?? 1 } } });

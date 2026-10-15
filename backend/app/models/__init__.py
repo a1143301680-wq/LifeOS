@@ -3,9 +3,10 @@ from app.models.idempotency import IdempotencyKey
 from app.models.milestone import Milestone
 from app.models.project import Project
 from app.models.project_stage import ProjectStage
+from app.models.project_todo_link import ProjectTodoLink
 from app.models.sync import SyncChange
 from app.models.todo import Todo
 from app.models.todo_category import TodoCategory
 from app.models.user import User
 
-__all__ = ["AISession", "IdempotencyKey", "Milestone", "Project", "ProjectStage", "SyncChange", "Todo", "TodoCategory", "User"]
+__all__ = ["AISession", "IdempotencyKey", "Milestone", "Project", "ProjectStage", "ProjectTodoLink", "SyncChange", "Todo", "TodoCategory", "User"]

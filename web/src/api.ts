@@ -10,6 +10,8 @@ import type {
   ProjectStagePayload,
   MilestoneCollection,
   MilestonePayload,
+  ProjectTodoLinkCollection,
+  TodoCandidatePage,
   Todo,
   TodoCreatePayload,
   TodoUpdatePayload,
@@ -78,6 +80,33 @@ export async function getCurrentUser(token: string) {
 export async function getPendingTodos(token: string) {
   const response = await authenticatedRequest<ListEnvelope<Todo>>("/todos", token);
   return response.items;
+}
+
+export async function getTodoCandidates(token: string, cursor: string | null) {
+  const query = new URLSearchParams({ status: "all", limit: "50" });
+  if (cursor !== null) query.set("cursor", cursor);
+  const response = await authenticatedRequest<TodoCandidatePage>(`/todos?${query}`, token);
+  if (!Array.isArray(response.items) || !(response.next_cursor === null || typeof response.next_cursor === "string")) throw new ApiError(0);
+  return response;
+}
+
+export async function getTodoSource(token: string, todoId: string) {
+  const response = await authenticatedRequest<DataEnvelope<Todo>>(`/todos/${encodeURIComponent(todoId)}`, token);
+  return response.data;
+}
+
+export async function getProjectTodoLinks(token: string, projectId: string) {
+  const response = await authenticatedRequest<DataEnvelope<ProjectTodoLinkCollection>>(`/projects/${encodeURIComponent(projectId)}/todo-links`, token);
+  if (!Array.isArray(response.data?.links)) throw new ApiError(0);
+  return response.data;
+}
+
+export async function putProjectTodoLinks(token: string, projectId: string, key: string, todoIds: string[]) {
+  const response = await authenticatedRequest<DataEnvelope<ProjectTodoLinkCollection>>(`/projects/${encodeURIComponent(projectId)}/todo-links`, token, {
+    method: "PUT", headers: { "Content-Type": "application/json", "Idempotency-Key": key }, body: JSON.stringify({ todo_ids: todoIds }),
+  });
+  if (!Array.isArray(response.data?.links)) throw new ApiError(0);
+  return response.data;
 }
 
 export async function getProjects(token: string) {

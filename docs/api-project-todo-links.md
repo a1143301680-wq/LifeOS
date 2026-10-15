@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-15
 Delivery task: TASK-036
-Status: proposed for Task Review; not an implemented API
+Status: implemented in TASK-036; pending independent Code Review
 
 ## Relationship And Storage
 
