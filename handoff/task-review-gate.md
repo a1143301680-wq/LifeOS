@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-10-14
+Last updated: 2026-10-15
 
 ## Gate Status
 
@@ -10,18 +10,18 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-10-14 09:30 +08:00
+Reviewed at: 2026-10-15 09:21 +08:00
 
-Reviewed task: TASK-035 PC lightweight Project/Goal milestones
+Reviewed task: TASK-036 PC Project/Goal Todo links
 
 ## Required Review
 
-- [x] Milestone storage, ownership, fields, dates, statuses, ordering, validation, and empty-default behavior are explicit.
-- [x] Soft deletion, tombstone ID rejection, retained/new row behavior, and canceled-record visibility are deterministic.
-- [x] Row and parent version/timestamp rules, normalized no-op, replay/conflict, transaction, and parent-lock boundaries are complete.
-- [x] Migration upgrade/downgrade/re-upgrade preserves existing Project, stage, current-stage, AI Session, and user data.
-- [x] PC editor and stale identity/Project response rules have executable acceptance and verification coverage.
-- [x] The exact 10-file Snapshot range matches the complete worktree and contains no implementation code.
+- [x] Same-owner many-to-many cardinality, storage, ownership, ordering, bounds, and source-projection rules are explicit.
+- [x] Link, reorder, unlink, clear, deleted-source placeholder, relink, and source-detail behavior are deterministic and non-mutating to Todos.
+- [x] Candidate selection uses the existing all-status opaque-cursor API and preserves selections outside loaded pages.
+- [x] Parent/Todo locking, idempotency, no-op, Project version, transaction, delete concurrency, and no-sync boundaries are complete.
+- [x] Migration upgrade/downgrade/re-upgrade preserves all existing records, versions, timestamps, and sync cursors without inferred backfill.
+- [x] The exact nine-file Snapshot range matches the complete worktree and contains no implementation code.
 
 ## Blocking Issues
 
@@ -32,21 +32,20 @@ None.
 ### Repository State
 
 - Branch: `main`
-- HEAD: `9030c7d2c8d3896fcb3d65ea454547844949858c`
-- `origin/main`: `9030c7d2c8d3896fcb3d65ea454547844949858c`
-- Remote `refs/heads/main`: `9030c7d2c8d3896fcb3d65ea454547844949858c`
-- Dependency check: TASK-034 terminal Closure Commit exists with subject `docs(task): close TASK-034` and is the aligned local/tracking/remote baseline. Existing migration head before TASK-035 is `20261012_0007`.
-- Worktree Summary before PASS persistence: 8 modified tracked documents and 2 untracked documents; all 10 match the proposed TASK-035 publication scope exactly.
+- HEAD: `702c6759b82185a112607c3f1361add0c05969ea`
+- `origin/main`: `702c6759b82185a112607c3f1361add0c05969ea`
+- Remote `refs/heads/main`: `702c6759b82185a112607c3f1361add0c05969ea`
+- Dependency check: TASK-035 terminal Closure Commit exists with subject `docs(task): close TASK-035` and is the aligned local/tracking/remote baseline. Existing migration head before TASK-036 is `20261014_0008`.
+- Worktree Summary before PASS persistence: 7 modified tracked documents and 2 untracked documents; all nine match the proposed TASK-036 publication scope exactly.
 - Staged Changes: None.
 - `git diff --check`: exit code 0; informational LF-to-CRLF warnings only.
 - `git diff --cached --check`: exit code 0.
-- Whitespace/EOF: all 10 files have a final newline and no extra EOF blank line.
-- Issue scan: no TASK-035 issue exists. `ISSUE-20261011-001` remains an unrelated open P3 TASK-030 language-consistency issue and does not block or expand TASK-035.
+- Whitespace/EOF: all nine files have a final newline and no extra EOF blank line.
+- Issue scan: no TASK-036 issue exists. `ISSUE-20261011-001` remains an unrelated open P3 TASK-030 issue and does not block or expand TASK-036.
 
 ### Approved Snapshot Scope
 
-- `docs/api-project-milestones.md`
-- `docs/api-project-stages.md`
+- `docs/api-project-todo-links.md`
 - `docs/pc-delivery-plan.md`
 - `handoff/current-task.md`
 - `handoff/project-state.md`
@@ -54,44 +53,43 @@ None.
 - `handoff/code-review-gate.md`
 - `handoff/git-snapshot.md`
 - `handoff/git-commit.md`
-- `tasks/TASK-035-pc-project-milestones.md`
+- `tasks/TASK-036-pc-project-todo-links.md`
 
-This is the complete worktree scope. `docs/api-project-stages.md` changes only its stale status header. No backend/Web implementation, Android file, migration implementation, dependency/lockfile, issue-log edit, completed task archive, generated output, credential, private fixture, or unrelated stable contract is present. Targeted scans found no secret value or user-machine path.
+This is the complete worktree scope. No backend/Web implementation, Android file, migration implementation, dependency/lockfile, issue-log edit, completed task archive, generated output, credential, private fixture, or unrelated stable contract is present. Targeted scans found no secret value or user-machine path.
 
-### Milestone Contract Review
+### Relationship And Deletion Review
 
-- Milestones are owner-scoped Project children with explicit title, nullable SQL DATE, three-state status, submitted order, row version, timestamps, and soft-deletion fields. The active collection is capped at 50 and GET is unpaginated within that bound.
-- API dates are strict valid Gregorian `YYYY-MM-DD` strings or null. Timestamps, numbers, malformed/impossible dates, and timezone conversion are forbidden; past, current, and future dates are all valid independently of status.
-- GET returns only active milestones in deterministic order and never seeds. PUT is an atomic whole-active-collection replacement with exact required fields, UUID collision/membership validation, unknown/null/omitted-field rejection, and fail-closed parent ownership.
-- Retained IDs update in place; unused client UUIDs create version-1 rows; omitted active rows become tombstones. Tombstones preserve prior content and creation time, increment once, receive deletion/update timestamps, remain unreadable in GET, and can never be reused or silently restored.
-- Canceled and completed records remain active and visible until explicitly omitted. Every status may explicitly transition to either other status; no date, completion, overdue, Project progress, or Project status is inferred.
+- The association is normalized same-owner many-to-many storage with `(project_id, todo_id)` identity and per-Project order. One Todo may belong to multiple Projects; the link stores no copied Todo fields and never changes the source.
+- GET projects every persisted reference from current source data. Active pending/completed/canceled Todos expose only the bounded seven-field projection; soft-deleted or otherwise inaccessible sources retain ID/order but return `unavailable: true` and `todo: null` without deleted content leakage.
+- PUT atomically replaces one Project's ordered IDs. Retained references preserve creation time, new IDs require an existing owned active Todo, omitted IDs unlink only the association, and an empty array clears all links.
+- A previously linked Todo that later becomes deleted may be retained/reordered or removed; an unlinked deleted Todo cannot be added again. Unavailable saved selections survive GET, candidate paging, refresh, and draft editing until explicit removal.
+- Unlink never deletes or edits a Todo, emits no sync event, and leaves other Projects' references unchanged. Source edits/deletion change later projections without a Project version bump.
 
-### Version, Idempotency, And Concurrency Review
+### Candidate Pagination And Source Navigation
 
-- A retained row increments once only when normalized title/date/status/order changes. Removal increments that row once. Unchanged rows retain versions and timestamps; an already-empty or otherwise identical normalized PUT is a complete no-op.
-- Any effective collection change increments the parent Project version exactly once and updates its timestamp while preserving Project fields, stages, AI Sessions, and prompts.
-- The milestone PUT shares the existing parent Project `SELECT ... FOR UPDATE` boundary already used by Project PATCH and stage PUT. Interleaved Project/stage/milestone writes must preserve every parent-version increment and transaction integrity.
-- Row changes, tombstones, parent metadata, and successful idempotency response share one transaction. Invalid requests and failures roll back all effects. Same-key/same-payload replay returns the original response; changed payload under that key conflicts.
-- Last-write-wins and the absence of `base_version`/`expected_version` are explicit, so Coding is not expected to invent an optimistic conflict contract.
+- Candidate selection reuses `GET /api/v1/todos?status=all&limit=50`. The existing API accepts `status=all`, excludes soft-deleted Todos, returns an opaque filter-bound `next_cursor`, and supports subsequent pages with identical filters.
+- The contract requires Load more until `next_cursor` is null, ID deduplication, stale/concurrent page guards, preservation of already selected IDs outside loaded pages, and no writes before explicit Save. A 50-item page is never treated as the entire collection.
+- Available source detail reuses existing Todo GET and existing 401/404/410 semantics. It is read-only, returns to the same Project/focus, refreshes source state on close, and exposes no completion/edit/delete action from the Project panel.
+- Source projection, candidate pages, detail, collection GET/PUT, and readback are all tied to identity plus Project generation so late responses cannot affect another context.
 
-### Migration And Verification Review
+### Version, Locking, And Migration Review
 
-- `20261014_0008` is one forward migration from `20261012_0007`; previous revisions remain immutable. It creates an empty constrained/indexed milestone table and performs no Project-time, read-time, restart-time, or repeated-head seeding.
-- Downgrade removes only milestone storage. Re-upgrade recreates an empty table while preserving users, Projects, stages/current selection, and AI Sessions.
-- Disposable PostgreSQL verification starts at 0007 with synthetic related data, checks upgrade/no-seed, keyed API persistence, tombstones and ID rejection, repeated head, downgrade/re-upgrade, one Alembic head, and interleaved Project/stage/milestone writes. SQLite tests are not treated as migration proof.
-- PC acceptance covers add/edit/reorder/remove/clear-all, all statuses, date clear/no-timezone-shift, stable UUIDs and retry keys, Save/Cancel, refresh-only readback failure, independent states, identity/Project switching, desktop/narrow layouts, and real disposable-API persistence distinct from stubbed browser checks.
-- Full backend/Web tests, production build, Playwright, regressions, exact Git/security/artifact checks, and cleanup evidence are explicit and executable.
+- Equal ordered IDs are a normalized no-op preserving link timestamps and parent version/timestamp; effective membership/order changes increment the Project version exactly once.
+- Link membership/order, parent metadata, and successful idempotency response share one transaction. Invalid writes roll back all association, Project, Todo/sync, and idempotency effects. Replays and changed-payload conflicts reuse existing semantics.
+- Link PUT locks the owned Project through the existing shared parent boundary and locks submitted owned Todo rows in deterministic UUID order before availability validation. Interleaved Project/stage/milestone/link writes preserve parent increments.
+- Todo delete and new link creation have explicit serial outcomes: link first may later surface as unavailable; delete first causes generic validation rejection. The association write never changes Todo fields/version/timestamps/category/status/completion or sync rows/cursors.
+- `20261015_0009` follows `20261014_0008`, creates an empty constrained association table, performs no inferred link backfill, and leaves existing users, Projects, stages, milestones, AI Sessions, Todos, versions, timestamps, and sync cursors unchanged. Downgrade removes only link data; re-upgrade starts empty.
 
-### Slice And Boundary Review
+### Slice And Verification Review
 
-- TASK-035 is one closeable slice: empty milestone persistence, nested GET/PUT, Project-detail editor, and focused/full verification.
-- Todo/stage links, dependencies, automatic progress, reminders, timeline/history, Trash/restore, lifecycle, Calendar/Dashboard integration, Android, sync/SSE, AI/provider/memory/Agent behavior, and generic refactors remain excluded.
-- Known risks are dispositioned: full-list last-write-wins, calendar-date preservation, soft-delete wording without restore claims, independent section races, and configured-database deployment distinct from disposable evidence.
+- TASK-036 is one closeable slice: association persistence, nested GET/PUT, paginated selection, unavailable projection, read-only source view, and focused/full verification.
+- Todo writes/model/DTO/sync contracts, reverse-project Todo UI, auto-progress, stages/milestones, timeline, lifecycle, Calendar/Dashboard integration, Android, AI/provider/memory/Agent behavior, and global refactors remain excluded.
+- Verification covers ownership/cardinality, all source states, unavailable retention, bounds/rollback, no source/sync mutation, pagination beyond 50, retry keys, stale responses, migration and concurrency on disposable PostgreSQL, full backend/Web suites, build, responsive Playwright flows, direct persistence evidence, scope/security checks, and cleanup.
 
 ### Git Snapshot Readiness
 
-READY. Git Snapshot may establish the pre-Coding baseline using exactly the 10 files above. It must independently recheck branch, HEAD, remote parity, complete tracked/untracked scope, staged state, full/cached whitespace, secrets, private fixtures, and generated artifacts. Coding remains unauthorized until Snapshot completes and synchronizes both task records to `IN_PROGRESS`.
+READY. Git Snapshot may establish the pre-Coding baseline using exactly the nine files above. It must independently recheck branch, HEAD, remote parity, complete tracked/untracked scope, staged state, full/cached whitespace, secrets, private fixtures, and generated artifacts. Coding remains unauthorized until Snapshot completes and synchronizes both task records to `IN_PROGRESS`.
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-035 publication/readiness scope. Do not start Coding, stage implementation, commit implementation, or push implementation before the Snapshot transition completes.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-036 publication/readiness scope. Do not start Coding, stage implementation, commit implementation, or push implementation before the Snapshot transition completes.
