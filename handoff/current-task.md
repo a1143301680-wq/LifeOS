@@ -6,7 +6,7 @@ Last updated: 2026-10-15
 
 - Task ID: TASK-036
 - Task Name: PC Project/Goal Todo links
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-034 editable stages; TASK-035 terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea`; existing Todo list/detail and identity isolation; migration `20261014_0008`
@@ -141,6 +141,6 @@ Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f13
 
 Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Decision
 
-Required Next Action: independently review TASK-036 implementation and verification evidence. Git publication remains blocked until Code Review PASS.
+Required Next Action: perform the TASK-036 Decision Closure Check against Result Commit `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce` and this completion record. Do not publish the next task before closure.

@@ -4,18 +4,18 @@ Last updated: 2026-10-15
 
 ## Commit Status
 
-Status: PENDING
+Status: COMPLETE
 
 Task ID: TASK-036
 
 Branch: main
 
-Commit Hash: Pending
+Commit Hash: 54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce
 
-Commit Message: Pending Code Review recommendation
+Commit Message: feat(project): link todos to projects
 
 Push Target: origin/main
 
 ## Instructions
 
-Wait for TASK-036 Code Review PASS and exact Reviewed Scope before staging/committing/pushing its result. TASK-035 terminal closure 702c675 is complete; do not repeat its Closure Check or Closure Commit.
+TASK-036 Result Commit was pushed to `origin/main`; local HEAD, `origin/main`, and remote `refs/heads/main` matched. Decision must perform the TASK-036 Closure Check before any terminal Closure Commit or next-task publication.

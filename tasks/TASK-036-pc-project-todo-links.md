@@ -6,7 +6,7 @@ Last updated: 2026-10-15
 
 - Task ID: TASK-036
 - Task Name: PC Project/Goal Todo links
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-034 editable stages; TASK-035 terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea`; existing Todo list/detail and identity isolation; migration `20261014_0008`
@@ -261,3 +261,18 @@ None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
 - Final Task Status: `REVIEWING`; Git Commit owns transition to `COMPLETED` after successful publication.
 - Recommended Commit Message: `feat(project): link todos to projects`
 - Next Role: Git Commit
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce`
+- Commit Message: `feat(project): link todos to projects`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
