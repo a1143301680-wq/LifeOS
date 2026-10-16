@@ -4,113 +4,112 @@ Last updated: 2026-10-15
 
 ## Metadata
 
-- Task ID: TASK-036
-- Task Name: PC Project/Goal Todo links
-- Status: COMPLETED
+- Task ID: TASK-037
+- Task Name: PC Project logs and timeline foundation
+- Status: READY
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
-- Dependencies: TASK-034 editable stages; TASK-035 terminal Closure Commit `702c6759b82185a112607c3f1361add0c05969ea`; existing Todo list/detail and identity isolation; migration `20261014_0008`
-- Contract: `docs/api-project-todo-links.md` (Task Review-approved)
+- Dependencies: Project/stage/milestone/AI Session foundations; TASK-036 terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25`; existing owned Todo source APIs; migration `20261015_0009`
+- Contract: `docs/api-project-timeline.md` (proposed for Task Review)
 
 ## Background
 
-TASK-035 is terminally closed. Decision verified main HEAD, origin/main, and remote main at its terminal Closure Commit on 2026-10-15 with a clean worktree and the exact five authorized Closure files. Normal LifeOS startup earlier on 2026-10-15 applied pending stage/milestone migrations and a separate query confirmed the configured user database at 20261014_0008. That deployment verification is distinct from earlier disposable test evidence.
+TASK-036 terminal closure is published; main HEAD, origin/main, and remote main matched its terminal commit with a clean worktree before this publication. Its exact five-file Closure scope and commit whitespace were verified. The next roadmap slice is Project logs/timeline before lifecycle, Notes, Calendar, and PC acceptance.
 
-The next roadmap slice connects existing Todo actions to Projects. PC foundations remain prioritized; AI memory/self-iteration/Agents and Android remain deferred.
+Reliable timestamps already exist for AI Sessions and completed linked Todos; milestone status-change history does not. This slice adds real manual records and a common read-only timeline without inventing past events. PC foundations remain ahead of Android and deferred AI memory/Agent work.
 
 ## Goal
 
-A PC user can explicitly associate existing owned Todos with a Project, reorder/unlink them, reopen the saved references, see current source state, and view the underlying Todo without creating duplicate Todos or changing Todo behavior.
+A PC user can record/edit/remove a manual Project log, see it alongside actual AI Sessions and qualifying completed linked Todos in one ordered paginated timeline, and open the underlying source with correct Project context.
 
 ## In Scope
 
-- Empty normalized many-to-many Project/Todo association table and migration, with owner validation and bounded ordered references.
-- Nested GET/full-list PUT, idempotency, no-op/version/locking behavior, and unavailable-source placeholders.
-- Project-detail linked list/editor, paginated all-status candidate selection, refresh, and read-only source detail using existing Todo APIs.
-- Focused tests, disposable PostgreSQL migration/API/concurrency verification, desktop/narrow browser flows, and existing Project/stage/milestone/Session/Dashboard/Todo regressions.
-- Publication housekeeping: update TASK-035 terminal milestone/plan and persist the separately verified configured-database 0008 startup result; no completed-archive edits.
+- User-owned manual project_logs storage, soft deletion, and a forward/backward migration with no historical backfill.
+- Keyed manual log create/read/update/delete, exact content/field rules, no-op and shared parent-version/transaction behavior.
+- Read-only three-source timeline with explicit occurrence semantics, deterministic keyset pagination, ownership/deletion filters, and bounded queries.
+- Project-detail timeline/manual-log UI, source navigation/back/focus, independent failures, retries, and identity/Project race protection.
+- Focused/backend/migration/concurrency/Web/browser verification and existing feature regressions.
+- Publication housekeeping: record TASK-036 terminal closure and correct stale live plan/state wording without editing its completed archive.
 
 ## Out Of Scope
 
-- Todo creation/editing/completion/deletion from the Project panel, Todo project_id fields, reverse-project Todo UI, new Todo APIs, or Todo/sync contract changes.
-- Stage/milestone links, auto-progress, logs/timeline/history, archive/Project delete, Notes, Calendar/Dashboard integration, reminders, Android/offline writes, and link sync/SSE.
-- AI/provider/language fixes, memory/learning/Agents/autonomous linking, external imports, generic relationship engines, and global UI refactors.
-- Business changes to completed task archives or unrelated product/architecture contracts.
+- Milestone/stage change history, immutable audit/event store, automatic source logging/backfill, custom/backdated manual log occurrence, and AI Session schema/table-link migration.
+- Project lifecycle/archive/delete, Notes, Calendar/Dashboard timeline integration, stats, auto-progress, reminders, Android/offline/sync/SSE.
+- Todo/source editing from timeline, new Todo fields/endpoints, AI prompt/provider/language/memory/Agent changes, automatic writes, and generic workflow/UI rewrites.
+- Completed task archives, old migrations, or unrelated stable contract changes.
 
 ## Relevant Files
 
-- `docs/api-project-todo-links.md`: exact relationship/cardinality, source/unavailable DTOs, payload/error/locking/transaction rules, candidate pagination, source view, and PC flow.
-- `docs/requirements.md`: sections 7/10 Project/Todo semantics; `docs/mvp.md`: Phase 2 Todo-link acceptance; `docs/architecture.md`: sections 4-5 and 9-10 ownership/entity boundaries.
-- `docs/api-phase1a.md`: existing Todo list filters/cursors and detail/deleted-resource contract only; do not change it.
-- `docs/api-project-stages.md`, `docs/api-project-milestones.md`: existing parent version/locking behavior; `docs/pc-delivery-plan.md`: sequence.
-- `backend/app/models/project.py`, `backend/app/models/todo.py`, `backend/app/models/__init__.py`, `backend/app/api/v1/router.py`, `backend/app/services/project_stages.py`, `backend/app/services/project_milestones.py`, `backend/app/services/idempotency.py`, `backend/app/api/v1/todos.py`, `backend/app/services/todo_list.py`.
-- `backend/alembic/versions/20261014_0008_add_project_milestones.py`, existing Project/milestone/Todo tests and disposable PostgreSQL fixtures.
-- `web/src/App.tsx`, `web/src/ProjectMilestones.tsx`, `web/src/ProjectStages.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`; existing Project/milestone/Session/Dashboard/Todo browser and component tests.
-- New paths below are expected outputs. Search issue-log.md for TASK-036 and deferred ISSUE-20261011-001; do not read full issue history by default.
+- `docs/api-project-timeline.md`: complete manual CRUD/source/timestamp/pagination/UI contract.
+- `docs/requirements.md`: sections 7 Timeline, 8 Resume, and 9 AI Workspace; `docs/mvp.md`: Phase 2 timeline foundation / Phase 3 Session appearance; `docs/architecture.md`: ownership/core tables/AI Workspace recommendations.
+- `docs/pc-delivery-plan.md`; existing stage/milestone/Todo-link API docs for parent locking and source boundaries; `docs/api-phase1a.md` Todo detail/completion semantics only.
+- `backend/app/models/project.py`, `backend/app/models/ai_session.py`, `backend/app/models/todo.py`, `backend/app/models/project_todo_link.py`, model registration and API router.
+- `backend/app/services/project_stages.py`, `backend/app/services/project_todo_links.py`, `backend/app/services/idempotency.py`, `backend/app/services/todo_list.py`, `backend/app/api/v1/ai_sessions.py`, `backend/app/api/v1/todos.py`; latest 0009 migration and existing disposable PostgreSQL tests.
+- `web/src/App.tsx` Project/AI Session navigation, `web/src/ProjectTodoDetail.tsx`, `web/src/ProjectTodoLinks.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`; existing Project/Session/link/Dashboard component and E2E tests.
+- New paths below are expected outputs. Search issue-log.md for TASK-037 and deferred ISSUE-20261011-001; full issue history is not required.
 
 ## Allowed Files
 
-- New `backend/app/models/project_todo_link.py`, `backend/app/schemas/project_todo_link.py`, `backend/app/services/project_todo_links.py`, `backend/app/api/v1/project_todo_links.py`; model registration and API router.
-- New `backend/alembic/versions/20261015_0009_add_project_todo_links.py` only; no older revision rewrites.
-- New `backend/tests/test_project_todo_links.py`, `backend/tests/test_project_todo_link_migration.py`; existing backend tests/disposable PostgreSQL helper only for scoped fixture/head/compatibility/concurrency coverage.
-- `backend/app/services/project_stages.py` only if its existing shared owned-Project locking helper needs a narrowly scoped change; no Project/stage/milestone/Todo contract mutation.
-- New `web/src/ProjectTodoLinks.tsx`, `web/src/ProjectTodoLinks.test.tsx`, `web/src/ProjectTodoDetail.tsx` and its focused tests if a separate detail component is useful; new `web/e2e/project-todo-links.spec.ts`.
-- Scoped `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`; existing Web/E2E tests only for new nested reads/source API stubs or focused compatibility checks.
-- `docs/api-project-todo-links.md` header status only for verified implementation progress; contract-body changes return to Decision. `docs/pc-delivery-plan.md` for verified progress; active TASK-036 role-owned workflow/gate/Git/issue records.
+- New `backend/app/models/project_log.py`, `backend/app/schemas/project_log.py`, `backend/app/schemas/project_timeline.py`, `backend/app/services/project_logs.py`, `backend/app/services/project_timeline.py`, `backend/app/api/v1/project_logs.py`, `backend/app/api/v1/project_timeline.py`; model registration and API router.
+- New `backend/alembic/versions/20261015_0010_add_project_logs.py` only; existing shared owned-Project helper in `backend/app/services/project_stages.py` only for necessary narrow reuse.
+- New `backend/tests/test_project_logs.py`, `backend/tests/test_project_timeline.py`, `backend/tests/test_project_log_migration.py`; existing tests/disposable PostgreSQL helper only for focused compatibility/head/fixture/concurrency checks.
+- New `web/src/ProjectTimeline.tsx`, `web/src/ProjectTimeline.test.tsx`; narrowly scoped new ProjectLog editor/detail helpers/tests under `web/src/ProjectLog*` if useful; new `web/e2e/project-timeline.spec.ts`.
+- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`; `web/src/ProjectTodoDetail.tsx` only for necessary reusable source/focus integration; existing Web/E2E tests only for focused navigation/new read compatibility.
+- `docs/api-project-timeline.md` header status for verified implementation progress only; contract-body changes return to Decision. `docs/pc-delivery-plan.md` verified progress and active role-owned TASK-037 workflow/gate/Git/issue state.
 
 ## Forbidden Files And Changes
 
-- `android/**`, old migrations, completed archives, requirements/MVP/architecture/Phase 1A API/data-model contracts, accepted ADRs, dependencies/lockfiles without a concrete blocker returned to Decision.
-- Todo model/schema/write endpoints, existing sync entity/event/cursor behavior, stage/milestone/progress semantics, AI prompts/providers, secrets, private user fixtures, generated build/test output.
-- Copying Todo data into link storage, assuming single-Project ownership of a Todo, implicit link inference, deleting a Todo on unlink, or exposing deleted/foreign source content.
-- Treating a 50-item candidate page as the whole Todo collection; silently removing saved selections outside loaded pages; writes during browsing/selection before Save.
+- `android/**`, older migrations, completed archives, requirements/MVP/architecture/Phase 1A API/data-model/accepted ADR bodies, dependencies/lockfiles without a concrete blocker returned to Decision.
+- Existing AI Session/Todo/stage/milestone/link model/write contracts or sync entities/events/cursors; copied AI Session rows or fabricated source history.
+- Inferring milestone completions from updated_at/status or showing Todo completions that preceded linking as Project activity.
+- Client-writable log ownership/timestamps/kinds, unbounded timeline history loading, source mutation just from navigation, credentials/private fixtures/generated output.
 
 ## Implementation Requirements
 
-1. Implement `docs/api-project-todo-links.md` exactly. Cardinality, source visibility/deletion, request fields, candidate pagination, read-only source view, transaction and version behavior are settled scope.
-2. Add empty association storage and 0009 migration from 0008. Preserve all existing records/versions/cursors; do not backfill guessed links or seed user data.
-3. Add only the two nested association endpoints. Lock the Project through the existing shared boundary and owned submitted Todos in deterministic order; validate before mutation. Persist link changes, one effective parent version/timestamp increment, and idempotency response atomically; never alter Todos or emit sync events.
-4. Build independent Linked Todos display/editor with ordered selected references, all-status cursor-paginated candidates, unavailable placeholders, Save/Cancel, unchanged-payload retries, canonical readback, and parent refresh.
-5. Add a bounded read-only source detail using existing GET Todo. Preserve Project context/focus; handle 401/404/410/retry and suppress stale reads/writes/pages/detail/readback on identity/Project changes.
-6. Regress Project metadata/stages/milestones/AI Sessions/Dashboard/Today/Todo and existing sync behavior. Refresh/source navigation must not accidentally invoke mutation APIs.
-7. Validate migration, persistence, ownership, shared Project version concurrency, and Todo-delete/link serialization on disposable PostgreSQL. Use synthetic fixtures; no configured-user DB mutation as a gate shortcut. The normal startup path applies implemented migrations before later runtime use.
+1. Implement `docs/api-project-timeline.md` exactly: manual writable/read fields, server occurrence time, source inclusion/exclusion, summary composition, tie ordering, cursor binding, transaction/version and navigation rules are settled scope.
+2. Add empty project_logs and 0010 migration from 0009. Preserve all legacy records/versions/cursors. Do not backfill manual rows or physically migrate existing AI Sessions into the new table.
+3. Implement manual POST/GET-detail/PATCH/DELETE with existing identity/envelopes/idempotency and shared Project lock. Validate before writes; transact log state, effective parent version/timestamp, and idempotency response together.
+4. Implement the read-only timeline over active manual logs, AI Sessions, and currently linked owned completed Todos whose actual completion is not earlier than linking. Normalize timestamp comparisons and use bounded keyset retrieval with the exact tie tuple.
+5. Build independent Timeline/manual log UI with load-more/refresh, explicit Save/Cancel/Delete, source opening and return/focus, canonical post-save refresh, retry keys, and no cross-context stale responses.
+6. Preserve existing Project, stage, milestone, Todo-link, Session/AI prompt, Dashboard/Today/Todo and sync behavior. Reuse source navigation without automatic source edits or provider calls.
+7. Verify migration/API/pagination/locking on disposable PostgreSQL plus SQLite-focused tests, Web tests, and desktop/narrow browser flow. Clearly distinguish stubbed browser evidence from direct browser/backend coverage; do not mutate user data or claim deployed 0010 from test results.
 
 ## Acceptance Criteria
 
-- [x] Existing/new Projects have no inferred links; one owned Todo can link to multiple Projects without copied or mutated source data.
-- [x] Migration and constraints preserve existing Project/stage/milestone/Session/Todo/user data and sync cursors across upgrade/repeated-head/downgrade/re-upgrade.
-- [x] GET/PUT enforce ownership, UUID/field/0-50/duplicate bounds, ordered membership, unavailable-source rules, and atomic invalid-request rollback.
-- [x] Link/reorder/unlink/clear persist with no source mutation; Todo edits/status/deletion are reflected by current source projections and safe placeholders, without losing retained selections.
-- [x] Idempotency/no-op/parent version/timestamp semantics are correct and concurrency with Project/stage/milestone writes plus Todo deletion respects the defined lock/visibility boundary.
-- [x] PC handles paginated all-status candidates beyond the first page, explicit Save/Cancel, independent refresh/errors, stable retry payload/keys, and safe identity/Project switching across reads and writes.
-- [x] Source detail reads the real Todo, handles unavailable/expired/error states, restores Project context/focus, and introduces no Todo mutation; existing feature/sync contracts regress.
-- [x] Backend/Web tests, production build, desktop/narrow browser flows, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [ ] Manual logs create/read/edit/soft-delete with exact title/content validation, server occurrence, owner isolation, replay/conflict/no-op, and effective row/parent version behavior.
+- [ ] Migration starts empty, preserves legacy Project/stage/milestone/Session/Todo/link/user/sync data across upgrade/repeated-head/downgrade/re-upgrade, and enforces log constraints.
+- [ ] Timeline exposes exactly the three eligible source kinds with correct current title/summary/version/time and no foreign/deleted/pre-link/reopened or fabricated history.
+- [ ] Ordering and cursor seek match the complete tie tuple; more-than-one-page equal-time/cross-kind/same-UUID cases are deterministic, bounded, owner/Project-bound, and malformed cursors are rejected.
+- [ ] Source edits/removal/unlink/re-completion and refresh follow the current-source contract; timeline GET never changes sources/parent/sync state.
+- [ ] PC supports manual Save/Cancel/Delete, independent load/page/detail/refresh errors, stable retry keys, source/back/focus, identity/Project switching, and no stale read/write/page callback leakage.
+- [ ] Concurrent manual log and existing Project/stage/milestone/link mutations preserve parent increments; existing source APIs, prompts, Dashboard/Resume, Todo/Today, and sync regress without scope expansion.
+- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
-- Backend: owner/auth/empty behavior, same Todo in two Projects, active/terminal/deleted source states, generic foreign/missing errors, retained unavailable references, duplicates/UUID/unknown/null/max bounds, order/no-op/clear/relink, idempotency replay/conflict, and full rollback.
-- Verify no Todo field/version/timestamp/category/completion or sync cursor/row change from association PUT. Source edit/delete changes projection without parent bump; unavailable responses contain no deleted content.
-- Disposable PostgreSQL: synthetic legacy data at 0008; upgrade without backfill; keyed API save/readback; constraint/ownership/foreign-key checks; concurrent Project PATCH/stage PUT/milestone PUT/link PUT preserve parent increments; concurrent link creation/Todo deletion yields the permitted serial outcomes. Repeat head, downgrade/re-upgrade, and preserve pre-existing data/cursors.
-- Web: more than 50 all-status candidates with opaque cursor paging/deduplication, selections outside pages, unavailable retained items, reordering, limit validation, Save/Cancel, unchanged/changed retry keys, refresh-only readback failures, and late GET/PUT/page/detail responses after Project/identity switching.
-- Source view: real Todo GET request, live metadata and note/category rendering, 404/410/401/retry, close/focus return, refresh after source changes, and no mutation request.
-- Run backend `python -m pytest` with existing disposable PostgreSQL test-bin configuration, Web `npm test -- --run`, `npm run build`, and `npx playwright test`. Add focused 1280px/375px link/source flows and real disposable-API persistence evidence; distinguish stubbed browser from direct browser/backend coverage and report conditional skips honestly.
-- Inspect exact changed/untracked/staged scope, `git diff --check`, cached whitespace, secrets/private fixtures, generated output, and test service cleanup. No live AI provider call is required.
+- Backend manual CRUD: ownership/parent/log mismatch, 400 bounds/null/extra/empty patch/body rules, 410 tombstones, content clear, no-op/edit/occurrence preservation, delete and identical replay, version/timestamp/idempotency atomicity and rollback.
+- Timeline: exact kinds/source mappings and 300-code-point previews; timezone/SQLite/PostgreSQL timestamp normalization; equal time/rank/UUID tie cases; source edits, deleted logs/Todos, unlinked/reopened/recompleted Todos, missing/pre-link completion time, no double counting and no GET writes.
+- Pagination: more than limit across all sources; same UUID across source kinds; no duplicates/skips for unchanged tuples; owner/Project/version/type/shape/date/kind/length-invalid cursors; page-size changes; bounded retrieval rather than loading all history.
+- Disposable PostgreSQL: synthetic legacy sources at 0009; empty migration/data preservation/constraints/round trip; actual keyed CRUD/timeline readback and keyset ordering; concurrent manual and metadata/stage/milestone/link writes preserve parent counter. Confirm no unexpected source/sync mutation.
+- Web: form/detail/readback and ambiguous retry keys, manual edit/delete invalidation, source-specific navigation and 401/404/410 errors, close/back/focus, live refresh, append deduplication, independent partial failures, and late requests after identity/Project switches.
+- Run backend `python -m pytest` including disposable PostgreSQL configuration; Web `npm test -- --run`, `npm run build`, and `npx playwright test`; focused 1280px/375px timeline browser flow and real disposable-API persistence evidence. Record conditional skips and exact browser/backend boundaries.
+- Inspect exact tracked/untracked/staged scope, `git diff --check`, cached whitespace, secrets/private fixtures/generated output, and disposable service cleanup. No live AI call is required.
 
 ## Risks
 
-- Whole-list writes remain last-write-wins; locking guarantees transaction/version integrity, not multi-editor optimistic conflict handling.
-- Source Todo state can change after a successful save. Canonical GET and explicit refresh, rather than copied state, keep source ownership/deletion meaningful.
-- Candidate pagination must preserve existing selections that are absent from the current page. Source status/priority must not be used as an implicit link filter.
-- Read-only source navigation is a new entry point into existing Todo records; isolate context/focus/race handling without widening Todo editing scope.
-- Configured database was verified at 0008 during user-authorized startup on 2026-10-15. That does not apply the future 0009 or replace disposable migration/concurrency verification.
+- A current-source feed changes when sources are edited/unlinked/deleted; it cannot promise immutable historical/audit pagination. Show actual timestamps and preserve the declared refresh semantics.
+- Existing milestone records lack state-change history; defer those events instead of inventing them. Existing AI Session specialized timeline entries do not require a duplicate manual row.
+- Cross-source timestamp normalization and kind/UUID ties must agree in SQL, cursor encoding, and UI keys.
+- Multiple source navigation entry points and in-flight writes require strict identity/Project scoping and focus restoration.
+- Last verified configured user DB is 0008; TASK-036 introduced 0009 and this task proposes 0010. Normal startup/deployment must apply the implemented head before runtime use; disposable migration evidence is separate.
 
 ## Publication And Snapshot Scope
 
-Base: main at `702c6759b82185a112607c3f1361add0c05969ea`; local HEAD, origin/main, and remote main matched with a clean worktree. TASK-035 terminal commit contains exactly its five authorized documents and passes whitespace checks. Do not repeat its Closure Check or edit its completed archive.
+Base: main at `4073c098e779e602409cfb45d25408d640fe9a25`; local HEAD/origin/main/remote parity and clean worktree verified before publication. TASK-036 terminal commit matches its exact five Closure documents and passes whitespace. No repeated Closure Check or completed-archive edit.
 
-Proposed pre-Coding snapshot scope, including Task Review's gate/READY synchronization, is exactly these nine documents:
+Proposed snapshot scope, including Task Review's gate/READY synchronization, is exactly these nine readiness documents:
 
-- `docs/api-project-todo-links.md`
+- `docs/api-project-timeline.md`
 - `docs/pc-delivery-plan.md`
 - `handoff/current-task.md`
 - `handoff/project-state.md`
@@ -118,39 +117,25 @@ Proposed pre-Coding snapshot scope, including Task Review's gate/READY synchroni
 - `handoff/code-review-gate.md`
 - `handoff/git-snapshot.md`
 - `handoff/git-commit.md`
-- `tasks/TASK-036-pc-project-todo-links.md`
+- `tasks/TASK-037-pc-project-logs-timeline.md`
 
 No business implementation, issue-log edit, or unknown pre-existing work is included. Task Review must independently approve exact scope before Git Snapshot.
 
 ## Decision Record
 
-- 2026-10-15: verified TASK-035 terminal Closure Commit 702c675 and clean three-way parity; published this next bounded Project foundation slice.
-- 2026-10-15: selected same-owner many-to-many references to preserve existing Todo/Android sync DTOs; unlink affects only a reference.
-- 2026-10-15: earlier authorized startup applied 0007/0008 and the configured DB query confirmed 0008. Publication does not claim 0009 implemented/deployed.
-- 2026-10-15: deferred P3 language issue, personal AI memory, self-iteration, and Agents remain outside scope.
+- 2026-10-15: verified TASK-036 terminal Closure Commit 4073c09 and clean three-way parity; published the next bounded PC foundation slice.
+- 2026-10-15: selected manual recording-time logs plus read-only AI Session/current linked-completion aggregation; milestone/stage historical events remain deferred rather than inferred.
+- 2026-10-15: no runtime/user-database change; existing configured-0008 checkpoint is preserved separately from disposable-test evidence and future migration requirements.
+- 2026-10-15: personal memory/self-iteration/Agent work and the P3 language issue remain deferred.
 
 ## Coding Output Requirements
 
-Report changed paths, schema/migration and cardinality/deletion policy, API/locking/version/idempotency evidence, no Todo/sync mutation proof, candidate paging/source-navigation behavior, all acceptance results, tests/build/browser/PostgreSQL checks, exact security/diff checks, limitations, and next role.
+Report changed files, migration/data preservation, manual write/ownership/version/idempotency behavior, precise source/timestamp/cursor rules, UI/navigation/race behavior, all acceptance results, test/build/browser/PostgreSQL evidence, exact scope/security checks, limitations, and next role.
 
 ## Current Stage
 
-Task Review: PASS at 2026-10-15 09:21 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
+Task Review: PASS at 2026-10-16 09:08 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
 
-Git Snapshot: COMPLETE on branch `main`; base commit `702c6759b82185a112607c3f1361add0c05969ea`; snapshot commit `39872aa423abfa03092593797bb5e1f7630f4b89`.
+Next Role: Git Snapshot
 
-Snapshot Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
-
-Closure Check: PASS
-
-Checked At: 2026-10-15 10:07:41 +08:00
-
-Result Commit: `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce`
-
-Completion Commit: `5a02dcd5b9a48f7a376b312d2b2081acc75a4e4e`
-
-Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; Code Review PASS; eight acceptance criteria confirmed; exact 30-file result scope and four-file completion metadata. Full evidence, limits, and five-file terminal allowlist are in `tasks/TASK-036-pc-project-todo-links.md`.
-
-Next Role: Git Commit (Terminal Closure Commit)
-
-Required Next Action: commit and push only `docs/api-project-todo-links.md`, `docs/pc-delivery-plan.md`, `handoff/current-task.md`, `handoff/project-state.md`, and `tasks/TASK-036-pc-project-todo-links.md` with message `docs(task): close TASK-036`. Verify local/tracking/remote parity and clean worktree, then return to Decision. Do not run another Closure Check or publish the next task from this step.
+Required Next Action: Git Snapshot must independently verify and establish the exact approved nine-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.

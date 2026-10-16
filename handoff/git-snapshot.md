@@ -4,22 +4,22 @@ Last updated: 2026-10-15
 
 ## Snapshot Status
 
-Status: COMPLETE
+Status: PENDING
 
-Task ID: TASK-036
+Task ID: TASK-037
 
 Branch: main
 
-Base Commit: 702c6759b82185a112607c3f1361add0c05969ea
+Base Commit: 4073c098e779e602409cfb45d25408d640fe9a25
 
-Working Tree: 9 approved TASK-036 pre-Coding publication/readiness documents committed separately; no business implementation
+Working Tree: proposed nine-document Decision publication; no pre-existing edits or business implementation.
 
-Snapshot Commit Created: Yes
+Snapshot Commit Created: Pending
 
-Snapshot Commit: 39872aa423abfa03092593797bb5e1f7630f4b89
+Snapshot Commit: Pending
 
-Reason: approved TASK-036 readiness documents required a durable pre-Coding baseline.
+Reason: wait for Task Review PASS and synchronized READY task records.
 
 ## Instructions
 
-Recheck branch/HEAD/worktree/staging/diff/remote parity and the exact Task Review-approved nine-document scope. Snapshot only approved readiness documents, then synchronize both active records to IN_PROGRESS and route to Coding. No snapshot or Coding admission is authorized from this PENDING state.
+Recheck branch/HEAD/worktree/staging/diff/remote parity and exact Task Review-approved nine-document readiness scope. After snapshot publication, synchronize both active records to IN_PROGRESS and route to Coding. This PENDING state admits neither Snapshot nor Coding.
