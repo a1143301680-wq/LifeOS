@@ -140,9 +140,9 @@ Git Snapshot: COMPLETE on branch `main`; base commit `4073c098e779e602409cfb45d2
 
 Snapshot Reason: approved TASK-037 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: independently review TASK-037 implementation and durable Coding evidence. Do not publish until Code Review PASS.
+Required Next Action: commit and push only the five Closure-authorized documents below, verify parity and a clean worktree, then return to Decision without repeating Closure Check.
 
 ## Coding Result
 
@@ -305,5 +305,23 @@ None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-11-09 13:25:47 +08:00
+- Result Commit: `937d1fdfdb617fa85ef563fcc1643f47622ee489`
+- Completion Commit: `cd451ff842ac9c7d4d30dd53452f8aa6022f28e6`
+- Remote Verification: main HEAD, origin/main, and remote refs/heads/main matched the Completion Commit before edits. Result parent is snapshot 6c956a3; completion parent is the Result Commit.
+- Working Tree Before Closure Docs: clean, with no staged, unstaged, or untracked paths.
+- Review/Test Evidence: Code Review PASS / COMPLETED. Recorded verification: 205 backend tests including disposable PostgreSQL, 204 Web tests, production build PASS, Playwright 16 passed / 2 existing conditional skips, and sole Alembic head 20261015_0010. Decision verified the committed evidence without rerunning those suites.
+- Decision Verification: Result Commit exactly matches the 35-file Reviewed Scope. Completion Commit contains only current-task.md, git-commit.md, project-state.md, and this archive. Both commits pass Git whitespace checks.
+- Acceptance Criteria Result: all eight are checked in both records. Browser timeline tests use API stubs; persistence, migration, filtering, pagination, and concurrency were verified separately against disposable PostgreSQL.
+- Issue Disposition: no TASK-037 blocker remains. ISSUE-20261011-001 remains open P3/non-blocking and deferred.
+- Remaining Follow-ups: configured-database deployment of 0009 and 0010 is not verified by this check; apply pending migrations through normal startup/deployment before use. Full browser-to-real-backend acceptance remains for PC acceptance. Project lifecycle is the next unpublished slice.
+- Terminal Closure Commit: only the five documents below are authorized, with message `docs(task): close TASK-037`. Commit/push once, verify parity and a clean worktree, then return to Decision. Do not repeat Closure Check or create post-closure state edits.
+
+### Terminal Closure File Allowlist
+
+- `docs/api-project-timeline.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-037-pc-project-logs-timeline.md`

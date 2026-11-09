@@ -140,6 +140,14 @@ Git Snapshot: COMPLETE on branch `main`; base commit `4073c098e779e602409cfb45d2
 
 Snapshot Reason: approved TASK-037 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-037 Decision Closure Check against Result Commit `937d1fdfdb617fa85ef563fcc1643f47622ee489` and this completion record. Do not publish the next task before closure.
+Checked At: 2026-11-09 13:25:47 +08:00
+
+Result Commit: `937d1fdfdb617fa85ef563fcc1643f47622ee489`
+
+Completion Commit: `cd451ff842ac9c7d4d30dd53452f8aa6022f28e6`
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only the five documents in the TASK-037 archive's Terminal Closure File Allowlist with message `docs(task): close TASK-037`. Verify local/tracking/remote parity and a clean worktree, then return to Decision. Do not repeat Closure Check or publish the next task from this step.

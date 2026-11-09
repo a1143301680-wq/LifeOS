@@ -1,6 +1,6 @@
 # LifeOS Project State
 
-Last updated: 2026-10-15
+Last updated: 2026-11-09
 
 ## Current Phase
 
@@ -119,7 +119,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 - Decision published TASK-036 Project Todo links: ordered same-owner many-to-many references, current source state, unavailable placeholders, and read-only source navigation without Todo/sync contract changes. Its implementation contract is docs/api-project-todo-links.md; live routing remains in current-task.md.
 - TASK-036 Project Todo links completed in result commit `54500cc0e0f770ba89bdc75f5879d4afd2f5f6ce`; Code Review: PASS; 186 backend tests, 180 Web tests, production build, Playwright 14 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/locking/delete-serialization verification passed. Completion commit `5a02dcd5b9a48f7a376b312d2b2081acc75a4e4e` and terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25` are published. Decision verified clean local/tracking/remote parity on 2026-10-15; its workflow is closed.
 - Decision published TASK-037 Project logs/timeline foundation: manual log CRUD with server recording time and read-only paginated AI Session / qualifying linked-completion source aggregation. It excludes inferred milestone/stage history and duplicate Session records; live routing remains in current-task.md.
-- TASK-037 Project logs/timeline foundation completed in result commit `937d1fdfdb617fa85ef563fcc1643f47622ee489`; Code Review: PASS; 205 backend tests, 204 Web tests, production build, Playwright 16 passed / 2 documented conditional skips, and disposable PostgreSQL migration/API/filtering/pagination/concurrency verification passed. Decision Closure Check is the required next step.
+- TASK-037 Project logs/timeline foundation completed in result commit `937d1fdfdb617fa85ef563fcc1643f47622ee489`; Code Review: PASS; 205 backend tests, 204 Web tests, production build, Playwright 16 passed / 2 documented conditional skips, and disposable PostgreSQL verification passed. Completion `cd451ff842ac9c7d4d30dd53452f8aa6022f28e6` is published with local/tracking/remote parity. Decision Closure Check passed on 2026-11-09; the archive authorizes exactly five documents for the pending terminal Closure Commit.
 - On 2026-10-15, user-authorized normal startup applied pending migrations 0007/0008 and a separate query verified the configured user database at 20261014_0008; PC/API HTTP checks returned 200. This is actual deployment evidence, separate from disposable tests; TASK-036 revision 0009 is implemented but is not asserted as applied to the configured user database.
 - User direction on 2026-10-12: complete foundation features before adding personal AI memory, self-iteration, or Agent participation. Those ideas are deferred and do not expand this sequence.
 - ISSUE-20261011-001 is open P3/non-blocking: AI Plan my day output language varies. Its issue-log entry was persisted in the TASK-034 snapshot; it remains deferred without a feature repair.
@@ -171,7 +171,7 @@ Live active-task Status, Next Role, and Required Next Action are maintained only
 
 Active task status and live routing are maintained in `handoff/current-task.md`.
 
-Perform the TASK-037 Decision Closure Check against result commit `937d1fdfdb617fa85ef563fcc1643f47622ee489`. Do not publish the next task before terminal closure. The later sequence remains controlled lifecycle, Notes, Calendar, and PC acceptance in `docs/pc-delivery-plan.md`; Android follows PC acceptance, while AI memory/self-iteration/Agent participation remain deferred.
+After TASK-037 terminal closure succeeds, continue with controlled Project lifecycle, Notes, Calendar, and PC acceptance in `docs/pc-delivery-plan.md`. Android follows PC acceptance, while AI memory/self-iteration/Agent participation remain deferred. The active role and authorized next action remain in current-task.md.
 
 ## Notes For Windows
 

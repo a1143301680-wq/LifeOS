@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-15
 Delivery task: TASK-037
-Status: implemented in TASK-037; pending independent Code Review
+Status: implemented; TASK-037 Code Review PASS; result published in 937d1fd
 
 ## Storage And Source Boundaries
 
