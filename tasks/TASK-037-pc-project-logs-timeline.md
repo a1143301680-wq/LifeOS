@@ -1,16 +1,16 @@
 # TASK-037: PC Project logs and timeline foundation
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 
 ## Metadata
 
 - Task ID: TASK-037
 - Task Name: PC Project logs and timeline foundation
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: Project/stage/milestone/AI Session foundations; TASK-036 terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25`; existing owned Todo source APIs; migration `20261015_0009`
-- Contract: `docs/api-project-timeline.md` (proposed for Task Review)
+- Contract: `docs/api-project-timeline.md` (Task Review-approved)
 
 ## Background
 
@@ -76,14 +76,14 @@ A PC user can record/edit/remove a manual Project log, see it alongside actual A
 
 ## Acceptance Criteria
 
-- [ ] Manual logs create/read/edit/soft-delete with exact title/content validation, server occurrence, owner isolation, replay/conflict/no-op, and effective row/parent version behavior.
-- [ ] Migration starts empty, preserves legacy Project/stage/milestone/Session/Todo/link/user/sync data across upgrade/repeated-head/downgrade/re-upgrade, and enforces log constraints.
-- [ ] Timeline exposes exactly the three eligible source kinds with correct current title/summary/version/time and no foreign/deleted/pre-link/reopened or fabricated history.
-- [ ] Ordering and cursor seek match the complete tie tuple; more-than-one-page equal-time/cross-kind/same-UUID cases are deterministic, bounded, owner/Project-bound, and malformed cursors are rejected.
-- [ ] Source edits/removal/unlink/re-completion and refresh follow the current-source contract; timeline GET never changes sources/parent/sync state.
-- [ ] PC supports manual Save/Cancel/Delete, independent load/page/detail/refresh errors, stable retry keys, source/back/focus, identity/Project switching, and no stale read/write/page callback leakage.
-- [ ] Concurrent manual log and existing Project/stage/milestone/link mutations preserve parent increments; existing source APIs, prompts, Dashboard/Resume, Todo/Today, and sync regress without scope expansion.
-- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
+- [x] Manual logs create/read/edit/soft-delete with exact title/content validation, server occurrence, owner isolation, replay/conflict/no-op, and effective row/parent version behavior.
+- [x] Migration starts empty, preserves legacy Project/stage/milestone/Session/Todo/link/user/sync data across upgrade/repeated-head/downgrade/re-upgrade, and enforces log constraints.
+- [x] Timeline exposes exactly the three eligible source kinds with correct current title/summary/version/time and no foreign/deleted/pre-link/reopened or fabricated history.
+- [x] Ordering and cursor seek match the complete tie tuple; more-than-one-page equal-time/cross-kind/same-UUID cases are deterministic, bounded, owner/Project-bound, and malformed cursors are rejected.
+- [x] Source edits/removal/unlink/re-completion and refresh follow the current-source contract; timeline GET never changes sources/parent/sync state.
+- [x] PC supports manual Save/Cancel/Delete, independent load/page/detail/refresh errors, stable retry keys, source/back/focus, identity/Project switching, and no stale read/write/page callback leakage.
+- [x] Concurrent manual log and existing Project/stage/milestone/link mutations preserve parent increments; existing source APIs, prompts, Dashboard/Resume, Todo/Today, and sync regress without scope expansion.
+- [x] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
@@ -136,6 +136,159 @@ Report changed files, migration/data preservation, manual write/ownership/versio
 
 Task Review: PASS at 2026-10-16 09:08 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `4073c098e779e602409cfb45d25408d640fe9a25`; snapshot commit `6c956a35dd6245e45ac5edfa224b99285199b23b`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved nine-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-037 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-037 implementation and durable Coding evidence. Do not publish until Code Review PASS.
+
+## Coding Result
+
+- Result: PASS (Coding verification only; independent Code Review pending)
+- Task ID: TASK-037
+- Final Status: REVIEWING
+- Verified at: 2026-10-16 +08:00
+- Branch: main
+- HEAD / Snapshot: `6c956a35dd6245e45ac5edfa224b99285199b23b`, unchanged
+- Next Role: Code Review
+
+### Modified Files
+
+Exact 34-path working-tree scope, including three pre-existing Snapshot state changes. Coding did not edit `handoff/git-snapshot.md`; the other two active state files retain their existing snapshot and Decision evidence.
+
+- `backend/alembic/versions/20261015_0010_add_project_logs.py`
+- `backend/app/api/v1/project_logs.py`
+- `backend/app/api/v1/project_timeline.py`
+- `backend/app/api/v1/router.py`
+- `backend/app/models/__init__.py`
+- `backend/app/models/project_log.py`
+- `backend/app/schemas/project_log.py`
+- `backend/app/schemas/project_timeline.py`
+- `backend/app/services/project_logs.py`
+- `backend/app/services/project_timeline.py`
+- `backend/tests/test_project_log_migration.py`
+- `backend/tests/test_project_logs.py`
+- `backend/tests/test_project_milestone_migration.py`
+- `backend/tests/test_project_timeline.py`
+- `backend/tests/test_project_todo_link_migration.py`
+- `docs/api-project-timeline.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-037-pc-project-logs-timeline.md`
+- `web/e2e/ai-sessions.spec.ts`
+- `web/e2e/dashboard.spec.ts`
+- `web/e2e/project-milestones.spec.ts`
+- `web/e2e/project-stages.spec.ts`
+- `web/e2e/project-timeline.spec.ts`
+- `web/e2e/project-todo-links.spec.ts`
+- `web/e2e/projects.spec.ts`
+- `web/src/App.tsx`
+- `web/src/ProjectLogDetail.tsx`
+- `web/src/ProjectTimeline.test.tsx`
+- `web/src/ProjectTimeline.tsx`
+- `web/src/api.ts`
+- `web/src/styles.css`
+- `web/src/types.ts`
+
+### Implementation Summary
+
+- Added empty manual-only `project_logs`, owner/Project cascading foreign keys, positive version and title/content checks, lookup index, and migration 0010 from 0009. No backfill or AI Session copying. Two existing migration tests change only their expected current head.
+- Added owned manual POST/detail GET/PATCH/soft DELETE. Writable title/content only; normalized blank content clears to null; empty PATCH, explicit null title, extra fields, overlong/invalid values and any DELETE body are rejected. Fresh owned tombstones return 410 without content.
+- Reuses the shared Project row lock, bearer identity and canonical idempotency fingerprint/replay. Create/effective edit/delete increments the parent once; no-op preserves row/parent metadata. Row, parent and stored response commit atomically. Same-key DELETE replays the tombstone response; fresh-key repeat deletion does not mutate again.
+- Timeline has exactly manual_log at created_at, ai_session at started_at, and todo_completed at completed_at for active owned current links with completion not earlier than linking. Reads current source title/version and trimmed first 300 Unicode code points of content/completed_work; Todo summary is null. No milestone/stage inferred history, source interception, source mutation or sync event.
+- SQL applies owner/Project/source predicates, complete anchor seek and limit+1 separately to each of three queries; only these bounded results merge. Order is UTC occurrence descending, kind rank ascending, UUID ascending. Merge compares datetime directly, preserving microseconds even at distant dates. Versioned base64url cursor validates exact shape/types/UUIDs/aware time/kind/version/owner/Project/length and malformed/overflow/deep-nesting errors.
+- SQLite compatibility is local to the new timeline reader: existing Todo completion writes use Shanghai wall time and SQLite drops the offset, so SQL converts that field to UTC while preserving its fractional suffix. Log/link default timestamps and normalized Session starts use UTC. PostgreSQL compares aware instants natively. Actual Todo complete API and offset-equivalent PostgreSQL fixture tests verify these paths without changing existing source contracts.
+- Independent PC Timeline supports cursor paging, (kind, ID) append deduplication, refresh, source-derived times in identity timezone and source navigation. Manual forms support explicit Save/Cancel/Delete confirmation, validation, ambiguous retry key reuse, fresh keys on changed payload/conflict, draft retention and refresh-only post-write failure recovery.
+- Source detail uses owned manual GET, reusable read-only Todo detail, and the existing AI Session detail in a read-only timeline mode. Existing AI prompt composition is unchanged; no provider call. Return refreshes the timeline and restores source-trigger focus, falling back to Refresh when removed. Identity/Project keyed boundaries and request generations suppress late lists/pages/details/writes/readbacks.
+- Contract changes are header status only. Plan progress updated; six existing browser specs only gain an empty nested timeline GET stub. No completed archive, source write model/endpoint, dependency or old migration changed.
+
+### Acceptance Criteria Results
+
+1. PASS: manual lifecycle, trimming/content clear, read DTO, owner/parent mismatch, bearer/key errors, validation bounds, replay/conflict/no-op, immutable occurrence, soft tombstone/history retention and failed-idempotency rollback covered.
+2. PASS: real disposable PostgreSQL starts at 0009 with synthetic user/Project/stage/milestone/Session/Todo/link/sync data. Empty upgrade, repeated head, downgrade/re-upgrade preserve all legacy rows and sync sequence. PK/FK/title/content/version boundaries are checked. PostgreSQL varchar overflow may raise DataError before CHECK; SQLite uses CHECK for overlength.
+3. PASS: exactly three source kinds and exact six-field DTO, Unicode preview, latest titles/versions and filtering covered. Missing completion, canceled/pending/reopened, pre-link, deleted, unlinked and foreign sources are excluded.
+4. PASS: 72 equal-time entries across three kinds, same UUIDs across tables, changing page sizes, SQL limit bounds, kind/ID tie seeks, owner/Project-bound malformed cursors and distant-date microsecond ordering covered. PostgreSQL separately verifies equal-instant/cross-kind/same-UUID keyset readback.
+5. PASS: manual edit preserves occurrence, Session time edits move entries, Todo reopening/unlink/delete removes entries and re-completion projects only current completion. SQL capture verifies GET emits no INSERT/UPDATE/DELETE. Parent snapshots and Todo/sync row/sequence snapshots confirm no unintended mutation.
+6. PASS: explicit manual lifecycle, Cancel/confirmation, unchanged/changed/conflicting retry keys, initial/page/detail/parent/canonical-readback errors, source return/focus and identity/Project late-request matrix covered. Deleted source during confirmation clears content/actions.
+7. PASS: five real simultaneous transactions (manual POST, Project PATCH, stage PUT, milestone PUT and link PUT), each in a separate TestClient portal, preserve five parent increments. Existing features/prompts/sync pass full regression.
+8. PASS with documented coverage limits: full backend/Web/build/browser verification and disposable PostgreSQL pass; scope/security/whitespace checks pass. Browser stubs and configured-database deployment limits are explicit below.
+
+### Verification Commands And Results
+
+Commands run on 2026-10-16. Backend cwd `D:\LifeOS\backend`; Web cwd `D:\LifeOS\web`.
+
+- TDD tracer: `python -m pytest tests/test_project_logs.py -q --tb=short` initially failed with 404 before endpoint implementation; then passed the first lifecycle test.
+- `python -m pytest tests/test_project_logs.py tests/test_project_timeline.py -q --tb=short`: 17 passed before the final extra source-filter test; final full run below includes all 18 focused cases.
+- `$env:LIFEOS_TEST_PG_BIN='D:\PostgreSQL\18\bin'` then `python -m pytest tests/test_project_log_migration.py -q --tb=short`: 1 passed after correcting the database-boundary assertion to accept PostgreSQL DataError as well as IntegrityError.
+- With the same PostgreSQL-bin environment, `python -m pytest`: 205 passed, no warnings, 60.49 seconds. All four disposable PostgreSQL migration tests executed, not skipped.
+- `python -m alembic heads`: sole `20261015_0010 (head)`. This is repository migration state, not configured database deployment.
+- `npm test -- --run src/ProjectTimeline.test.tsx`: final 24 passed.
+- `npm test -- --run`: final 21 files / 204 passed, 49.65 seconds.
+- `npm run build`: final PASS.
+- `npx playwright test`: final 16 passed / 2 existing conditional skips, 7.3 seconds. Includes new 1280px/375px manual lifecycle, all three source entries, pagination, read-only source navigation, focus and no source mutation.
+- Two optional direct-backend browser tests remain skipped because `LIFEOS_PROJECT_E2E_TOKEN` / `LIFEOS_AI_SESSION_E2E_TOKEN` are not configured. No new Timeline browser test skipped. Real API/migration/locking evidence comes separately from FastAPI TestClient against disposable PostgreSQL.
+- Browser screenshots of narrow editor and desktop saved timeline visually inspected; horizontal-overflow assertions pass. Initial browser assertion incorrectly assumed exactly one Session GET under React StrictMode; changed to require a source GET and no source mutation, preserving real source-navigation assertions.
+- Warnings: Playwright/Node emits the existing NO_COLOR ignored because FORCE_COLOR is set notice. Git emits informational LF-to-CRLF notices. Backend/Web/build have no final test warnings.
+
+### Git Diff Check
+
+- Inspected `git status --short --untracked-files=all`, `git diff --stat`, `git diff` and `git diff --cached`; exact scope is the 34 paths above, with no unknown file or forbidden business change.
+- `git diff --check` and `git diff --cached --check`: PASS; staged scope empty. New-file trailing-whitespace/final-newline scan: PASS (15 files). Generated/private-path and credential-pattern scans: PASS; fixtures use synthetic test identities only.
+- No `.env`, secret, private fixture, local database, cache, build artifact, screenshot, generated log, debug code, dependency churn or broad formatting added to Git scope.
+- Pre-existing state preserved: `handoff/git-snapshot.md` is untouched by Coding; current-task and this archive retain prior snapshot/Decision evidence and now route to Code Review. Code Review gate Result unchanged. No stage, commit, push or destructive Git operation.
+- Disposable PostgreSQL fixtures stop/remove their temporary clusters. Existing system PostgreSQL process/service is left untouched.
+
+### Runtime And Coverage Limits
+
+- Frontend-only Vite preview started hidden at `http://127.0.0.1:5173` (PID 26356); HTTP GET returned 200. Logs are outside the repository in TEMP. Preview startup does not migrate or verify the configured backend/database.
+- Last separately verified configured user DB checkpoint remains 0008. This task did not query/upgrade it or mutate private user data; normal startup/deployment must apply 0009 and 0010 before Timeline runtime use.
+- Browser flows use API stubs; actual persistence/constraints/concurrency are verified by real disposable PostgreSQL and FastAPI TestClient, not claimed as direct browser-to-real-backend acceptance.
+- Current-source pagination is live-view, not immutable history/snapshot. Source changes may affect later pages; Refresh restarts page one. Existing last-write-wins behavior remains.
+- No AI provider call, Android run, lifecycle feature or full PC cross-module real-backend acceptance performed: outside this task.
+
+### Unresolved Issues
+
+No TASK-037 implementation blocker identified by Coding. Independent Code Review and normal configured-database migration/deployment remain pending.
+
+### Task-Outside Findings
+
+None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
+
+## Code Review Result
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-10-16 09:41 +08:00
+- Branch: `main`
+- HEAD / Snapshot Commit: `6c956a35dd6245e45ac5edfa224b99285199b23b`
+- Final task status: `REVIEWING`; Git Commit owns the transition to `COMPLETED` after successful publication.
+- Next Role: Git Commit
+
+### Review Summary
+
+- No blocking issue was found in the manual-log migration/CRUD, Project lock and idempotency transaction, three-source eligibility, timestamp normalization, deterministic keyset pagination, or PC source-navigation/request-isolation behavior.
+- The exact publish allowlist is the 34 Coding paths plus `handoff/code-review-gate.md`, for 35 paths total. No Android, dependency, old migration, completed archive, source write contract, credential, private fixture, generated artifact, staged change, commit, or push is included.
+- `git diff --check`, cached whitespace, untracked-file newline/whitespace, and targeted security/scope scans passed. LF-to-CRLF messages are informational.
+
+### Independent Verification
+
+- Focused backend plus disposable PostgreSQL: 19 passed.
+- Full backend with all disposable PostgreSQL tests: 205 passed.
+- Alembic: sole `20261015_0010 (head)`.
+- Focused Timeline component: 24 passed.
+- Full Web: 21 files / 204 tests passed.
+- Production build: PASS.
+- Playwright: 16 passed / 2 existing conditional direct-backend tests skipped; desktop and 375px TASK-037 flows passed.
+
+### Residual Risk
+
+- Configured user-database migration remains a deployment responsibility; this review only verified disposable PostgreSQL migration and API behavior.
+- Browser acceptance uses API stubs. Real persistence, constraints, source filtering, pagination, and concurrency were independently exercised through FastAPI against disposable PostgreSQL.
+
+### Recommended Commit Message
+
+`feat(project): add logs and timeline`

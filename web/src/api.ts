@@ -12,6 +12,9 @@ import type {
   MilestonePayload,
   ProjectTodoLinkCollection,
   TodoCandidatePage,
+  ProjectLog,
+  ProjectLogPayload,
+  TimelinePage,
   Todo,
   TodoCreatePayload,
   TodoUpdatePayload,
@@ -88,6 +91,26 @@ export async function getTodoCandidates(token: string, cursor: string | null) {
   const response = await authenticatedRequest<TodoCandidatePage>(`/todos?${query}`, token);
   if (!Array.isArray(response.items) || !(response.next_cursor === null || typeof response.next_cursor === "string")) throw new ApiError(0);
   return response;
+}
+
+export async function getProjectTimeline(token: string, projectId: string, cursor: string | null) {
+  const query = new URLSearchParams({ limit: "20" });
+  if (cursor !== null) query.set("cursor", cursor);
+  const result = await authenticatedRequest<TimelinePage>(`/projects/${encodeURIComponent(projectId)}/timeline?${query}`, token);
+  if (!Array.isArray(result.items) || !(result.next_cursor === null || typeof result.next_cursor === "string")) throw new ApiError(0);
+  return result;
+}
+
+export async function getProjectLog(token: string, projectId: string, logId: string) {
+  return (await authenticatedRequest<DataEnvelope<ProjectLog>>(`/projects/${encodeURIComponent(projectId)}/logs/${encodeURIComponent(logId)}`, token)).data;
+}
+
+export async function writeProjectLog(token: string, projectId: string, logId: string | null, method: "POST" | "PATCH" | "DELETE", key: string, payload?: ProjectLogPayload) {
+  const path = `/projects/${encodeURIComponent(projectId)}/logs${logId ? `/${encodeURIComponent(logId)}` : ""}`;
+  return authenticatedRequest<DataEnvelope<ProjectLog | { id: string; deleted: true; version: number }>>(path, token, {
+    method, headers: { "Idempotency-Key": key, ...(method === "DELETE" ? {} : { "Content-Type": "application/json" }) },
+    ...(method === "DELETE" ? {} : { body: JSON.stringify(payload) }),
+  });
 }
 
 export async function getTodoSource(token: string, todoId: string) {

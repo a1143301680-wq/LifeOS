@@ -619,6 +619,19 @@ h1, h2, p { margin-top: 0; }
 
 .project-stages { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
 .project-todo-links { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.project-timeline { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
+.timeline-entries { list-style: none; margin: 16px 0; padding: 0; }
+.timeline-entries > li { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.timeline-entries > li > div { min-width: 0; overflow-wrap: anywhere; }
+.timeline-entries .icon-button { flex: 0 0 32px; width: 32px; height: 32px; }
+.timeline-entries strong { font-size: 13px; }
+.timeline-entries p { white-space: pre-wrap; font-size: 13px; margin: 8px 0 0; }
+.timeline-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.project-log-detail { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.project-log-detail h5 { overflow-wrap: anywhere; font-size: 14px; }
+.project-log-form { display: grid; gap: 12px; margin-top: 16px; }
+.project-log-form label { display: grid; gap: 6px; font-size: 12px; }
+.project-log-form input, .project-log-form textarea { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid var(--line); border-radius: 4px; padding: 8px; font: inherit; }
 .linked-todos-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .linked-todos-heading h3, .linked-todos-heading h4 { margin: 0; font-size: 16px; }
 .linked-todo-tools { display: flex; gap: 3px; align-items: center; }

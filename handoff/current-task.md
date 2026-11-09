@@ -1,16 +1,16 @@
 # LifeOS Current Task
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
 
 ## Metadata
 
 - Task ID: TASK-037
 - Task Name: PC Project logs and timeline foundation
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: Project/stage/milestone/AI Session foundations; TASK-036 terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25`; existing owned Todo source APIs; migration `20261015_0009`
-- Contract: `docs/api-project-timeline.md` (proposed for Task Review)
+- Contract: `docs/api-project-timeline.md` (Task Review-approved)
 
 ## Background
 
@@ -76,14 +76,14 @@ A PC user can record/edit/remove a manual Project log, see it alongside actual A
 
 ## Acceptance Criteria
 
-- [ ] Manual logs create/read/edit/soft-delete with exact title/content validation, server occurrence, owner isolation, replay/conflict/no-op, and effective row/parent version behavior.
-- [ ] Migration starts empty, preserves legacy Project/stage/milestone/Session/Todo/link/user/sync data across upgrade/repeated-head/downgrade/re-upgrade, and enforces log constraints.
-- [ ] Timeline exposes exactly the three eligible source kinds with correct current title/summary/version/time and no foreign/deleted/pre-link/reopened or fabricated history.
-- [ ] Ordering and cursor seek match the complete tie tuple; more-than-one-page equal-time/cross-kind/same-UUID cases are deterministic, bounded, owner/Project-bound, and malformed cursors are rejected.
-- [ ] Source edits/removal/unlink/re-completion and refresh follow the current-source contract; timeline GET never changes sources/parent/sync state.
-- [ ] PC supports manual Save/Cancel/Delete, independent load/page/detail/refresh errors, stable retry keys, source/back/focus, identity/Project switching, and no stale read/write/page callback leakage.
-- [ ] Concurrent manual log and existing Project/stage/milestone/link mutations preserve parent increments; existing source APIs, prompts, Dashboard/Resume, Todo/Today, and sync regress without scope expansion.
-- [ ] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
+- [x] Manual logs create/read/edit/soft-delete with exact title/content validation, server occurrence, owner isolation, replay/conflict/no-op, and effective row/parent version behavior.
+- [x] Migration starts empty, preserves legacy Project/stage/milestone/Session/Todo/link/user/sync data across upgrade/repeated-head/downgrade/re-upgrade, and enforces log constraints.
+- [x] Timeline exposes exactly the three eligible source kinds with correct current title/summary/version/time and no foreign/deleted/pre-link/reopened or fabricated history.
+- [x] Ordering and cursor seek match the complete tie tuple; more-than-one-page equal-time/cross-kind/same-UUID cases are deterministic, bounded, owner/Project-bound, and malformed cursors are rejected.
+- [x] Source edits/removal/unlink/re-completion and refresh follow the current-source contract; timeline GET never changes sources/parent/sync state.
+- [x] PC supports manual Save/Cancel/Delete, independent load/page/detail/refresh errors, stable retry keys, source/back/focus, identity/Project switching, and no stale read/write/page callback leakage.
+- [x] Concurrent manual log and existing Project/stage/milestone/link mutations preserve parent increments; existing source APIs, prompts, Dashboard/Resume, Todo/Today, and sync regress without scope expansion.
+- [x] Backend/Web tests, production build, desktop/narrow browser checks, disposable PostgreSQL evidence, and exact Git/security/whitespace checks pass or explicitly disposition environmental limitations for Code Review.
 
 ## Verification Plan
 
@@ -136,6 +136,10 @@ Report changed files, migration/data preservation, manual write/ownership/versio
 
 Task Review: PASS at 2026-10-16 09:08 +08:00. Full evidence and the exact approved nine-file scope are in `handoff/task-review-gate.md`.
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch `main`; base commit `4073c098e779e602409cfb45d25408d640fe9a25`; snapshot commit `6c956a35dd6245e45ac5edfa224b99285199b23b`.
 
-Required Next Action: Git Snapshot must independently verify and establish the exact approved nine-file pre-Coding baseline. Do not start Coding until Snapshot completion synchronizes both active task records to `IN_PROGRESS`.
+Snapshot Reason: approved TASK-037 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Code Review
+
+Required Next Action: independently review TASK-037 implementation and durable Coding evidence. Do not publish until Code Review PASS.

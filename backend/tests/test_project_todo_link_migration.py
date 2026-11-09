@@ -53,7 +53,7 @@ def test_postgres_links_migration_persistence_constraints_and_serialization(disp
     assert snapshot(engine) == before
     with factory() as db:
         assert db.execute(select(ProjectTodoLink)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261015_0009"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261015_0010"
 
     def override_db():
         with factory() as db:

@@ -105,6 +105,11 @@ export type ProjectTodoLink = { todo_id: string; sort_order: number; unavailable
 export type ProjectTodoLinkCollection = { links: ProjectTodoLink[]; project_version: number };
 export type TodoCandidatePage = { items: Todo[]; next_cursor: string | null };
 
+export type ProjectLog = { id: string; title: string; content: string | null; version: number; created_at: string; updated_at: string };
+export type ProjectLogPayload = { title: string; content: string | null };
+export type TimelineEntry = { kind: "manual_log" | "ai_session" | "todo_completed"; source_id: string; occurred_at: string; title: string; summary: string | null; source_version: number };
+export type TimelinePage = { items: TimelineEntry[]; next_cursor: string | null };
+
 export type TodoUpdatePayload = {
   title: string;
   category_id: string;

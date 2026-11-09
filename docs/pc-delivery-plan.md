@@ -1,6 +1,6 @@
 # LifeOS PC Delivery Plan
 
-Updated: 2026-10-15
+Updated: 2026-10-16
 
 ## Direction
 
@@ -18,14 +18,14 @@ Projects, AI Session records, and Dashboard/Resume are published. Complete the r
 | 4 | TASK-034 Editable Project stages (closed) | Persisted type-based defaults, add/rename/remove/reorder, explicit current selection | Save and reopen a customized stage list |
 | 5 | TASK-035 Project milestones (closed) | Lightweight title/date/status/order per Project | Track the next meaningful target |
 | 6 | TASK-036 Project Todo links (closed) | Owner-scoped links to existing Todos and source navigation | Turn project work into actionable Todos |
-| 7 | TASK-037 Project logs and timeline (PLANNED) | Editable manual logs and paginated AI Session / qualifying linked-Todo source aggregation | Recover project history without fabricated events |
+| 7 | TASK-037 Project logs and timeline (REVIEWING) | Editable manual logs and paginated AI Session / qualifying linked-Todo source aggregation | Recover project history without fabricated events |
 | 8 | Unpublished: Project lifecycle | Controlled archive/delete with explicit dependent-record policy | Remove/archive projects predictably |
 | 9 | Unpublished: PC Notes | Lightweight contextual notes and external knowledge links | Capture and retrieve a note in context |
 | 10 | Unpublished: PC Calendar | Month/day aggregation of existing source records | Open the underlying record from Calendar |
 | 11 | Unpublished: PC acceptance and demo | Cross-module regression, two-user isolation, real local backend, browser checks, demo runbook | Demonstrate the PC MVP end to end |
 | 12 | Unpublished: Android REST bootstrap and reads | Authoritative category/Todo reconciliation and Today/Todo reads | Resume Android Phase 1A delivery |
 
-The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 through TASK-036 are terminally closed; TASK-037 Project logs/timeline is published for Task Review. Earlier future-ID reservations (TASK-035 through TASK-038) are superseded; assign each next ID when Decision publishes it. Future rows may be split further after inspection/Task Review and are not READY or authorized for Coding.
+The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 through TASK-036 are terminally closed; TASK-037 Project logs/timeline is implemented and awaiting Code Review. Earlier future-ID reservations (TASK-035 through TASK-038) are superseded; assign each next ID when Decision publishes it. Future rows may be split further after inspection/Task Review and are not READY or authorized for Coding.
 
 ## Boundaries
 
@@ -53,4 +53,4 @@ On 2026-10-15, user-authorized normal startup applied 20261012_0007 and 20261014
 
 ## Timeline Foundation Scope
 
-TASK-037 adds real manual log records and a paginated read-only common timeline of active manual logs, AI Sessions, and currently linked owned Todos completed during the link period. It does not fabricate milestone/stage change events or duplicate AI Session records. Source edits/removal may change the feed; immutable audit/history is deferred. Proposed migration 20261015_0010 follows 0009 and is not yet implemented/applied. Project lifecycle remains the next unpublished foundation slice.
+TASK-037 implements real manual log records and a paginated read-only common timeline of active manual logs, AI Sessions, and currently linked owned Todos completed during the link period. It does not fabricate milestone/stage change events or duplicate AI Session records. Source edits/removal may change the feed; immutable audit/history is deferred. Coding verified 205 backend tests including real disposable PostgreSQL migration/API/keyset/concurrency checks, 204 Web tests, production build, and Playwright 16 passed / 2 existing conditional skips. Desktop/narrow browser flows use API stubs; real API persistence is verified separately through FastAPI TestClient against disposable PostgreSQL, not direct browser/backend acceptance. Migration 20261015_0010 follows 0009 and is the sole implemented head; the configured user database was not queried/upgraded by this task. Normal startup/deployment must apply the head before runtime use. TASK-037 awaits independent Code Review; Project lifecycle remains the next unpublished foundation slice.

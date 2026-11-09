@@ -21,6 +21,7 @@ for (const width of [1280, 375]) {
     await page.route("**/api/v1/projects**", (route) => {
       const request = route.request();
       const url = request.url();
+      if (new URL(url).pathname.endsWith("/timeline")) return route.fulfill({ json: { items: [], next_cursor: null } });
       if (url.endsWith("/todo-links")) {
         if (request.method() === "PUT") {
           selected = request.postDataJSON().todo_ids;

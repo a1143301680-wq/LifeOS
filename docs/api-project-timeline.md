@@ -2,7 +2,7 @@
 
 Decision date: 2026-10-15
 Delivery task: TASK-037
-Status: proposed for Task Review; not an implemented API
+Status: implemented in TASK-037; pending independent Code Review
 
 ## Storage And Source Boundaries
 

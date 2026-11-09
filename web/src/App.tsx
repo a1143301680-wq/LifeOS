@@ -51,6 +51,7 @@ import Dashboard from "./Dashboard";
 import ProjectStages from "./ProjectStages";
 import ProjectMilestones from "./ProjectMilestones";
 import ProjectTodoLinks from "./ProjectTodoLinks";
+import ProjectTimeline from "./ProjectTimeline";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
@@ -221,8 +222,9 @@ function localDateTime(value: string | null) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 23);
 }
 
-function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
+function AISessionPanel({ project, token, onUnauthorized, initialSessionId, onReturnToTimeline, onRefreshTimeline }: {
   project: Project; token: string; onUnauthorized: (message: string | null) => void; initialSessionId?: string | null;
+  onReturnToTimeline?: () => void; onRefreshTimeline?: () => Promise<void>;
 }) {
   const activeRef = useRef(false);
   const listRequestRef = useRef(0);
@@ -241,6 +243,8 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const [copyFailed, setCopyFailed] = useState(false);
   const [failedAttempt, setFailedAttempt] = useState<FailedCreateAttempt | null>(null);
+  const [sourceUnavailable, setSourceUnavailable] = useState(false);
+  const timelineHeading = useRef<HTMLHeadingElement>(null);
 
   const loadList = useCallback(async () => {
     const requestId = ++listRequestRef.current;
@@ -260,7 +264,7 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
 
   useEffect(() => {
     activeRef.current = true;
-    void loadList();
+    if (!onReturnToTimeline) void loadList();
     return () => { activeRef.current = false; listRequestRef.current += 1; detailRequestRef.current += 1; };
   }, [loadList]);
 
@@ -268,6 +272,7 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
     const requestId = ++detailRequestRef.current;
     setSelectedId(id);
     setSelected(null);
+    setSourceUnavailable(false);
     setMode(null);
     setNotice(null);
     setCopyMessage(null);
@@ -280,6 +285,7 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
     } catch (error) {
       if (!activeRef.current || detailRequestRef.current !== requestId) return;
       if (error instanceof ApiError && error.status === 401) { onUnauthorized("Your identity expired. Enter the token again."); return; }
+      setSourceUnavailable(error instanceof ApiError && (error.status === 404 || error.status === 410));
       setDetailStatus("error");
     }
   }
@@ -287,6 +293,10 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
   useEffect(() => {
     if (initialSessionId) void openSession(initialSessionId);
   }, [initialSessionId]);
+
+  useEffect(() => {
+    if (onReturnToTimeline) timelineHeading.current?.focus();
+  }, [selected, onReturnToTimeline]);
 
   function beginCreate() {
     detailRequestRef.current += 1;
@@ -405,12 +415,13 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
 
   const latest = sessions[0];
   return <div className="ai-sessions" aria-label="AI Sessions">
-    <div className="ai-session-heading"><h3>AI Sessions</h3><button className="secondary-button" type="button" onClick={beginCreate}><Plus aria-hidden="true" />New AI session</button></div>
+    <div className="ai-session-heading"><h3 ref={timelineHeading} tabIndex={onReturnToTimeline ? -1 : undefined}>{onReturnToTimeline ? "AI Session source" : "AI Sessions"}</h3>{!onReturnToTimeline ? <button className="secondary-button" type="button" onClick={beginCreate}><Plus aria-hidden="true" />New AI session</button> : null}</div>
+    {onReturnToTimeline ? <div className="session-actions"><button className="secondary-button" type="button" onClick={onReturnToTimeline}>Back to Timeline</button><button className="secondary-button" type="button" disabled={detailStatus === "loading"} onClick={() => { if (initialSessionId) void openSession(initialSessionId); void onRefreshTimeline?.(); }}><RefreshCw aria-hidden="true" />Refresh Session source</button></div> : null}
     {listStatus === "loading" ? <p role="status">Loading AI sessions...</p> : null}
     {listStatus === "error" ? <div role="alert"><p>Could not load AI sessions.</p><button className="secondary-button" type="button" onClick={() => void loadList()}>Retry sessions</button></div> : null}
     {listStatus === "ready" && !latest ? <p className="session-empty">No AI sessions yet</p> : null}
-    {latest ? <div className="session-latest"><strong>Latest AI Session</strong><span>{latest.goal}</span><p>{latest.completed_work || latest.next_step || "No summary yet"}</p></div> : null}
-    {sessions.length ? <ul className="session-list" aria-label="Project AI sessions">{sessions.map((item) => <li key={item.id}>
+    {latest && !onReturnToTimeline ? <div className="session-latest"><strong>Latest AI Session</strong><span>{latest.goal}</span><p>{latest.completed_work || latest.next_step || "No summary yet"}</p></div> : null}
+    {sessions.length && !onReturnToTimeline ? <ul className="session-list" aria-label="Project AI sessions">{sessions.map((item) => <li key={item.id}>
       <button type="button" onClick={() => void openSession(item.id)} aria-current={selectedId === item.id ? "true" : undefined}>
         <strong>{item.goal}</strong><time dateTime={item.started_at}>{new Date(item.started_at).toLocaleString()}</time>
       </button>
@@ -427,16 +438,16 @@ function AISessionPanel({ project, token, onUnauthorized, initialSessionId }: {
       {message ? <p role="alert" className="create-message-error">{message}</p> : null}
     </form> : null}
     {!mode && detailStatus === "loading" ? <p role="status">Loading AI session...</p> : null}
-    {!mode && detailStatus === "error" ? <div role="alert"><p>Could not load this AI session.</p><button className="secondary-button" type="button" onClick={() => selectedId && void openSession(selectedId)}>Retry session</button></div> : null}
+    {!mode && detailStatus === "error" ? <div role="alert"><p>{onReturnToTimeline && sourceUnavailable ? "AI Session unavailable" : "Could not load this AI session."}</p><button className="secondary-button" type="button" onClick={() => selectedId && void openSession(selectedId)}>Retry session</button></div> : null}
     {!mode && selected ? <div className="session-detail">
-      <div className="session-detail-heading"><h4>{selected.goal}</h4><button className="secondary-button" type="button" onClick={beginEdit}><Pencil aria-hidden="true" />Edit AI session</button></div>
+      <div className="session-detail-heading"><h4>{selected.goal}</h4>{!onReturnToTimeline ? <button className="secondary-button" type="button" onClick={beginEdit}><Pencil aria-hidden="true" />Edit AI session</button> : null}</div>
       {notice ? <p role="status" className="project-notice">{notice}</p> : null}
       {sessionFields.map(({ key, label }) => selected[key] ? <div className="session-detail-field" key={key}><strong>{label}</strong><p>{selected[key]}</p></div> : null)}
       <div className="session-detail-field"><strong>Start time</strong><p>{new Date(selected.started_at).toLocaleString()}</p></div>
       {selected.ended_at ? <div className="session-detail-field"><strong>End time</strong><p>{new Date(selected.ended_at).toLocaleString()}</p></div> : null}
       <div className="session-copy-actions">{(["start", "end", "continue"] as const).map((kind) => <button className="secondary-button" type="button" key={kind} onClick={() => void copyPrompt(kind)}><Copy aria-hidden="true" />Copy {kind === "start" ? "start prompt" : kind === "end" ? "end summary prompt" : "continuation prompt"}</button>)}</div>
       {copyMessage ? <p role={copyFailed ? "alert" : "status"}>{copyMessage}</p> : null}
-      <button className="text-button" type="button" onClick={() => { detailRequestRef.current += 1; setSelectedId(null); setSelected(null); setDetailStatus("idle"); setCopyMessage(null); }}>Back to sessions</button>
+      {!onReturnToTimeline ? <button className="text-button" type="button" onClick={() => { detailRequestRef.current += 1; setSelectedId(null); setSelected(null); setDetailStatus("idle"); setCopyMessage(null); }}>Back to sessions</button> : null}
     </div> : null}
   </div>;
 }
@@ -2179,6 +2190,13 @@ export default function App() {
                         setProjects(list);
                         setProjectStatus("ready");
                       }} />
+                      <ProjectTimeline key={`timeline:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} timezone={identity.timezone} onUnauthorized={returnToSetup} onSaved={async () => {
+                        const generation = projectGenerationRef.current;
+                        const requestId = projectDetailRequestRef.current;
+                        const [detail, list] = await Promise.all([getProject(activeToken!, projectDetail.id), getProjects(activeToken!)]);
+                        if (generation !== projectGenerationRef.current || requestId !== projectDetailRequestRef.current) return;
+                        setProjectDetail(detail); setProjects(list); setProjectStatus("ready");
+                      }} renderSession={(id, onClose, onRefresh) => <AISessionPanel key={`timeline-session:${identity.id}:${projectDetail.id}:${id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={id} onReturnToTimeline={onClose} onRefreshTimeline={onRefresh} />} />
                       <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={dashboardSessionId} />
                     </> : null}
                   </section>
