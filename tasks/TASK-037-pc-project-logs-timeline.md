@@ -6,7 +6,7 @@ Last updated: 2026-10-16
 
 - Task ID: TASK-037
 - Task Name: PC Project logs and timeline foundation
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: Project/stage/milestone/AI Session foundations; TASK-036 terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25`; existing owned Todo source APIs; migration `20261015_0009`
@@ -292,3 +292,18 @@ None added. Deferred ISSUE-20261011-001 remains outside scope and unchanged.
 ### Recommended Commit Message
 
 `feat(project): add logs and timeline`
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `937d1fdfdb617fa85ef563fcc1643f47622ee489`
+- Commit Message: `feat(project): add logs and timeline`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.

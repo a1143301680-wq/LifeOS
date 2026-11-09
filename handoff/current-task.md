@@ -6,7 +6,7 @@ Last updated: 2026-10-16
 
 - Task ID: TASK-037
 - Task Name: PC Project logs and timeline foundation
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: Project/stage/milestone/AI Session foundations; TASK-036 terminal Closure Commit `4073c098e779e602409cfb45d25408d640fe9a25`; existing owned Todo source APIs; migration `20261015_0009`
@@ -140,6 +140,6 @@ Git Snapshot: COMPLETE on branch `main`; base commit `4073c098e779e602409cfb45d2
 
 Snapshot Reason: approved TASK-037 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Code Review
+Next Role: Decision
 
-Required Next Action: independently review TASK-037 implementation and durable Coding evidence. Do not publish until Code Review PASS.
+Required Next Action: perform the TASK-037 Decision Closure Check against Result Commit `937d1fdfdb617fa85ef563fcc1643f47622ee489` and this completion record. Do not publish the next task before closure.
