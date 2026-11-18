@@ -1,6 +1,6 @@
 # LifeOS Task Review Gate
 
-Last updated: 2026-10-15
+Last updated: 2026-11-09
 
 ## Gate Status
 
@@ -10,18 +10,18 @@ Target Status: READY
 
 Reviewed by: Task Review window
 
-Reviewed at: 2026-10-16 09:08 +08:00
+Reviewed at: 2026-11-09 13:38 +08:00
 
-Reviewed task: TASK-037 PC Project logs and timeline foundation
+Reviewed task: TASK-038 PC Project lifecycle
 
 ## Required Review
 
-- [x] Manual-log fields, CRUD validation, server occurrence, soft deletion, idempotency, row/parent versions, and transaction rules are explicit.
-- [x] The three timeline source kinds, ownership/deletion filters, source occurrence semantics, summaries, current-source behavior, and navigation are deterministic.
-- [x] Ordering, complete tie tuple, cursor structure/binding/validation, live-view limits, and bounded keyset retrieval are implementable and testable.
-- [x] Migration upgrade/downgrade/re-upgrade preserves all existing source and sync data without fabricated backfill.
-- [x] The manual-log and common-timeline UI forms one closeable Project-history foundation while milestone/stage inferred history remains excluded.
-- [x] The exact nine-file Snapshot range matches the complete worktree and contains no implementation code.
+- [x] Archive, restore, and soft delete form one closeable Project-lifecycle slice; physical deletion, Trash, retention, and child lifecycle mutation remain excluded.
+- [x] Active, archived, and deleted storage states, migration behavior, list/detail visibility, ownership, replay, version, timestamp, and transaction rules are explicit and testable.
+- [x] Deleted-parent handling and Project row locking cover current nested reads/writes, including the explicitly scoped AI Session integration, without changing child public contracts.
+- [x] Soft delete preserves Project children and independent Todo/sync data; archived Projects remain usable but are excluded from Dashboard.
+- [x] PC Active/Archived views, lifecycle commands, confirmation, canonical refresh, stale-response guards, and responsive verification are sufficiently specified.
+- [x] The exact nine-file Snapshot scope matches the complete worktree and contains only TASK-038 publication/readiness documents.
 
 ## Blocking Issues
 
@@ -32,20 +32,21 @@ None.
 ### Repository State
 
 - Branch: `main`
-- HEAD: `4073c098e779e602409cfb45d25408d640fe9a25`
-- `origin/main`: `4073c098e779e602409cfb45d25408d640fe9a25`
-- Remote `refs/heads/main`: `4073c098e779e602409cfb45d25408d640fe9a25`
-- Dependency check: TASK-036 terminal Closure Commit exists with subject `docs(task): close TASK-036` and is the aligned local/tracking/remote baseline. Existing migration head before TASK-037 is `20261015_0009`.
-- Worktree Summary before PASS persistence: 7 modified tracked documents and 2 untracked documents; all nine match the proposed TASK-037 publication scope exactly.
+- HEAD: `647f369741b6a1472f5ab6f6e465e3b1d01070ff`
+- `origin/main`: `647f369741b6a1472f5ab6f6e465e3b1d01070ff`
+- Remote `refs/heads/main`: `647f369741b6a1472f5ab6f6e465e3b1d01070ff`
+- Dependency check: TASK-037 terminal Closure Commit exists with subject `docs(task): close TASK-037`; local HEAD, tracking branch, and remote main all match it. Existing migration head is `20261015_0010`, whose `down_revision` is `20261015_0009`.
+- Worktree Summary before PASS persistence: 7 modified tracked documents and 2 untracked documents; all nine match the proposed TASK-038 publication scope exactly.
+- Changed Files: exactly the nine files under Approved Snapshot Scope; no extra or missing path.
 - Staged Changes: None.
 - `git diff --check`: exit code 0; informational LF-to-CRLF warnings only.
 - `git diff --cached --check`: exit code 0.
-- Whitespace/EOF: all nine files have a final newline and no extra EOF blank line.
-- Issue scan: no TASK-037 issue exists. `ISSUE-20261011-001` remains an unrelated open P3 TASK-030 issue and does not block or expand TASK-037.
+- Whitespace/EOF: all nine files have a final newline and no extra EOF blank line. Independent `--no-index --check` output for both untracked files reported no whitespace error.
+- Issue scan: no TASK-038 issue exists. `ISSUE-20261011-001` remains an unrelated TASK-030 AI language issue and does not block or expand TASK-038.
 
 ### Approved Snapshot Scope
 
-- `docs/api-project-timeline.md`
+- `docs/api-project-lifecycle.md`
 - `docs/pc-delivery-plan.md`
 - `handoff/current-task.md`
 - `handoff/project-state.md`
@@ -53,39 +54,31 @@ None.
 - `handoff/code-review-gate.md`
 - `handoff/git-snapshot.md`
 - `handoff/git-commit.md`
-- `tasks/TASK-037-pc-project-logs-timeline.md`
+- `tasks/TASK-038-pc-project-lifecycle.md`
 
-This is the complete worktree scope. No backend/Web implementation, Android file, migration implementation, dependency/lockfile, issue-log edit, completed task archive, generated output, credential, private fixture, or unrelated stable contract is present. Targeted scans found no secret value or user-machine path.
+This is the complete worktree scope. No backend/Web implementation, Android file, migration implementation, dependency/lockfile, issue-log edit, completed task archive, generated output, credential value, private fixture, local database, or unrelated stable contract is present.
 
-### Manual Log Review
+### Lifecycle And API Contract Review
 
-- `project_logs` stores only explicit manual records with server-generated identity and occurrence (`created_at`), bounded title/content, positive version, timestamps, owner/Project links, and soft deletion. Clients cannot backdate or write ownership, kind, version, or timestamps.
-- POST, PATCH, detail GET, and DELETE have exact payload/error behavior. Blank content normalizes to null; PATCH no-op preserves row and parent metadata; effective create/edit/delete increments the parent once and the affected row at its defined boundary.
-- Fresh access to an owned tombstone returns `410`; same-key DELETE replay still returns the original tombstone response while a new-key second delete does not mutate again. No restore or hard-delete route exists.
-- Manual row changes, parent version/timestamp, and successful idempotency response share one transaction and the existing parent Project lock boundary. Concurrent Project/stage/milestone/link/manual mutations must preserve parent increments.
+- `archived_at` and `deleted_at` define three valid states: active has neither value, archived has only `archived_at`, and deleted retains non-null `archived_at` plus non-null `deleted_at`. Lifecycle remains separate from Project business status and pinning.
+- Migration `20261109_0011` follows `20261015_0010`, leaves existing Projects active, preserves versions/timestamps/children/sync state, and documents the disposable-only downgrade visibility consequence.
+- `GET /projects` has a deterministic `active|archived` scope, defaults to active, remains owner-scoped and ordered, excludes deleted rows, and rejects unknown scope. Detail and nested reads allow active/archived parents while missing, foreign, or deleted parents return non-disclosing 404.
+- Archive, restore, and delete use empty bodies and UUID idempotency keys. Effective transitions increment Project version once; lifecycle no-ops preserve version/timestamps; active delete returns `409 project_not_archived`; rejected requests do not create success records.
+- Exact historical replay is preserved without a second mutation. Fresh deleted-parent requests fail, while lifecycle mutation, Project/child mutation, and successful idempotency persistence are required to share the defined transaction and parent-lock ordering.
 
-### Timeline Source Review
+### Dependent Data And Concurrency Review
 
-- Timeline entries come from exactly three real sources: active manual logs in the Project at `created_at`; owned AI Sessions in the Project at `started_at`; and active owned completed Todos currently linked to the Project where non-null `completed_at >= link.created_at`.
-- Milestone/stage state, `updated_at`, target dates, percentages, pre-link Todo completions, deleted/unlinked/reopened/canceled/pending Todos, and fabricated history are excluded.
-- Each entry exposes exactly kind, source ID, UTC-comparable occurrence, current title/summary, and current source version. Summary uses the first 300 Unicode code points of normalized source text; stable identity is `(kind, source_id)`.
-- Source changes have explicit live-view effects: manual edits keep occurrence; Session `started_at` edits may move entries; unlink/delete/reopen removes Todo entries; re-completion projects only the current completion. No duplicate source row or immutable-audit claim is introduced.
-- Source navigation reuses owned manual detail, existing Project Session detail, and read-only Todo detail with 401/404/410 handling, back/focus restoration, refresh, and no source mutation.
+- Soft delete keeps stages, milestones, Todo links, AI Sessions, logs, and all other Project data. Linked Todos remain independent; other Projects retain shared Todo references; no lifecycle sync entity or tombstone is introduced.
+- Structural inspection confirmed the shared owned-Project helper is already the parent boundary for Project detail plus stage, milestone, Todo-link, log, and timeline routes. TASK-038 can add lifecycle filtering and optional locking centrally while preserving archived access.
+- AI Session handlers currently use a separate Project helper path and perform writes without the shared parent lock. The task explicitly permits only the narrow `ai_sessions.py` ownership/locking integration and requires replay plus before/after-delete concurrency tests, so this known implementation point is scoped rather than unresolved.
+- Codebase index coverage was checked for 14 relied-on backend, migration, and Web files. All reported metadata matching the indexed baseline with no recorded coverage issue; conclusions remain best-effort static analysis and are backed by direct source reads for the reviewed paths.
 
-### Ordering And Pagination Review
+### PC And Verification Review
 
-- The complete order and seek tuple is `occurred_at DESC`, kind rank `manual_log=0`, `ai_session=1`, `todo_completed=2` ASC, then `source_id ASC`. Equal-time, cross-kind, and same-UUID-across-table cases are covered.
-- The versioned base64url cursor contains only `v=1`, bound owner/project IDs, and the exact anchor tuple. Shape, types, UUIDs, aware timestamp, kind, version, binding, empty input, malformed input, and 4096-character maximum have deterministic validation.
-- Page size may change because it is not a source filter. `next_cursor` appears only when a `limit+1` eligible item exists, and the last returned tuple is the anchor.
-- Queries must apply cursor and `limit+1` at the database/source-query boundary via SQL union or bounded per-source merge. Loading complete source histories before slicing is forbidden.
-- Pagination is explicitly a current-source live view rather than a snapshot. Source timestamp/status/link changes may affect later pages; Refresh restarts from page one. This limitation is surfaced rather than left ambiguous.
-
-### Migration, Scope, And Verification Review
-
-- `20261015_0010` follows `20261015_0009`, creates an empty constrained/indexed manual-log table, does no guessed backfill or AI Session copy, and preserves users, Projects, stages, milestones, Sessions, Todos, links, versions, timestamps, and sync cursors.
-- Downgrade removes only manual logs; re-upgrade starts empty. Disposable PostgreSQL verifies migration preservation, keyed CRUD/readback, tuple ordering, pagination, source filtering, constraints, concurrent parent writes, and absence of unexpected source/sync mutation.
-- TASK-037 is one closeable vertical slice: manual records plus the first truthful common Project timeline and its source navigation. Lifecycle, Notes, Calendar/Dashboard integration, stats, Android, sync/SSE, source editing, AI/provider/memory/Agent work, and generic refactors remain excluded.
-- Verification covers focused/full backend and Web suites, production build, responsive Playwright flow, real disposable-API evidence, SQLite/PostgreSQL timestamp normalization, pagination edge cases, stale identity/Project responses, regressions, scope/security scans, and cleanup.
+- Active/Archived list switching, archive/restore, confirmed delete, canonical destination refresh, identity/Project/scope stale-request guards, and desktop/narrow behavior form an executable UI acceptance path.
+- Archived Projects remain detail-editable; deleted Projects disappear from fresh Project/child access. Pinned archived/deleted Projects are excluded from Dashboard without changing Dashboard ranking.
+- Verification covers focused and full backend/Web suites, production build, Playwright at 1280px and 375px, real disposable PostgreSQL migration/API/locking evidence, replay/conflict/no-op cases, retained child/Todo/sync state, and existing Project/child/AI/timeline regressions.
+- Configured user databases and live providers are excluded. Browser stubs must be distinguished from real API evidence, and environmental limits must be explicitly dispositioned at Code Review.
 
 ### Git Snapshot Readiness
 
@@ -93,4 +86,4 @@ READY. Git Snapshot may establish the pre-Coding baseline using exactly the nine
 
 ## Instructions
 
-Task Review PASS authorizes Git Snapshot for the exact approved TASK-037 publication/readiness scope. Do not start Coding, stage implementation, commit implementation, or push implementation before the Snapshot transition completes.
+Task Review PASS authorizes Git Snapshot for the exact approved TASK-038 publication/readiness scope. Do not start Coding, stage implementation, commit implementation, or push implementation before the Snapshot transition completes.
