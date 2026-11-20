@@ -1,6 +1,6 @@
 # LifeOS Current Task
 
-Last updated: 2026-11-18
+Last updated: 2026-11-20
 
 ## Metadata
 
@@ -121,6 +121,16 @@ Code Review: CHANGES_REQUESTED at 2026-11-18 14:06 +08:00. Blocking issue CR-TAS
 
 Code Review re-review: PASS at 2026-11-20 11:48 +08:00. CR-TASK-038-001 is verified.
 
-Next Role: Decision
+Closure Check: PASS
 
-Required Next Action: perform the TASK-038 Decision Closure Check against Result Commit `2308b53c3305b27a101a038c24dfe39467399c40` and this completion record. Do not publish the next task before closure.
+Checked At: 2026-11-20 11:53:07 +08:00
+
+Result Commit: `2308b53c3305b27a101a038c24dfe39467399c40`
+
+Completion Commit: `839a7dd5fe51aa092c4b21e7bfa1eaeaa3127b32`
+
+Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; exact 27-file reviewed result and four-file completion metadata; Code Review re-review PASS; all eight criteria confirmed; CR-TASK-038-001 verified. Full evidence and the five-file allowlist are in the task archive.
+
+Next Role: Git Commit (Terminal Closure Commit)
+
+Required Next Action: commit and push only the five documents in the TASK-038 archive's Terminal Closure File Allowlist with message `docs(task): close TASK-038`. Verify local/tracking/remote parity and a clean worktree, then return to Decision. Do not repeat Closure Check or publish the next task from this step.

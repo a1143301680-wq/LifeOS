@@ -1,6 +1,6 @@
 # TASK-038: PC Project lifecycle
 
-Last updated: 2026-11-18
+Last updated: 2026-11-20
 
 ## Metadata
 
@@ -117,9 +117,9 @@ Git Snapshot: COMPLETE on branch main; base 647f369741b6a1472f5ab6f6e465e3b1d010
 
 Snapshot Reason: approved TASK-038 readiness documents required a durable pre-Coding baseline.
 
-Next Role: Git Commit
+Next Role: Git Commit (Terminal Closure Commit)
 
-Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`.
+Required Next Action: commit and push only the five documents in the Terminal Closure File Allowlist below with message `docs(task): close TASK-038`. Verify parity and a clean worktree, then return to Decision without repeating Closure Check.
 
 ## Coding Result
 
@@ -279,5 +279,24 @@ None recorded.
 
 ## Closure
 
-- Closure Check: PENDING
-- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
+- Closure Check: PASS
+- Checked At: 2026-11-20 11:53:07 +08:00
+- Result Commit: `2308b53c3305b27a101a038c24dfe39467399c40`
+- Completion Commit: `839a7dd5fe51aa092c4b21e7bfa1eaeaa3127b32`
+- Remote Verification: before Closure edits, main HEAD, origin/main, and remote refs/heads/main all matched the Completion Commit. Result parent is snapshot 4138f59; completion parent is the Result Commit.
+- Working Tree Before Closure Docs: clean, with no staged, unstaged, or untracked paths.
+- Review/Test Evidence: final Code Review re-review PASS / COMPLETED at 2026-11-20 11:48 +08:00. Initial review verified 209 backend tests including disposable PostgreSQL and sole Alembic head 20261109_0011. Web-only rework was independently verified with 205 Web tests, production build PASS, and Playwright 18 passed / 2 existing conditional direct-backend skips at 1280px and 375px.
+- Decision Verification: exact Result Commit paths match all 27 Reviewed Scope paths. Completion Commit contains only current-task.md, git-commit.md, project-state.md, and this archive. Both published commits pass Git whitespace checks. Decision checked the persisted review/test evidence without rerunning the already-reviewed suites or changing business code.
+- Acceptance Criteria Result: all eight criteria are checked in both active records and supported by review evidence, including preserved children/Todos/sync state, deleted-parent access rules, parent locking, archived Dashboard exclusion, and navigation-safe lifecycle retries. Browser flows use synthetic API responses; actual backend migration/API/concurrency evidence comes separately from disposable PostgreSQL, not direct browser-to-user-database acceptance.
+- Issue Disposition: CR-TASK-038-001 is verified in issue-log.md and final re-review; no blocking TASK-038 finding remains. ISSUE-20261011-001 remains open P3/non-blocking and deferred. The review's optional P3 suggestion to extract legacy-Project migration fixture/snapshot helpers is deferred test maintenance, not a closure blocker.
+- Remaining Follow-ups: this check does not establish the configured user database's current revision or deploy 0011. Normal startup/deployment must verify and apply pending migrations through 20261109_0011 before lifecycle use. Retain the two conditional browser skips for later PC acceptance. Notes is the next unpublished business slice; Calendar/PC acceptance follow, then Android. AI memory/Agent work remains deferred.
+- State Synchronization: both task records remain COMPLETED; live routing now authorizes terminal closure only. Roadmap, project state, and the lifecycle API status header are synchronized with final Review PASS and published-result evidence; API contract body is unchanged.
+- Terminal Closure Commit: authorize exactly the five documents below with message `docs(task): close TASK-038`. Commit/push once; verify local/tracking/remote parity and a clean worktree; return to Decision. Do not repeat Closure Check, create post-closure state edits, or publish the next task from the Git window.
+
+### Terminal Closure File Allowlist
+
+- `docs/api-project-lifecycle.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/project-state.md`
+- `tasks/TASK-038-pc-project-lifecycle.md`

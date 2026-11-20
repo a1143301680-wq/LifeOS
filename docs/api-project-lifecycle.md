@@ -2,7 +2,7 @@
 
 Decision date: 2026-11-09
 Delivery task: TASK-038
-Status: implemented in TASK-038 and awaiting Code Review
+Status: implemented; TASK-038 Code Review re-review PASS; result published in 2308b53
 
 ## State And Storage
 
