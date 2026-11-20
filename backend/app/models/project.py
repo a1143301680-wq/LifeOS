@@ -15,6 +15,7 @@ class Project(Base):
         CheckConstraint("type IN ('development', 'learning', 'life', 'health', 'pet', 'other')", name="ck_projects_type"),
         CheckConstraint("status IN ('planning', 'in_progress', 'paused', 'completed', 'abandoned')", name="ck_projects_status"),
         CheckConstraint("manual_progress BETWEEN 0 AND 100", name="ck_projects_progress"),
+        CheckConstraint("deleted_at IS NULL OR archived_at IS NOT NULL", name="ck_projects_deleted_requires_archive"),
         Index("ix_projects_user_pin_updated_id", "user_id", "is_pinned", "updated_at", "id"),
     )
 
@@ -30,3 +31,5 @@ class Project(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default=text("1"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 from uuid import UUID
 
@@ -59,5 +59,13 @@ class ProjectRead(BaseModel):
     version: int
     created_at: datetime
     updated_at: datetime
+    archived_at: datetime | None = None
+
+    @field_validator("archived_at")
+    @classmethod
+    def normalize_archived_at(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
 
     model_config = ConfigDict(from_attributes=True)

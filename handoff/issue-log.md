@@ -328,6 +328,24 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Fix notes: decide the language policy first, then inspect provider instructions and UI rendering. Preserve current validation and explicit Save for suggested Todos; no fix in this turn.
 - Verification: add deterministic language-policy coverage and perform a bounded live check when the later task is implemented.
 
+### CR-TASK-038-001: Lifecycle write state is lost across scope navigation
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-11-18 14:06 +08:00
+- Related task: TASK-038 PC Project lifecycle
+- Files: `D:\LifeOS\web\src\ProjectLifecycle.tsx:13`, `D:\LifeOS\web\src\App.tsx:1224`, `D:\LifeOS\web\src\App.tsx:1233`, `D:\LifeOS\web\e2e\project-lifecycle.spec.ts:82`
+- Description: lifecycle `inFlight` and ambiguous retry-key state lives in a detail component that scope navigation unmounts. The stale mutation callback then exits without canonical list refresh. Returning to the same Project while the request is pending can submit the same action using a new key.
+- Impact: Active/Archived projections can remain stale after a successful mutation, and duplicate concurrent lifecycle requests/success idempotency records are possible for one user action.
+- Expected: pending state and unchanged retry key survive identity/project/action-equivalent navigation; navigation suppresses stale detail rendering but mutation completion still refreshes an appropriate current/destination list; duplicate submission remains blocked.
+- Actual: the existing delayed-Archive browser case verifies only the selected tab before manually loading Archived. It does not assert Active reconciliation and does not attempt to reopen/resubmit while the first request is pending.
+- Fix owner/window: Coding through guarded rework admission.
+- Fix notes: lift pending/retry ownership to an identity/project/action-stable boundary, preserve the key across remount, and run generation-protected canonical refresh after success. Do not broaden backend or lifecycle scope.
+- Verification: pause Archive; switch scopes; return to the same Project; attempt Archive again and prove only one request/key; release the request; verify Active excludes the Project and Archived includes it. Rerun focused/full Web, build, and Playwright at 1280px and 375px.
+- Resolution: App owns pending attempts and ambiguous retry keys across detail remounts. Successful writes refresh the current scope and preserve navigation when the initiating detail context has changed.
+- Final Verification: Code Review independently confirmed same-key retry after remount, duplicate prevention during a delayed write, and Active/Archived reconciliation at 1280px and 375px on 2026-11-20. Full Web, build, and Playwright passed.
+
 ## Entry Template
 
 ```text

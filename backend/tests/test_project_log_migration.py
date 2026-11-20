@@ -41,7 +41,7 @@ def test_postgres_logs_round_trip_timeline_constraints_and_shared_lock(disposabl
     with factory() as db:
         db.add(User(id=owner, alias="logs-owner", display_name="Owner", timezone="UTC", bootstrap_token_hash=PasswordHasher(time_cost=1, memory_cost=1024, parallelism=1).hash("logs-synthetic-token")))
         db.flush()
-        db.add(Project(id=project, user_id=owner, name="Preserved", manual_progress=42))
+        db.execute(Project.__table__.insert().values(id=project, user_id=owner, name="Preserved", manual_progress=42))
         db.add(Todo(id=source, user_id=owner, title="Completed source", status="completed", completed_at=time.astimezone(timezone(timedelta(hours=8)))))
         db.flush()
         db.add(ProjectStage(id=stage, user_id=owner, project_id=project, name="Stage", sort_order=0))
@@ -55,7 +55,7 @@ def test_postgres_logs_round_trip_timeline_constraints_and_shared_lock(disposabl
     assert legacy(engine) == before
     with factory() as db:
         assert db.execute(select(ProjectLog)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261015_0010"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261109_0011"
 
     def override_db():
         with factory() as db:

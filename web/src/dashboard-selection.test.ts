@@ -40,3 +40,9 @@ test("never repeats an ID", () => {
   const same = project("same", "in_progress", false, "2026-10-10T00:00:00Z");
   expect(selectFocusedProjects([same, same]).map((item) => item.id)).toEqual(["same"]);
 });
+
+test("pinned archived projects are excluded alongside legacy active projects", () => {
+  const archived = { ...project("archived", "in_progress", true, "2026-10-11T00:00:00Z"), archived_at: "2026-10-11T00:00:00Z" };
+  const active = project("active", "planning", false, "2026-10-10T00:00:00Z");
+  expect(selectFocusedProjects([archived, active])).toEqual([active]);
+});

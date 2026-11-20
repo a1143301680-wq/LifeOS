@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.v1.projects import get_owned_project
+from app.services.project_stages import get_owned_project
 from app.core.auth import get_current_user
 from app.core.database import get_db
 from app.core.envelope import data_envelope, list_envelope
@@ -54,13 +54,13 @@ async def create_ai_session(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_db),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
-    get_owned_project(db, current_user.id, project_id)
     key, request_hash, replay = await get_idempotency_context(
         db, request=request, user_id=current_user.id, raw_key=idempotency_key
     )
     if replay is not None:
         return replay
     try:
+        get_owned_project(db, current_user.id, project_id, lock=True)
         ai_session = AISession(user_id=current_user.id, project_id=project_id, **payload.model_dump())
         db.add(ai_session)
         db.flush()
@@ -91,8 +91,6 @@ async def update_ai_session(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_db),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
-    get_owned_project(db, current_user.id, project_id)
-    ai_session = get_owned_session(db, current_user.id, project_id, session_id)
     key, request_hash, replay = await get_idempotency_context(
         db, request=request, user_id=current_user.id, raw_key=idempotency_key
     )
@@ -102,12 +100,13 @@ async def update_ai_session(
     if not changes:
         raise ApiError(400, "validation_error", "at least one AI session field is required")
 
-    started_at = as_utc(changes.get("started_at", ai_session.started_at))
-    ended_at = changes.get("ended_at", ai_session.ended_at)
-    if ended_at is not None and as_utc(ended_at) < started_at:
-        raise ApiError(400, "validation_error", "ended_at must be at or after started_at")
-
     try:
+        get_owned_project(db, current_user.id, project_id, lock=True)
+        ai_session = get_owned_session(db, current_user.id, project_id, session_id)
+        started_at = as_utc(changes.get("started_at", ai_session.started_at))
+        ended_at = changes.get("ended_at", ai_session.ended_at)
+        if ended_at is not None and as_utc(ended_at) < started_at:
+            raise ApiError(400, "validation_error", "ended_at must be at or after started_at")
         effective = {name: value for name, value in changes.items() if field_changed(ai_session, name, value)}
         if effective:
             for name, value in effective.items():

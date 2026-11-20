@@ -1,12 +1,12 @@
 # TASK-038: PC Project lifecycle
 
-Last updated: 2026-11-09
+Last updated: 2026-11-18
 
 ## Metadata
 
 - Task ID: TASK-038
 - Task Name: PC Project lifecycle
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-037 terminal Closure Commit `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; Project and existing nested source APIs; migration 20261015_0010
@@ -67,14 +67,14 @@ A PC user can archive a Project, find and restore it from Archived, or explicitl
 
 ## Acceptance Criteria
 
-- [ ] Existing Projects migrate as active without data/version/timestamp/sync changes; repeated head preserves state and downgrade visibility is verified.
-- [ ] Default and archived listings are owner-scoped and correctly ordered; archived detail/children remain usable and deleted Projects are excluded from all fresh parent/child requests.
-- [ ] Archive/restore/delete enforce exact payload, ownership, idempotency, no-op, transaction and version rules; active DELETE is rejected.
-- [ ] Soft-delete preserves all dependent rows and independent Todo/sync data; other Projects retain shared Todo references.
-- [ ] PostgreSQL concurrency verifies Project and child mutations ordered before/after deletion, including AI Session writes, with no post-delete mutation or lost parent increments.
-- [ ] PC Active/Archived, archive/restore, confirm/cancel delete, navigation/refresh errors and identity/Project/scope switching work without stale responses.
-- [ ] Pinned archived Projects are excluded from Dashboard; existing Project/stage/milestone/log/timeline/Todo/AI Session/prompt behavior and sync regressions pass.
-- [ ] Backend/Web/build, desktop/narrow browser, disposable PostgreSQL and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [x] Existing Projects migrate as active without data/version/timestamp/sync changes; repeated head preserves state and downgrade visibility is verified.
+- [x] Default and archived listings are owner-scoped and correctly ordered; archived detail/children remain usable and deleted Projects are excluded from all fresh parent/child requests.
+- [x] Archive/restore/delete enforce exact payload, ownership, idempotency, no-op, transaction and version rules; active DELETE is rejected.
+- [x] Soft-delete preserves all dependent rows and independent Todo/sync data; other Projects retain shared Todo references.
+- [x] PostgreSQL concurrency verifies Project and child mutations ordered before/after deletion, including AI Session writes, with no post-delete mutation or lost parent increments.
+- [x] PC Active/Archived, archive/restore, confirm/cancel delete, navigation/refresh errors and identity/Project/scope switching work without stale responses.
+- [x] Pinned archived Projects are excluded from Dashboard; existing Project/stage/milestone/log/timeline/Todo/AI Session/prompt behavior and sync regressions pass.
+- [x] Backend/Web/build, desktop/narrow browser, disposable PostgreSQL and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
 
 ## Verification Plan
 
@@ -113,6 +113,156 @@ Report lifecycle/migration behavior, child ownership and concurrency evidence, U
 
 ## Current Stage
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch main; base 647f369741b6a1472f5ab6f6e465e3b1d01070ff; snapshot 4138f592f7fa3bb0be080b28e97cce2e778e7732.
 
-Required Next Action: establish the pre-Coding Git Snapshot from the exact nine-document approved scope and independently verify branch, HEAD, remote parity, staged state, whitespace, secrets, private fixtures, and generated artifacts. Do not start Coding until Snapshot synchronizes both records to IN_PROGRESS.
+Snapshot Reason: approved TASK-038 readiness documents required a durable pre-Coding baseline.
+
+Next Role: Git Commit
+
+Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`.
+
+## Coding Result
+
+- Result: PASS
+- Task ID: TASK-038
+- Final Status: REVIEWING
+- Branch: main
+- Snapshot and HEAD: `4138f592f7fa3bb0be080b28e97cce2e778e7732`
+- Verified: 2026-11-18, Asia/Shanghai
+- Next Role: Code Review
+
+### Modified Files
+
+The working tree contains these 25 paths including the existing snapshot record. Coding updated the two active task records and preserved their snapshot evidence.
+
+- `backend/alembic/versions/20261109_0011_add_project_lifecycle.py`
+- `backend/app/api/v1/ai_sessions.py`
+- `backend/app/api/v1/projects.py`
+- `backend/app/models/project.py`
+- `backend/app/schemas/project.py`
+- `backend/app/services/project_stages.py`
+- `backend/tests/test_project_lifecycle.py`
+- `backend/tests/test_project_lifecycle_migration.py`
+- `backend/tests/test_project_log_migration.py`
+- `backend/tests/test_project_milestone_migration.py`
+- `backend/tests/test_project_stage_migration.py`
+- `backend/tests/test_project_todo_link_migration.py`
+- `docs/api-project-lifecycle.md`
+- `docs/pc-delivery-plan.md`
+- `handoff/current-task.md`
+- `handoff/git-snapshot.md`
+- `tasks/TASK-038-pc-project-lifecycle.md`
+- `web/e2e/project-lifecycle.spec.ts`
+- `web/src/App.tsx`
+- `web/src/api.ts`
+- `web/src/dashboard-selection.test.ts`
+- `web/src/dashboard-selection.ts`
+- `web/src/ProjectLifecycle.tsx`
+- `web/src/styles.css`
+- `web/src/types.ts`
+
+### Implementation Summary
+
+- Added nullable lifecycle timestamps and a database constraint requiring an archive timestamp for a deleted Project. Revision `20261109_0011` follows `20261015_0010`.
+- Default and archived listings filter by owner and lifecycle, using the established pin, update time and ID order. Shared parent lookup filters deleted Projects, including when taking write locks. AI Session writes use that same lock.
+- Archive, restore and archived-only soft deletion use empty bodies, UUID idempotency keys and one transaction for the Project update and stored response. Effective transitions bump the parent once. No-op actions preserve versions and timestamps. Historical responses remain replayable.
+- PC Projects adds scope controls, confirmed deletion and canonical list/detail reads. A failed read after mutation can be retried as a read. Identity and Project request generations plus scope transitions guard late results. Dashboard excludes pinned archived Projects.
+
+### Acceptance Criteria Results
+
+1. PASS. Disposable PostgreSQL verified data and sync sequence preservation, active visibility on upgrade, retained deleted visibility on repeated head, and restored active visibility after downgrade removes the flags and re-upgrade recreates them.
+2. PASS. Focused API tests cover owner and scope isolation, archived access and fresh 404s on deleted parent and child paths. The ordering clauses are the existing pin, update time and ID sequence.
+3. PASS. Focused tests cover empty-body and key validation, conflict, exact replay including DELETE, no-op, active-delete rejection and transactional rollback.
+4. PASS. PostgreSQL compares all retained child, Todo and sync records around deletion and verifies a shared Todo through a second Project.
+5. PASS. PostgreSQL exercises both lock orders for Project PATCH, stage PUT, milestone PUT, link PUT, log POST and AI Session POST/PATCH. It checks conditional parent version increments and retained AI Session data.
+6. PASS with recorded coverage. Both browser sizes exercise archive, restore, confirmation and cancellation, stable ambiguous retry keys, readback retry and a late mutation during scope switching. Identity and Project switching use the existing request-generation guards and existing suite coverage.
+7. PASS. A Dashboard unit case excludes a pinned archived Project. Full backend, Web and browser regressions cover the existing Project and child workflows.
+8. PASS with the verification boundaries below.
+
+### Verification Commands And Results
+
+- From `backend`, set `$env:LIFEOS_TEST_PG_BIN='D:/PostgreSQL/18/bin'` and run `python -m pytest tests/test_project_lifecycle.py tests/test_project_lifecycle_migration.py -q --tb=short`. Four passed. The expanded concurrency fixture required a milestone ID to reach the lock check.
+- From `backend`, run `python -m pytest` with the same disposable PostgreSQL setting. 209 passed.
+- From `backend`, run `python -m alembic heads`. Sole head is `20261109_0011`.
+- From `web`, run `npm test -- --run`. 205 passed across 21 files.
+- From `web`, run `npm run build`. Passed.
+- From `web`, run `npx playwright test`. 18 passed and two existing direct-backend cases were skipped because their disposable-backend tokens were absent. Lifecycle tests passed at 1280px and 375px with API stubs. Screenshots and horizontal-overflow assertions passed. Playwright emitted the NO_COLOR and FORCE_COLOR precedence notice.
+- Real migration, API persistence and concurrent transactions ran against a disposable PostgreSQL instance. Browser flows exercised the frontend with synthetic API responses. The configured user database still needs migration before runtime use. The frontend dev server returned HTTP 200 at `http://127.0.0.1:5173`.
+
+### Git Diff Check
+
+`git status --short --untracked-files=all`, `git diff --stat` and `git diff` were inspected. Tracked and untracked paths match the list above. Working and cached whitespace checks passed with Git line-ending notices. The index is empty. New-file whitespace, artifact path and credential-pattern scans passed. The original snapshot record was preserved.
+
+### Unresolved Issues
+
+Independent Code Review and configured database deployment are pending.
+
+### Task-Outside Findings
+
+None recorded.
+
+## Code Review Result
+
+- Result: CHANGES_REQUESTED
+- Target Status: CHANGES_REQUESTED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-11-18 14:06 +08:00
+- Branch / HEAD / Snapshot: `main` / `4138f592f7fa3bb0be080b28e97cce2e778e7732`
+- Next Role: Coding through guarded rework admission
+
+### Blocking Issue
+
+- `CR-TASK-038-001` (P1): lifecycle `inFlight` and ambiguous retry-key state is owned by the detail component and is discarded by scope navigation. A delayed successful write can leave the current Project list stale, while returning to the same Project permits a second request with a fresh key before the first completes.
+- Required fix and verification are persisted in `handoff/code-review-gate.md` and `handoff/issue-log.md`.
+
+### Independent Verification
+
+- Focused lifecycle API/migration: 4 passed against disposable PostgreSQL.
+- Full backend: 209 passed; Alembic sole head `20261109_0011`.
+- Full Web: 21 files / 205 tests passed; production build PASS.
+- Playwright: 18 passed / 2 existing conditional skips, but the lifecycle stale-scope case asserts only the selected tab and does not prove list reconciliation or duplicate-write prevention.
+- Git working/cached whitespace, untracked EOF/whitespace, security/artifact scans, exact 25-path Coding scope, and empty staging passed before review persistence.
+
+### Non-blocking Suggestion
+
+- P3: consider a later shared helper for revision-aware Project migration fixtures/snapshots; this does not expand the current rework.
+
+## Coding Rework Result
+
+- Finding: CR-TASK-038-001
+- Result: PASS
+- Final Status: REVIEWING
+- Branch and snapshot: `main`, `4138f592f7fa3bb0be080b28e97cce2e778e7732`
+- Next Role: Code Review
+
+### Changes
+
+- `web/src/App.tsx` owns pending attempts and retry keys for the current identity session, by Project and action. An in-flight write locks lifecycle actions on that Project across detail remounts. Ambiguous failures keep the action's key, while deterministic 4xx responses discard it. Identity changes clear the registry and invalidate late completions.
+- `web/src/ProjectLifecycle.tsx` receives pending and error state from App and owns confirmation UI only.
+- Late success refreshes the current scope through the existing request-generation checks. It preserves navigation and refreshes detail only if the user is looking at the affected Project.
+- `web/e2e/project-lifecycle.spec.ts` reproduces key loss on remount, then verifies same-key retry, disabled Archive after reopening during a delayed write, a single held request, automatic removal from Active and presence in Archived at 1280px and 375px.
+
+### Verification
+
+- From `web`, the expanded 1280px case failed before the fix because the retry generated a different key.
+- `npx playwright test e2e/project-lifecycle.spec.ts` passed both widths.
+- `npm test -- --run src/App.projects.test.tsx src/App.dashboard.test.tsx src/dashboard-selection.test.ts` passed 11 tests.
+- `npm test -- --run` passed 205 tests across 21 files.
+- `npm run build` passed.
+- `npx playwright test` passed 18 tests, with two existing direct-backend cases conditionally skipped. Playwright emitted the existing color environment notice. The lifecycle browser tests use synthetic API responses.
+- Backend verification for the original implementation is recorded above. This rework only changed Web behavior.
+- Git whitespace checks passed for working and cached diffs, and staging is empty. The 27-path reviewed scope matches the current working tree. This rework touched only the three Web files above and the two active task records. The existing snapshot, review gate and issue evidence are preserved for re-review.
+
+## Code Re-review Result
+
+- Result: PASS
+- Target Status: COMPLETED
+- Reviewed by: Code Review window
+- Reviewed at: 2026-11-20 11:48 +08:00
+- Branch / HEAD / Snapshot: `main` / `4138f592f7fa3bb0be080b28e97cce2e778e7732`
+- Blocking issues: none. CR-TASK-038-001 is verified.
+- Independent evidence: Web 205 passed, production build passed, Playwright 18 passed and 2 existing direct-backend cases were skipped. Both lifecycle viewports verified retry-key reuse, one pending write across remount, and authoritative list refresh after delayed success.
+- Reviewed Scope: exactly 27 files listed in `handoff/code-review-gate.md`. Working and cached whitespace checks passed. Staging is empty.
+- Final task status: REVIEWING
+- Next Role: Git Commit
+- Recommended commit message: `feat(project): add project lifecycle`

@@ -73,7 +73,10 @@ def test_disposable_postgres_backfill_round_trip_and_concurrent_writes(disposabl
         db.flush()
         for project_type in DEFAULT_STAGE_NAMES:
             project = Project(id=uuid4(), user_id=user.id, name=project_type, type=project_type, manual_progress=39, version=7)
-            db.add(project)
+            db.execute(Project.__table__.insert().values(
+                id=project.id, user_id=project.user_id, name=project.name, type=project.type,
+                manual_progress=project.manual_progress, version=project.version,
+            ))
             ids[project_type] = project.id
         db.flush()
         ai = AISession(id=uuid4(), user_id=user.id, project_id=ids["development"], goal="Preserve session")
@@ -84,7 +87,7 @@ def test_disposable_postgres_backfill_round_trip_and_concurrent_writes(disposabl
     alembic(url, "upgrade", "20261012_0007")
     with factory() as db:
         for project_type, project_id in ids.items():
-            project = db.get(Project, project_id)
+            project = db.execute(select(Project.version, Project.manual_progress).where(Project.id == project_id)).one()
             rows = db.execute(select(ProjectStage).where(ProjectStage.project_id == project_id).order_by(ProjectStage.sort_order)).scalars().all()
             assert [row.name for row in rows] == list(DEFAULT_STAGE_NAMES[project_type])
             assert all(not row.is_current for row in rows)
@@ -138,7 +141,7 @@ def test_disposable_postgres_backfill_round_trip_and_concurrent_writes(disposabl
 
     alembic(url, "downgrade", "20261010_0006")
     with factory() as db:
-        assert db.get(Project, ids["development"]).version == 9
+        assert db.scalar(select(Project.version).where(Project.id == ids["development"])) == 9
         assert db.get(AISession, ai_id).goal == "Preserve session"
     alembic(url, "upgrade", "head")
     with factory() as db:

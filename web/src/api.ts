@@ -6,6 +6,8 @@ import type {
   ListEnvelope,
   Project,
   ProjectPayload,
+  ProjectScope,
+  ProjectLifecycleAction,
   ProjectStageCollection,
   ProjectStagePayload,
   MilestoneCollection,
@@ -132,9 +134,17 @@ export async function putProjectTodoLinks(token: string, projectId: string, key:
   return response.data;
 }
 
-export async function getProjects(token: string) {
-  const response = await authenticatedRequest<ListEnvelope<Project>>("/projects", token);
+export async function getProjects(token: string, scope: ProjectScope = "active") {
+  const response = await authenticatedRequest<ListEnvelope<Project>>(scope === "archived" ? "/projects?scope=archived" : "/projects", token);
   return response.items;
+}
+
+export async function changeProjectLifecycle(token: string, id: string, action: ProjectLifecycleAction, key: string) {
+  const path = `/projects/${encodeURIComponent(id)}`;
+  await authenticatedRequest<DataEnvelope<unknown>>(action === "delete" ? path : `${path}/${action}`, token, {
+    method: action === "delete" ? "DELETE" : "POST",
+    headers: { "Idempotency-Key": key },
+  });
 }
 
 export async function getProject(token: string, projectId: string) {

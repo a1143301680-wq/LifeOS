@@ -1,3 +1,5 @@
+from datetime import timezone
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Request
@@ -24,9 +26,10 @@ def project_to_dict(project: Project) -> dict:
 
 
 @router.get("")
-def list_projects(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def list_projects(scope: Literal["active", "archived"] = "active", current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    archived = Project.archived_at.is_not(None) if scope == "archived" else Project.archived_at.is_(None)
     projects = db.execute(
-        select(Project).where(Project.user_id == current_user.id)
+        select(Project).where(Project.user_id == current_user.id, Project.deleted_at.is_(None), archived)
         .order_by(Project.is_pinned.desc(), Project.updated_at.desc(), Project.id.asc())
     ).scalars()
     return list_envelope([project_to_dict(project) for project in projects])
@@ -105,3 +108,69 @@ async def update_project(
         db.rollback()
         raise
     return JSONResponse(status_code=200, content=body)
+
+
+async def change_lifecycle(action: Literal["archive", "restore", "delete"], project_id: UUID,
+                           request: Request, user: User, db: Session, raw_key: str | None):
+    if await request.body():
+        raise ApiError(400, "validation_error", "Lifecycle actions require an empty body")
+    key, request_hash, replay = await get_idempotency_context(db, request=request, user_id=user.id, raw_key=raw_key)
+    if replay is not None:
+        return replay
+    try:
+        try:
+            project = get_owned_project(db, user.id, project_id, lock=True)
+        except ApiError:
+            # A concurrent delete may have committed the matching response while we waited.
+            _, _, replay = await get_idempotency_context(db, request=request, user_id=user.id, raw_key=raw_key)
+            if replay is not None:
+                return replay
+            raise
+        _, _, replay = await get_idempotency_context(db, request=request, user_id=user.id, raw_key=raw_key)
+        if replay is not None:
+            return replay
+        archived = project.archived_at is not None
+        if action == "delete" and not archived:
+            raise ApiError(409, "project_not_archived", "Archive the project before deleting it")
+        if action == "delete" or archived != (action == "archive"):
+            now = now_server()
+            project.updated_at = now
+            project.version += 1
+            if action == "delete":
+                project.deleted_at = now.astimezone(timezone.utc)
+            else:
+                project.archived_at = now.astimezone(timezone.utc) if action == "archive" else None
+            db.flush()
+            if action != "delete":
+                db.refresh(project)
+        data = project_to_dict(project) if action != "delete" else {
+            "id": str(project.id), "deleted": True, "deleted_at": project.deleted_at.isoformat(), "version": project.version,
+        }
+        body = data_envelope(data)
+        store_idempotency_response(
+            db, user_id=user.id, key=key, method=request.method, path=request.url.path,
+            request_hash=request_hash, response_status=200, response_body=body,
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return JSONResponse(status_code=200, content=body)
+
+
+@router.post("/{project_id}/archive")
+async def archive_project(project_id: UUID, request: Request, current_user: User = Depends(get_current_user),
+                          db: Session = Depends(get_db), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
+    return await change_lifecycle("archive", project_id, request, current_user, db, idempotency_key)
+
+
+@router.post("/{project_id}/restore")
+async def restore_project(project_id: UUID, request: Request, current_user: User = Depends(get_current_user),
+                          db: Session = Depends(get_db), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
+    return await change_lifecycle("restore", project_id, request, current_user, db, idempotency_key)
+
+
+@router.delete("/{project_id}")
+async def delete_project(project_id: UUID, request: Request, current_user: User = Depends(get_current_user),
+                         db: Session = Depends(get_db), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key")):
+    return await change_lifecycle("delete", project_id, request, current_user, db, idempotency_key)

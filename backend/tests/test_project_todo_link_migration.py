@@ -26,6 +26,10 @@ def snapshot(engine):
     with engine.connect() as connection:
         tables = ("users", "projects", "project_stages", "milestones", "ai_sessions", "todos", "todo_categories", "sync_changes")
         result = {table: list(connection.execute(text(f"SELECT * FROM {table} ORDER BY id")).mappings()) for table in tables}
+        result["projects"] = [
+            {key: value for key, value in row.items() if key not in {"archived_at", "deleted_at"}}
+            for row in result["projects"]
+        ]
         result["cursor_sequence"] = tuple(connection.execute(text("SELECT last_value, is_called FROM sync_changes_cursor_seq")).one())
         return result
 
@@ -40,7 +44,7 @@ def test_postgres_links_migration_persistence_constraints_and_serialization(disp
     with factory() as db:
         db.add(User(id=owner, alias="links-owner", display_name="Owner", timezone="UTC", bootstrap_token_hash=PasswordHasher(time_cost=1, memory_cost=1024, parallelism=1).hash("links-test-token")))
         db.flush()
-        db.add(Project(id=project, user_id=owner, name="Preserved project", manual_progress=42))
+        db.execute(Project.__table__.insert().values(id=project, user_id=owner, name="Preserved project", manual_progress=42))
         db.add_all([Todo(id=id, user_id=owner, title=f"Synthetic Todo {index}") for index, id in enumerate(todo_ids)])
         db.flush()
         db.add(ProjectStage(id=stage, user_id=owner, project_id=project, name="Current", sort_order=0, is_current=True))
@@ -53,7 +57,7 @@ def test_postgres_links_migration_persistence_constraints_and_serialization(disp
     assert snapshot(engine) == before
     with factory() as db:
         assert db.execute(select(ProjectTodoLink)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261015_0010"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261109_0011"
 
     def override_db():
         with factory() as db:

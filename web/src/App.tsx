@@ -36,6 +36,7 @@ import {
   getPendingTodos,
   getProject,
   getProjects,
+  changeProjectLifecycle,
   getSyncChanges,
   getTodayTodos,
   getTodoCategories,
@@ -52,6 +53,8 @@ import ProjectStages from "./ProjectStages";
 import ProjectMilestones from "./ProjectMilestones";
 import ProjectTodoLinks from "./ProjectTodoLinks";
 import ProjectTimeline from "./ProjectTimeline";
+import ProjectLifecycle from "./ProjectLifecycle";
+import type { ProjectLifecycleAction, ProjectScope } from "./types";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
 import { loadSyncState, persistSyncState } from "./sync-state";
@@ -128,6 +131,8 @@ type ProjectDraft = Omit<ProjectPayload, "manual_progress" | "description" | "ne
   manual_progress: string;
   next_step: string;
 };
+
+type LifecycleAttempts = Partial<Record<ProjectLifecycleAction, { key: string | null; pending: boolean }>>;
 
 const projectTypes: Array<{ value: Project["type"]; label: string }> = [
   { value: "development", label: "Development" },
@@ -738,6 +743,8 @@ export default function App() {
   const projectListRequestRef = useRef(0);
   const projectDetailRequestRef = useRef(0);
   const projectSubmitInFlight = useRef(false);
+  const lifecycleAttemptsRef = useRef(new Map<string, LifecycleAttempts>());
+  const [lifecycleAttempts, setLifecycleAttempts] = useState(lifecycleAttemptsRef.current);
   const projectionStateRef = useRef({
     selectedDate: "",
     todayStatus: "idle" as LoadStatus,
@@ -758,8 +765,19 @@ export default function App() {
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [categoryStatus, setCategoryStatus] = useState<LoadStatus>("idle");
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectScope, updateProjectScope] = useState<ProjectScope>("active");
+  const projectScopeRef = useRef<ProjectScope>("active");
+  const setProjectScope = useCallback((scope: ProjectScope) => {
+    projectScopeRef.current = scope;
+    updateProjectScope(scope);
+  }, []);
   const [projectStatus, setProjectStatus] = useState<LoadStatus>("idle");
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, updateSelectedProjectId] = useState<string | null>(null);
+  const selectedProjectIdRef = useRef<string | null>(null);
+  const setSelectedProjectId = useCallback((id: string | null) => {
+    selectedProjectIdRef.current = id;
+    updateSelectedProjectId(id);
+  }, []);
   const [projectDetail, setProjectDetail] = useState<Project | null>(null);
   const [projectDetailStatus, setProjectDetailStatus] = useState<LoadStatus>("idle");
   const [dashboardOrigin, setDashboardOrigin] = useState(false);
@@ -836,6 +854,8 @@ export default function App() {
     projectListRequestRef.current += 1;
     projectDetailRequestRef.current += 1;
     projectSubmitInFlight.current = false;
+    lifecycleAttemptsRef.current = new Map();
+    setLifecycleAttempts(lifecycleAttemptsRef.current);
     clearIdentity();
     setActiveToken(null);
     setIdentity(null);
@@ -849,6 +869,7 @@ export default function App() {
     setCategories([]);
     setCategoryStatus("idle");
     setProjects([]);
+    setProjectScope("active");
     setProjectStatus("idle");
     setSelectedProjectId(null);
     setProjectDetail(null);
@@ -961,12 +982,12 @@ export default function App() {
     }
   }, [returnToSetup]);
 
-  const loadProjects = useCallback(async (token: string) => {
+  const loadProjects = useCallback(async (token: string, scope: ProjectScope = projectScope) => {
     const generation = projectGenerationRef.current;
     const requestId = ++projectListRequestRef.current;
     setProjectStatus("loading");
     try {
-      const loaded = await getProjects(token);
+      const loaded = await getProjects(token, scope);
       if (projectGenerationRef.current !== generation || projectListRequestRef.current !== requestId) return;
       setProjects(loaded);
       setProjectStatus("ready");
@@ -978,9 +999,9 @@ export default function App() {
       }
       setProjectStatus("error");
     }
-  }, [returnToSetup]);
+  }, [projectScope, returnToSetup]);
 
-  const loadProjectDetail = useCallback(async (token: string, projectId: string) => {
+  const loadProjectDetail = useCallback(async (token: string, projectId: string, scope: ProjectScope = projectScope) => {
     const generation = projectGenerationRef.current;
     const requestId = ++projectDetailRequestRef.current;
     setProjectDetailStatus("loading");
@@ -995,9 +1016,18 @@ export default function App() {
         returnToSetup("Your identity expired. Enter the token again.");
         return;
       }
+      if (error instanceof ApiError && error.status === 404) {
+        setSelectedProjectId(null);
+        setProjectDetail(null);
+        setProjectFormMode(null);
+        setDashboardSessionId(null);
+        setProjectDetailStatus("idle");
+        void loadProjects(token, scope);
+        return;
+      }
       setProjectDetailStatus("error");
     }
-  }, [returnToSetup]);
+  }, [loadProjects, projectScope, returnToSetup]);
 
   const refreshSyncProjections = useCallback(async (
     token: string,
@@ -1139,6 +1169,7 @@ export default function App() {
   }
 
   function openToday() {
+    if (view === "projects") backToProjectList();
     dismissTodoNotice();
     setView("today");
     if (activeToken && (todayStatus === "idle" || todayStatus === "error")) void loadToday(activeToken, selectedDate);
@@ -1147,17 +1178,13 @@ export default function App() {
   function openDashboard() {
     dismissTodoNotice();
     invalidateAIPlan();
-    projectDetailRequestRef.current += 1;
-    setSelectedProjectId(null);
-    setProjectDetail(null);
-    setProjectDetailStatus("idle");
-    setProjectFormMode(null);
+    backToProjectList();
     setDashboardOrigin(false);
-    setDashboardSessionId(null);
     setView("dashboard");
   }
 
   function openTodos() {
+    if (view === "projects") backToProjectList();
     dismissTodoNotice();
     invalidateAIPlan();
     setView("todos");
@@ -1165,6 +1192,7 @@ export default function App() {
   }
 
   function openCategories() {
+    if (view === "projects") backToProjectList();
     dismissTodoNotice();
     invalidateAIPlan();
     setView("categories");
@@ -1182,27 +1210,124 @@ export default function App() {
 
   function openProject(projectId: string, fromDashboard = false, sessionId: string | null = null) {
     if (!activeToken) return;
+    backToProjectList();
     setDashboardOrigin(fromDashboard);
     setDashboardSessionId(sessionId);
     if (fromDashboard) {
+      setProjectScope("active");
       setView("projects");
-      void loadProjects(activeToken);
+      void loadProjects(activeToken, "active");
     }
     setSelectedProjectId(projectId);
-    setProjectDetail(null);
-    setProjectFormMode(null);
-    setProjectNotice(null);
-    void loadProjectDetail(activeToken, projectId);
+    void loadProjectDetail(activeToken, projectId, fromDashboard ? "active" : projectScope);
   }
 
   function backToProjectList() {
     projectDetailRequestRef.current += 1;
+    projectSubmitInFlight.current = false;
     setSelectedProjectId(null);
     setProjectDetail(null);
     setProjectDetailStatus("idle");
     setProjectFormMode(null);
+    setProjectDraft(emptyProjectDraft());
+    setProjectSubmitStatus("idle");
+    setProjectMessage(null);
+    setFailedProjectAttempt(null);
     setProjectNotice(null);
     setDashboardSessionId(null);
+  }
+
+  function switchProjectScope(scope: ProjectScope) {
+    if (!activeToken || scope === projectScope) return;
+    backToProjectList();
+    setDashboardOrigin(false);
+    setProjectScope(scope);
+    setProjects([]);
+    void loadProjects(activeToken, scope);
+  }
+
+  function updateLifecycleAttempts(id: string, attempts?: LifecycleAttempts) {
+    const next = new Map(lifecycleAttemptsRef.current);
+    if (attempts) next.set(id, attempts);
+    else next.delete(id);
+    lifecycleAttemptsRef.current = next;
+    setLifecycleAttempts(next);
+  }
+
+  async function runProjectLifecycle(id: string, action: ProjectLifecycleAction) {
+    if (!activeToken) return;
+    const attempts = lifecycleAttemptsRef.current.get(id);
+    if (attempts && Object.values(attempts).some((attempt) => attempt.pending)) return;
+    const key = attempts?.[action]?.key ?? crypto.randomUUID();
+    const generation = projectGenerationRef.current;
+    const requestId = projectDetailRequestRef.current;
+    updateLifecycleAttempts(id, { ...attempts, [action]: { key, pending: true } });
+
+    function refreshCurrentScope() {
+      const scope = projectScopeRef.current;
+      void loadProjects(activeToken!, scope);
+      if (selectedProjectIdRef.current === id) void loadProjectDetail(activeToken!, id, scope);
+    }
+
+    try {
+      await changeProjectLifecycle(activeToken, id, action, key);
+    } catch (error) {
+      if (generation !== projectGenerationRef.current) return;
+      if (error instanceof ApiError && error.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (error instanceof ApiError && error.status === 404) {
+        updateLifecycleAttempts(id);
+        refreshCurrentScope();
+        return;
+      }
+      const rejected = error instanceof ApiError && error.status >= 400 && error.status < 500;
+      updateLifecycleAttempts(id, { ...attempts, [action]: { key: rejected ? null : key, pending: false } });
+      return;
+    }
+    if (generation !== projectGenerationRef.current) return;
+    updateLifecycleAttempts(id);
+    if (requestId !== projectDetailRequestRef.current) {
+      refreshCurrentScope();
+      return;
+    }
+    const destination = action === "restore" ? "active" : "archived";
+    backToProjectList();
+    setDashboardOrigin(false);
+    setProjectScope(destination);
+    setProjects([]);
+    void loadProjects(activeToken, destination);
+    if (action !== "delete") {
+      setSelectedProjectId(id);
+      await loadProjectDetail(activeToken, id, destination);
+    }
+  }
+
+  async function refreshProjectAfterChildSave(token: string, id: string) {
+    const generation = projectGenerationRef.current;
+    const detailRequest = projectDetailRequestRef.current;
+    const listRequest = ++projectListRequestRef.current;
+    const [detail, list] = await Promise.allSettled([getProject(token, id), getProjects(token, projectScope)]);
+    if (generation !== projectGenerationRef.current || detailRequest !== projectDetailRequestRef.current) return;
+    if (detail.status === "rejected" && detail.reason instanceof ApiError && detail.reason.status === 404) {
+      backToProjectList();
+      void loadProjects(token);
+      return;
+    }
+    if (detail.status === "fulfilled") setProjectDetail(detail.value);
+    if (listRequest === projectListRequestRef.current) {
+      if (list.status === "fulfilled") setProjects(list.value);
+      setProjectStatus(list.status === "fulfilled" ? "ready" : "error");
+    }
+    for (const result of [detail, list]) {
+      if (result.status === "rejected" && result.reason instanceof ApiError && result.reason.status === 401) {
+        returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+    }
+    if (detail.status === "rejected") throw detail.reason;
+    if (list.status === "rejected") throw list.reason;
   }
 
   function startProjectCreate() {
@@ -1251,6 +1376,7 @@ export default function App() {
     const fingerprint = JSON.stringify({ projectId, payload });
     const idempotencyKey = failedProjectAttempt?.fingerprint === fingerprint ? failedProjectAttempt.idempotencyKey : crypto.randomUUID();
     const generation = projectGenerationRef.current;
+    const detailRequest = projectDetailRequestRef.current;
     projectSubmitInFlight.current = true;
     setProjectSubmitStatus("submitting");
     setProjectMessage(null);
@@ -1258,19 +1384,30 @@ export default function App() {
       const saved = projectId
         ? await updateProject(activeToken, projectId, idempotencyKey, payload)
         : await createProject(activeToken, idempotencyKey, payload);
-      if (projectGenerationRef.current !== generation) return;
+      if (projectGenerationRef.current !== generation || projectDetailRequestRef.current !== detailRequest) return;
+      if (!projectId) {
+        setProjectDetail(saved);
+        setProjectDetailStatus("ready");
+      }
       setSelectedProjectId(saved.id);
-      setProjectDetail(saved);
-      setProjectDetailStatus("ready");
       setProjectFormMode(null);
       setProjectSubmitStatus("idle");
       setProjectNotice(projectId ? "Project saved." : "Project created.");
       setFailedProjectAttempt(null);
+      if (projectId) {
+        projectSubmitInFlight.current = false;
+        void loadProjectDetail(activeToken, projectId);
+      }
       await loadProjects(activeToken);
     } catch (error) {
-      if (projectGenerationRef.current !== generation) return;
+      if (projectGenerationRef.current !== generation || projectDetailRequestRef.current !== detailRequest) return;
       if (error instanceof ApiError && error.status === 401) {
         returnToSetup("Your identity expired. Enter the token again.");
+        return;
+      }
+      if (projectId && error instanceof ApiError && error.status === 404) {
+        backToProjectList();
+        void loadProjects(activeToken);
         return;
       }
       if (error instanceof ApiError && (error.status === 400 || error.status === 409)) {
@@ -1283,7 +1420,7 @@ export default function App() {
       setProjectSubmitStatus("error");
       setProjectMessage("Could not save project. Try again.");
     } finally {
-      if (projectGenerationRef.current === generation) projectSubmitInFlight.current = false;
+      if (projectGenerationRef.current === generation && projectDetailRequestRef.current === detailRequest) projectSubmitInFlight.current = false;
     }
   }
 
@@ -2131,15 +2268,19 @@ export default function App() {
               <div className="section-heading">
                 <div><p className="eyebrow">Long-running work</p><h1>Projects / Goals</h1></div>
                 <div className="section-actions">
-                  <button className="primary-button compact" type="button" onClick={startProjectCreate} disabled={projectSubmitStatus === "submitting"}><Plus aria-hidden="true" />New project</button>
+                  {projectScope === "active" ? <button className="primary-button compact" type="button" onClick={startProjectCreate} disabled={projectSubmitStatus === "submitting"}><Plus aria-hidden="true" />New project</button> : null}
                   <button className="icon-button bordered" type="button" onClick={() => activeToken && void loadProjects(activeToken)} disabled={projectStatus === "loading"} title="Refresh projects" aria-label="Refresh projects"><RefreshCw className={projectStatus === "loading" ? "spin" : ""} aria-hidden="true" /></button>
                 </div>
+              </div>
+              <div className="project-scopes" role="group" aria-label="Project visibility">
+                <button className="secondary-button" type="button" aria-pressed={projectScope === "active"} onClick={() => switchProjectScope("active")}>Active</button>
+                <button className="secondary-button" type="button" aria-pressed={projectScope === "archived"} onClick={() => switchProjectScope("archived")}>Archived</button>
               </div>
               <div className={`projects-layout${projectFormMode || selectedProjectId ? "" : " projects-layout-single"}`}>
                 <div className="projects-results">
                   {projectStatus === "loading" ? <div className="list-status" role="status">Loading projects...</div> : null}
                   {projectStatus === "error" ? <div className="list-status error-state" role="alert"><div><strong>Could not load projects</strong></div><button className="secondary-button" onClick={() => activeToken && void loadProjects(activeToken)}><RefreshCw aria-hidden="true" /> Retry</button></div> : null}
-                  {projectStatus === "ready" && projects.length === 0 ? <div className="empty-state"><FolderOpen aria-hidden="true" /><h2>No projects yet</h2><p>New projects will appear here.</p></div> : null}
+                  {projectStatus === "ready" && projects.length === 0 ? <div className="empty-state"><FolderOpen aria-hidden="true" /><h2>{projectScope === "archived" ? "No archived projects" : "No projects yet"}</h2></div> : null}
                   {projectStatus === "ready" && projects.length > 0 ? (
                     <ul className="project-list" aria-label="Projects / Goals">
                       {projects.map((project) => <li key={project.id}>
@@ -2171,32 +2312,17 @@ export default function App() {
                       {projectDetail.description ? <div className="project-copy"><h3>Description</h3><p>{projectDetail.description}</p></div> : null}
                       <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
                       <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
-                      <ProjectStages key={`stages:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={() => { void loadProjectDetail(activeToken!, projectDetail.id); void loadProjects(activeToken!); }} />
-                      <ProjectMilestones key={`milestones:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={async () => {
-                        const generation = projectGenerationRef.current;
-                        const requestId = projectDetailRequestRef.current;
-                        const [detail, list] = await Promise.all([getProject(activeToken!, projectDetail.id), getProjects(activeToken!)]);
-                        if (generation !== projectGenerationRef.current || requestId !== projectDetailRequestRef.current) return;
-                        setProjectDetail(detail);
-                        setProjects(list);
-                        setProjectStatus("ready");
-                      }} />
-                      <ProjectTodoLinks key={`todo-links:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} timezone={identity.timezone} onUnauthorized={returnToSetup} onSaved={async () => {
-                        const generation = projectGenerationRef.current;
-                        const requestId = projectDetailRequestRef.current;
-                        const [detail, list] = await Promise.all([getProject(activeToken!, projectDetail.id), getProjects(activeToken!)]);
-                        if (generation !== projectGenerationRef.current || requestId !== projectDetailRequestRef.current) return;
-                        setProjectDetail(detail);
-                        setProjects(list);
-                        setProjectStatus("ready");
-                      }} />
-                      <ProjectTimeline key={`timeline:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} timezone={identity.timezone} onUnauthorized={returnToSetup} onSaved={async () => {
-                        const generation = projectGenerationRef.current;
-                        const requestId = projectDetailRequestRef.current;
-                        const [detail, list] = await Promise.all([getProject(activeToken!, projectDetail.id), getProjects(activeToken!)]);
-                        if (generation !== projectGenerationRef.current || requestId !== projectDetailRequestRef.current) return;
-                        setProjectDetail(detail); setProjects(list); setProjectStatus("ready");
-                      }} renderSession={(id, onClose, onRefresh) => <AISessionPanel key={`timeline-session:${identity.id}:${projectDetail.id}:${id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={id} onReturnToTimeline={onClose} onRefreshTimeline={onRefresh} />} />
+                      <ProjectLifecycle
+                        key={`${identity.id}:${projectScope}:${projectDetail.id}`}
+                        archived={projectDetail.archived_at != null}
+                        busy={Object.values(lifecycleAttempts.get(projectDetail.id) ?? {}).some((attempt) => attempt.pending)}
+                        error={Object.values(lifecycleAttempts.get(projectDetail.id) ?? {}).some((attempt) => !attempt.pending)}
+                        onAction={(action) => runProjectLifecycle(projectDetail.id, action)}
+                      />
+                      <ProjectStages key={`stages:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={() => { void refreshProjectAfterChildSave(activeToken!, projectDetail.id).catch(() => { }); }} />
+                      <ProjectMilestones key={`milestones:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} onUnauthorized={returnToSetup} onSaved={() => refreshProjectAfterChildSave(activeToken!, projectDetail.id)} />
+                      <ProjectTodoLinks key={`todo-links:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} timezone={identity.timezone} onUnauthorized={returnToSetup} onSaved={() => refreshProjectAfterChildSave(activeToken!, projectDetail.id)} />
+                      <ProjectTimeline key={`timeline:${identity.id}:${projectDetail.id}`} token={activeToken!} projectId={projectDetail.id} timezone={identity.timezone} onUnauthorized={returnToSetup} onSaved={() => refreshProjectAfterChildSave(activeToken!, projectDetail.id)} renderSession={(id, onClose, onRefresh) => <AISessionPanel key={`timeline-session:${identity.id}:${projectDetail.id}:${id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={id} onReturnToTimeline={onClose} onRefreshTimeline={onRefresh} />} />
                       <AISessionPanel key={`${identity.id}:${projectDetail.id}`} project={projectDetail} token={activeToken!} onUnauthorized={returnToSetup} initialSessionId={dashboardSessionId} />
                     </> : null}
                   </section>

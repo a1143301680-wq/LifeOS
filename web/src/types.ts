@@ -23,6 +23,7 @@ export type TodoCategory = {
 };
 
 export type Project = {
+  archived_at?: string | null;
   id: string;
   name: string;
   description: string | null;
@@ -37,6 +38,8 @@ export type Project = {
 };
 
 export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "status" | "manual_progress" | "next_step" | "is_pinned">;
+export type ProjectScope = "active" | "archived";
+export type ProjectLifecycleAction = "archive" | "restore" | "delete";
 
 export type MilestoneStatus = "pending" | "completed" | "canceled";
 export type MilestonePayload = { id: string; title: string; target_date: string | null; status: MilestoneStatus };

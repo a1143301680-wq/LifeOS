@@ -2,7 +2,7 @@
 
 Decision date: 2026-11-09
 Delivery task: TASK-038
-Status: proposed for Task Review; not an implemented API
+Status: implemented in TASK-038 and awaiting Code Review
 
 ## State And Storage
 

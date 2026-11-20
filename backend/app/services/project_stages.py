@@ -28,7 +28,7 @@ def seed_project_stages(db: Session, project: Project) -> None:
 
 
 def get_owned_project(db: Session, user_id: UUID, project_id: UUID, *, lock: bool = False) -> Project:
-    query = select(Project).where(Project.id == project_id, Project.user_id == user_id)
+    query = select(Project).where(Project.id == project_id, Project.user_id == user_id, Project.deleted_at.is_(None))
     if lock:
         query = query.with_for_update()
     project = db.execute(query).scalar_one_or_none()

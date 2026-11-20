@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-11-09
+Last updated: 2026-11-18
 
 ## Metadata
 
 - Task ID: TASK-038
 - Task Name: PC Project lifecycle
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-037 terminal Closure Commit `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; Project and existing nested source APIs; migration 20261015_0010
@@ -67,14 +67,14 @@ A PC user can archive a Project, find and restore it from Archived, or explicitl
 
 ## Acceptance Criteria
 
-- [ ] Existing Projects migrate as active without data/version/timestamp/sync changes; repeated head preserves state and downgrade visibility is verified.
-- [ ] Default and archived listings are owner-scoped and correctly ordered; archived detail/children remain usable and deleted Projects are excluded from all fresh parent/child requests.
-- [ ] Archive/restore/delete enforce exact payload, ownership, idempotency, no-op, transaction and version rules; active DELETE is rejected.
-- [ ] Soft-delete preserves all dependent rows and independent Todo/sync data; other Projects retain shared Todo references.
-- [ ] PostgreSQL concurrency verifies Project and child mutations ordered before/after deletion, including AI Session writes, with no post-delete mutation or lost parent increments.
-- [ ] PC Active/Archived, archive/restore, confirm/cancel delete, navigation/refresh errors and identity/Project/scope switching work without stale responses.
-- [ ] Pinned archived Projects are excluded from Dashboard; existing Project/stage/milestone/log/timeline/Todo/AI Session/prompt behavior and sync regressions pass.
-- [ ] Backend/Web/build, desktop/narrow browser, disposable PostgreSQL and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [x] Existing Projects migrate as active without data/version/timestamp/sync changes; repeated head preserves state and downgrade visibility is verified.
+- [x] Default and archived listings are owner-scoped and correctly ordered; archived detail/children remain usable and deleted Projects are excluded from all fresh parent/child requests.
+- [x] Archive/restore/delete enforce exact payload, ownership, idempotency, no-op, transaction and version rules; active DELETE is rejected.
+- [x] Soft-delete preserves all dependent rows and independent Todo/sync data; other Projects retain shared Todo references.
+- [x] PostgreSQL concurrency verifies Project and child mutations ordered before/after deletion, including AI Session writes, with no post-delete mutation or lost parent increments.
+- [x] PC Active/Archived, archive/restore, confirm/cancel delete, navigation/refresh errors and identity/Project/scope switching work without stale responses.
+- [x] Pinned archived Projects are excluded from Dashboard; existing Project/stage/milestone/log/timeline/Todo/AI Session/prompt behavior and sync regressions pass.
+- [x] Backend/Web/build, desktop/narrow browser, disposable PostgreSQL and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
 
 ## Verification Plan
 
@@ -113,6 +113,14 @@ Report lifecycle/migration behavior, child ownership and concurrency evidence, U
 
 ## Current Stage
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch main; base 647f369741b6a1472f5ab6f6e465e3b1d01070ff; snapshot 4138f592f7fa3bb0be080b28e97cce2e778e7732.
 
-Required Next Action: establish the pre-Coding Git Snapshot from the exact nine-document approved scope and independently verify branch, HEAD, remote parity, staged state, whitespace, secrets, private fixtures, and generated artifacts. Do not start Coding until Snapshot synchronizes both records to IN_PROGRESS.
+Snapshot Reason: approved TASK-038 readiness documents required a durable pre-Coding baseline.
+
+Code Review: CHANGES_REQUESTED at 2026-11-18 14:06 +08:00. Blocking issue CR-TASK-038-001 is persisted in `handoff/code-review-gate.md` and `handoff/issue-log.md`.
+
+Code Review re-review: PASS at 2026-11-20 11:48 +08:00. CR-TASK-038-001 is verified.
+
+Next Role: Git Commit
+
+Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`. Transition both task records to COMPLETED after successful publication.

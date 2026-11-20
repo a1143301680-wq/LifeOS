@@ -616,6 +616,10 @@ h1, h2, p { margin-top: 0; }
 .project-copy h3 { margin: 0 0 5px; color: var(--muted); font-size: 11px; }
 .project-copy p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
 .project-notice { color: var(--green); font-size: 12px; }
+.project-scopes, .project-lifecycle { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.project-scopes [aria-pressed="true"] { border-color: var(--green); color: var(--green); }
+.project-delete-confirm { width: 100%; }
+.project-delete-confirm button { margin: 0 8px 8px 0; }
 
 .project-stages { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }
 .project-todo-links { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); min-width: 0; }

@@ -20,7 +20,12 @@ from test_project_stage_migration import alembic, disposable_postgres
 
 def legacy_snapshot(engine):
     with engine.connect() as connection:
-        return {table: list(connection.execute(text(f"SELECT * FROM {table} ORDER BY id")).mappings()) for table in ("users", "projects", "project_stages", "ai_sessions")}
+        result = {table: list(connection.execute(text(f"SELECT * FROM {table} ORDER BY id")).mappings()) for table in ("users", "projects", "project_stages", "ai_sessions")}
+        result["projects"] = [
+            {key: value for key, value in row.items() if key not in {"archived_at", "deleted_at"}}
+            for row in result["projects"]
+        ]
+        return result
 
 
 def test_postgres_milestone_migration_api_constraints_and_shared_parent_lock(disposable_postgres):
@@ -32,7 +37,7 @@ def test_postgres_milestone_migration_api_constraints_and_shared_parent_lock(dis
     with factory() as db:
         db.add(User(id=user_id, alias="milestone-owner", display_name="Owner", timezone="UTC", bootstrap_token_hash=PasswordHasher(time_cost=1, memory_cost=1024, parallelism=1).hash("milestone-test-token")))
         db.flush()
-        db.add(Project(id=project_id, user_id=user_id, name="Preserved project", type="other", manual_progress=42, version=3))
+        db.execute(Project.__table__.insert().values(id=project_id, user_id=user_id, name="Preserved project", type="other", manual_progress=42, version=3))
         db.flush()
         db.add(ProjectStage(id=stage_id, user_id=user_id, project_id=project_id, name="Preserved current", sort_order=0, is_current=True))
         db.add(AISession(id=session_id, user_id=user_id, project_id=project_id, goal="Preserved session"))
@@ -42,7 +47,7 @@ def test_postgres_milestone_migration_api_constraints_and_shared_parent_lock(dis
     assert legacy_snapshot(engine) == before
     with factory() as db:
         assert db.execute(select(Milestone)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261015_0010"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261109_0011"
 
     def override_db():
         with factory() as db:
