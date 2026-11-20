@@ -6,7 +6,7 @@ Last updated: 2026-11-18
 
 - Task ID: TASK-038
 - Task Name: PC Project lifecycle
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-037 terminal Closure Commit `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; Project and existing nested source APIs; migration 20261015_0010
@@ -266,3 +266,18 @@ None recorded.
 - Final task status: REVIEWING
 - Next Role: Git Commit
 - Recommended commit message: `feat(project): add project lifecycle`
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `2308b53c3305b27a101a038c24dfe39467399c40`
+- Commit Message: `feat(project): add project lifecycle`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.

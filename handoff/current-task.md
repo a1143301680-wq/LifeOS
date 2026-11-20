@@ -6,7 +6,7 @@ Last updated: 2026-11-18
 
 - Task ID: TASK-038
 - Task Name: PC Project lifecycle
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion / Project depth
 - Dependencies: TASK-037 terminal Closure Commit `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; Project and existing nested source APIs; migration 20261015_0010
@@ -121,6 +121,6 @@ Code Review: CHANGES_REQUESTED at 2026-11-18 14:06 +08:00. Blocking issue CR-TAS
 
 Code Review re-review: PASS at 2026-11-20 11:48 +08:00. CR-TASK-038-001 is verified.
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`. Transition both task records to COMPLETED after successful publication.
+Required Next Action: perform the TASK-038 Decision Closure Check against Result Commit `2308b53c3305b27a101a038c24dfe39467399c40` and this completion record. Do not publish the next task before closure.
