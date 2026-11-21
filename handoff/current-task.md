@@ -6,7 +6,7 @@ Last updated: 2026-11-21
 
 - Task ID: TASK-039
 - Task Name: PC Notes
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-038 terminal Closure Commit `08702c9ae28ff136b2ae8cedd02713740e00bb4e`; existing Project and Todo APIs; migration 20261109_0011
@@ -97,6 +97,6 @@ Snapshot Reason: approved TASK-039 readiness documents required a durable pre-Co
 
 Code re-review: PASS at 2026-11-21 22:42 +08:00. CR-TASK-039-001 and CR-TASK-039-002 are verified.
 
-Next Role: Git Commit
+Next Role: Decision
 
-Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`.
+Required Next Action: perform the TASK-039 Decision Closure Check against Result Commit `22d36b7f81ecaa46b79aecc4a7e2f00f1bda60e3` and this completion record. Do not publish the next task before closure.

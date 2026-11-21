@@ -6,7 +6,7 @@ Last updated: 2026-11-21
 
 - Task ID: TASK-039
 - Task Name: PC Notes
-- Status: REVIEWING
+- Status: COMPLETED
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-038 terminal Closure Commit `08702c9ae28ff136b2ae8cedd02713740e00bb4e`; existing Project and Todo APIs; migration 20261109_0011
@@ -242,3 +242,18 @@ None recorded.
 - Reviewed scope: exactly the 26 files listed in `handoff/code-review-gate.md`. Whitespace checks passed and staging was empty.
 - Final task status: REVIEWING. Next Role: Git Commit.
 - Recommended commit message: `feat(notes): add PC Notes workspace`
+
+## Git Commit
+
+- Status: COMPLETE
+- Result Commit: `22d36b7f81ecaa46b79aecc4a7e2f00f1bda60e3`
+- Commit Message: `feat(notes): add PC Notes workspace`
+- Push Target: `origin/main`
+- Remote Parity: PASS; local HEAD, `origin/main`, and remote `refs/heads/main` matched after push.
+- Code Review: PASS
+- Next Role: Decision
+
+## Closure
+
+- Closure Check: PENDING
+- Terminal Closure Commit: not authorized until Decision records a PASS and exact closure-file allowlist.
