@@ -55,7 +55,7 @@ def test_postgres_logs_round_trip_timeline_constraints_and_shared_lock(disposabl
     assert legacy(engine) == before
     with factory() as db:
         assert db.execute(select(ProjectLog)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261109_0011"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261120_0012"
 
     def override_db():
         with factory() as db:

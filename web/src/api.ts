@@ -4,6 +4,9 @@ import type {
   AITodayPlan,
   DataEnvelope,
   ListEnvelope,
+  Note,
+  NoteInput,
+  NoteFilters,
   Project,
   ProjectPayload,
   ProjectScope,
@@ -80,6 +83,27 @@ async function authenticatedRequest<T>(path: string, token: string, init?: Reque
 export async function getCurrentUser(token: string) {
   const response = await authenticatedRequest<DataEnvelope<UserIdentity>>("/me", token);
   return response.data;
+}
+
+export async function getNotes(token: string, filters: NoteFilters, cursor: string | null) {
+  const query = new URLSearchParams({ limit: "20" });
+  if (filters.project_id) query.set("project_id", filters.project_id);
+  if (filters.todo_id) query.set("todo_id", filters.todo_id);
+  if (cursor) query.set("cursor", cursor);
+  return authenticatedRequest<ListEnvelope<Note>>(`/notes?${query}`, token);
+}
+
+export async function getNote(token: string, id: string) {
+  return (await authenticatedRequest<DataEnvelope<Note>>(`/notes/${encodeURIComponent(id)}`, token)).data;
+}
+
+export async function writeNote(token: string, id: string | null, input: NoteInput | null, key: string) {
+  const path = id ? `/notes/${encodeURIComponent(id)}` : "/notes";
+  return (await authenticatedRequest<DataEnvelope<{ id: string }>>(path, token, {
+    method: input === null ? "DELETE" : id ? "PATCH" : "POST",
+    headers: { "Idempotency-Key": key, ...(input === null ? {} : { "Content-Type": "application/json" }) },
+    ...(input === null ? {} : { body: JSON.stringify(input) }),
+  })).data;
 }
 
 export async function getPendingTodos(token: string) {

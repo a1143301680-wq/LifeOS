@@ -47,7 +47,7 @@ def test_postgres_milestone_migration_api_constraints_and_shared_parent_lock(dis
     assert legacy_snapshot(engine) == before
     with factory() as db:
         assert db.execute(select(Milestone)).first() is None
-        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261109_0011"
+        assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "20261120_0012"
 
     def override_db():
         with factory() as db:

@@ -20,12 +20,12 @@ Projects, AI Session records, and Dashboard/Resume are published. Complete the r
 | 6 | TASK-036 Project Todo links (closed) | Owner-scoped links to existing Todos and source navigation | Turn project work into actionable Todos |
 | 7 | TASK-037 Project logs and timeline (closed) | Editable manual logs and paginated AI Session / qualifying linked-Todo source aggregation | Recover project history without fabricated events |
 | 8 | TASK-038 Project lifecycle (closed) | Controlled archive/delete with explicit dependent-record policy | Remove/archive projects predictably |
-| 9 | TASK-039 PC Notes (PLANNED) | Lightweight contextual notes and external knowledge links | Capture and retrieve a note in context |
+| 9 | TASK-039 PC Notes (REVIEWING) | Lightweight contextual notes and external knowledge links | Capture and retrieve a note in context |
 | 10 | Unpublished: PC Calendar | Month/day aggregation of existing source records | Open the underlying record from Calendar |
 | 11 | Unpublished: PC acceptance and demo | Cross-module regression, two-user isolation, real local backend, browser checks, demo runbook | Demonstrate the PC MVP end to end |
 | 12 | Unpublished: Android REST bootstrap and reads | Authoritative category/Todo reconciliation and Today/Todo reads | Resume Android Phase 1A delivery |
 
-The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 through TASK-037 are terminally closed. TASK-038 result is published and its Decision Closure Check passed; terminal Closure Commit is published. TASK-039 PC Notes is published for Task Review. Assign future IDs at publication.
+The former TASK-034 Project depth row is split above to bound migration, API, UI, and acceptance scope. TASK-034 through TASK-038 are terminally closed. TASK-039 PC Notes awaits Code Review. Assign future IDs at publication.
 
 ## Boundaries
 

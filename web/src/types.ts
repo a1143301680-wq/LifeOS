@@ -41,6 +41,21 @@ export type ProjectPayload = Pick<Project, "name" | "description" | "type" | "st
 export type ProjectScope = "active" | "archived";
 export type ProjectLifecycleAction = "archive" | "restore" | "delete";
 
+export type NoteReference = { id: string; label: string | null; available: boolean };
+export type Note = {
+  id: string;
+  title: string;
+  content: string | null;
+  project: NoteReference | null;
+  todo: NoteReference | null;
+  external_url: string | null;
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+export type NoteInput = { title: string; content: string | null; project_id: string | null; todo_id: string | null; external_url: string | null };
+export type NoteFilters = Pick<NoteInput, "project_id" | "todo_id">;
+
 export type MilestoneStatus = "pending" | "completed" | "canceled";
 export type MilestonePayload = { id: string; title: string; target_date: string | null; status: MilestoneStatus };
 export type Milestone = MilestonePayload & { sort_order: number; version: number; created_at: string; updated_at: string };

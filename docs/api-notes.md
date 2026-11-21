@@ -2,7 +2,7 @@
 
 Decision date: 2026-11-20
 Delivery task: TASK-039
-Status: proposed for Task Review
+Status: implemented in TASK-039 and awaiting Code Review
 
 ## Data
 

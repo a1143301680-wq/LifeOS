@@ -54,6 +54,7 @@ import ProjectMilestones from "./ProjectMilestones";
 import ProjectTodoLinks from "./ProjectTodoLinks";
 import ProjectTimeline from "./ProjectTimeline";
 import ProjectLifecycle from "./ProjectLifecycle";
+import NotesWorkspace, { type NotesContext } from "./NotesWorkspace";
 import type { ProjectLifecycleAction, ProjectScope } from "./types";
 import { clearIdentity, readIdentityToken, storeIdentity } from "./storage";
 import { SyncSession, type SyncSessionStatus } from "./sync-session";
@@ -104,7 +105,13 @@ type IdentityStatus = "setup" | "checking" | "ready" | "error";
 type LoadStatus = "idle" | "loading" | "ready" | "error";
 type CreateStatus = "idle" | "submitting" | "success" | "validation" | "error";
 type AIPlanStatus = "idle" | "loading" | "ready" | "error";
-type AppView = "dashboard" | "today" | "todos" | "categories" | "projects";
+type AppView = "dashboard" | "today" | "todos" | "categories" | "projects" | "notes";
+type NotesSession = {
+  id: number;
+  context: NotesContext | null;
+  returnView: AppView;
+  returnScope: ProjectScope;
+};
 type QuickCreateOrigin = "today" | "todos";
 type TodoPriority = Todo["priority"];
 type FailedCreateAttempt = {
@@ -756,6 +763,19 @@ export default function App() {
   const [identity, setIdentity] = useState<UserIdentity | null>(null);
   const [identityStatus, setIdentityStatus] = useState<IdentityStatus>(initialToken ? "checking" : "setup");
   const [view, setView] = useState<AppView>("dashboard");
+  const [notesSessions, setNotesSessions] = useState<NotesSession[]>([]);
+  const [activeNotesId, setActiveNotesId] = useState<number | null>(null);
+  const nextNotesId = useRef(0);
+  const [retainedNotes, setRetainedNotes] = useState<ReadonlySet<number>>(() => new Set());
+  const setRetainNotes = useCallback((id: number, retain: boolean) => {
+    setRetainedNotes((previous) => {
+      if (previous.has(id) === retain) return previous;
+      const next = new Set(previous);
+      if (retain) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
   const [todayDate, setTodayDate] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [todayData, setTodayData] = useState<TodayData | null>(null);
@@ -860,6 +880,9 @@ export default function App() {
     setActiveToken(null);
     setIdentity(null);
     setView("dashboard");
+    setRetainedNotes(new Set());
+    setNotesSessions([]);
+    setActiveNotesId(null);
     setTodayDate("");
     setSelectedDate("");
     setTodayData(null);
@@ -1208,18 +1231,35 @@ export default function App() {
     if (activeToken && (projectStatus === "idle" || projectStatus === "error")) void loadProjects(activeToken);
   }
 
-  function openProject(projectId: string, fromDashboard = false, sessionId: string | null = null) {
+  const expireNotesIdentity = useCallback(() => {
+    returnToSetup("Your identity expired. Enter the token again.");
+  }, [returnToSetup]);
+
+  function openNotes(context: NotesContext | null = null) {
+    invalidateAIPlan();
+    const retained = notesSessions.filter((session) => retainedNotes.has(session.id));
+    const existing = context
+      ? retained.find((session) => session.context?.kind === context.kind && session.context.source.id === context.source.id)
+      : retained.find((session) => session.id === activeNotesId) ?? retained.find((session) => session.context === null);
+    const session = existing ?? { id: ++nextNotesId.current, context, returnView: view, returnScope: projectScope };
+    setNotesSessions(existing ? retained : [...retained, session]);
+    setActiveNotesId(session.id);
+    setView("notes");
+  }
+
+  function openProject(projectId: string, fromDashboard = false, sessionId: string | null = null, sourceScope?: ProjectScope) {
     if (!activeToken) return;
+    const scope = sourceScope ?? (fromDashboard ? "active" : projectScope);
     backToProjectList();
     setDashboardOrigin(fromDashboard);
     setDashboardSessionId(sessionId);
-    if (fromDashboard) {
-      setProjectScope("active");
+    if (fromDashboard || sourceScope) {
+      setProjectScope(scope);
       setView("projects");
-      void loadProjects(activeToken, "active");
+      void loadProjects(activeToken, scope);
     }
     setSelectedProjectId(projectId);
-    void loadProjectDetail(activeToken, projectId, fromDashboard ? "active" : projectScope);
+    void loadProjectDetail(activeToken, projectId, scope);
   }
 
   function backToProjectList() {
@@ -1799,6 +1839,9 @@ export default function App() {
           <div className="quick-create-actions">
             <button className="primary-button" type="submit" disabled={!todoEditCategoryReady || todoEditStatus === "submitting"}>{todoEditStatus === "submitting" ? "Saving..." : todoEditStatus === "error" ? "Retry save" : "Save changes"}</button>
             <button className="secondary-button" type="button" onClick={cancelTodoEditor} disabled={todoEditStatus === "submitting"}>Cancel todo edit</button>
+            <button className="secondary-button" type="button" disabled={todoEditStatus === "submitting"} onClick={() => openNotes({
+              kind: "todo", source: { id: todoEditTarget.id, label: todoEditTarget.title, available: true },
+            })}>Todo notes</button>
             {categoriesUnavailable ? <button className="secondary-button" type="button" onClick={() => activeToken && void loadCategories(activeToken)}><RefreshCw aria-hidden="true" /> Retry categories</button> : null}
           </div>
           {categoryStatus === "loading" ? <p className="create-message" role="status">Loading categories...</p> : null}
@@ -2183,7 +2226,7 @@ export default function App() {
       ? todayStatus
       : view === "todos"
         ? todoStatus
-        : view === "categories" ? categoryStatus : projectStatus;
+        : view === "categories" ? categoryStatus : view === "projects" ? projectStatus : "idle";
     return (
       <main className="workspace-shell">
         <header className="app-header">
@@ -2194,6 +2237,7 @@ export default function App() {
             <button aria-current={view === "todos" ? "page" : undefined} onClick={openTodos} disabled={todoInteractionActive || todoActionSubmitting}>Todos</button>
             <button aria-current={view === "categories" ? "page" : undefined} onClick={openCategories} disabled={todoInteractionActive || todoActionSubmitting}>Categories</button>
             <button aria-current={view === "projects" ? "page" : undefined} onClick={openProjects} disabled={todoInteractionActive || todoActionSubmitting}>Projects</button>
+            <button aria-current={view === "notes" ? "page" : undefined} onClick={() => { if (view !== "notes") openNotes(); }} disabled={todoInteractionActive || todoActionSubmitting}>Notes</button>
           </nav>
           <div className="identity-control">
             {syncStatus ? (
@@ -2212,7 +2256,38 @@ export default function App() {
           </div>
         </header>
 
-        <section className={`workspace workspace-${view}`} id="main-content">
+        {notesSessions.map((session) => {
+          const visible = view === "notes" && activeNotesId === session.id;
+          return <section key={session.id} className="workspace workspace-notes" hidden={!visible} id={visible ? "main-content" : undefined}>
+          {visible ? notesSessions.filter((other) => other.id !== session.id && retainedNotes.has(other.id)).map((other) =>
+            <button key={other.id} className="secondary-button" type="button" onClick={() => setActiveNotesId(other.id)}>
+              Resume Notes for {other.context?.source.label ?? (other.context ? other.context.kind === "project" ? "Project" : "Todo" : "All notes")}
+            </button>
+          ) : null}
+          <NotesWorkspace sessionId={session.id} token={activeToken!}
+            context={session.context} visible={visible} onRetainChange={setRetainNotes}
+            reopenTodoOnBack={session.context?.kind === "todo" && todoEditTarget?.id !== session.context.source.id}
+            onBack={() => {
+              const origin = session.context;
+              if (origin?.kind === "project" && selectedProjectId !== origin.source.id) {
+                resetTodoEditor(false);
+                openProject(origin.source.id, false, null, session.returnScope);
+              } else {
+                setView(session.returnView);
+              }
+            }} onExpired={expireNotesIdentity}
+            onOpenProject={(project) => {
+              resetTodoEditor(false);
+              openProject(project.id, false, null, project.archived_at ? "archived" : "active");
+            }}
+            onOpenTodo={(todo, trigger, returning) => {
+              setView(returning ? session.returnView : "todos");
+              openTodoEditor(todo, trigger);
+            }}
+          />
+        </section>;
+        })}
+        {view !== "notes" ? <section className={`workspace workspace-${view}`} id="main-content">
           {view === "dashboard" ? <Dashboard key={`${identity.id}:${activeToken}`} token={activeToken!} identity={identity} onUnauthorized={returnToSetup} onOpenProject={(id) => openProject(id, true)} onOpenSession={(projectId, sessionId) => openProject(projectId, true, sessionId)} onOpenToday={openToday} composeContinuation={(project, session) => composeAISessionPrompt("continue", project, session)} /> : view === "today" ? (
             <>
               <div className="today-heading">
@@ -2312,6 +2387,9 @@ export default function App() {
                       {projectDetail.description ? <div className="project-copy"><h3>Description</h3><p>{projectDetail.description}</p></div> : null}
                       <div className="project-copy"><h3>Next step</h3><p>{projectDetail.next_step || "Not set"}</p></div>
                       <button className="secondary-button" type="button" onClick={startProjectEdit}><Pencil aria-hidden="true" />Edit project</button>
+                      <button className="secondary-button" type="button" onClick={() => openNotes({
+                        kind: "project", source: { id: projectDetail.id, label: projectDetail.name, available: true },
+                      })}>Project notes</button>
                       <ProjectLifecycle
                         key={`${identity.id}:${projectScope}:${projectDetail.id}`}
                         archived={projectDetail.archived_at != null}
@@ -2451,7 +2529,7 @@ export default function App() {
             </>
           )}
           <span className="sr-only" aria-live="polite">{currentStatus === "loading" ? "Loading" : ""}</span>
-        </section>
+        </section> : null}
       </main>
     );
   }

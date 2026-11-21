@@ -1,12 +1,12 @@
 # LifeOS Current Task
 
-Last updated: 2026-11-20
+Last updated: 2026-11-21
 
 ## Metadata
 
 - Task ID: TASK-039
 - Task Name: PC Notes
-- Status: READY
+- Status: REVIEWING
 - Priority: P1
 - Parent Task: PC V1 MVP completion
 - Dependencies: TASK-038 terminal Closure Commit `08702c9ae28ff136b2ae8cedd02713740e00bb4e`; existing Project and Todo APIs; migration 20261109_0011
@@ -50,13 +50,13 @@ Capture a plain-text note, optionally associate it with a Project and a Todo, an
 
 ## Acceptance Criteria
 
-- [ ] Notes can be created, reopened, edited and deleted on PC, with exact field validation and correct empty/error/loading states.
-- [ ] Project and Todo associations can be assigned/cleared independently, and an unavailable target leaves its note accessible.
-- [ ] Foreign identities cannot read or mutate notes or assign or expose foreign sources. Archived Projects can be associated.
-- [ ] Context actions open the correct filtered Notes view and prefill creation. Pagination and pickers work past the first page.
-- [ ] Safe external URL validation/opening, mutation replay/no-op/version behavior and stale-response/retry handling are verified.
-- [ ] Disposable PostgreSQL upgrade/downgrade and live API persistence preserve legacy Project/Todo/sync data. Existing feature regressions pass.
-- [ ] Backend and Web tests, production build, desktop/narrow Playwright and scope/whitespace checks pass or record concrete environmental limits.
+- [x] Notes can be created, reopened, edited and deleted on PC, with exact field validation and correct empty/error/loading states.
+- [x] Project and Todo associations can be assigned/cleared independently, and an unavailable target leaves its note accessible.
+- [x] Foreign identities cannot read or mutate notes or assign or expose foreign sources. Archived Projects can be associated.
+- [x] Context actions open the correct filtered Notes view and prefill creation. Pagination and pickers work past the first page.
+- [x] Safe external URL validation/opening, mutation replay/no-op/version behavior and stale-response/retry handling are verified.
+- [x] Disposable PostgreSQL upgrade/downgrade and live API persistence preserve legacy Project/Todo/sync data. Existing feature regressions pass.
+- [x] Backend and Web tests, production build, desktop/narrow Playwright and scope/whitespace checks pass or record concrete environmental limits.
 
 ## Verification Plan
 
@@ -91,6 +91,12 @@ Report changed paths, API and migration behavior, browser and backend verificati
 
 ## Current Stage
 
-Next Role: Git Snapshot
+Git Snapshot: COMPLETE on branch main; base 08702c9ae28ff136b2ae8cedd02713740e00bb4e; snapshot 4b4f7f510df20cce6e03b56769f6c1428edcf929.
 
-Required Next Action: establish the pre-Coding Git Snapshot from the exact nine-document approved scope and independently verify branch, HEAD, remote parity, staged state, whitespace, secrets, private fixtures, and generated artifacts. Do not start Coding until Snapshot synchronizes both active task records to IN_PROGRESS.
+Snapshot Reason: approved TASK-039 readiness documents required a durable pre-Coding baseline.
+
+Code re-review: PASS at 2026-11-21 22:42 +08:00. CR-TASK-039-001 and CR-TASK-039-002 are verified.
+
+Next Role: Git Commit
+
+Required Next Action: verify and publish the exact Reviewed Scope in `handoff/code-review-gate.md`.

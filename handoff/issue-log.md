@@ -346,6 +346,38 @@ Use this file for review findings, bugs, missing tests, follow-ups, and small pr
 - Resolution: App owns pending attempts and ambiguous retry keys across detail remounts. Successful writes refresh the current scope and preserve navigation when the initiating detail context has changed.
 - Final Verification: Code Review independently confirmed same-key retry after remount, duplicate prevention during a delayed write, and Active/Archived reconciliation at 1280px and 375px on 2026-11-20. Full Web, build, and Playwright passed.
 
+### CR-TASK-039-001: Notes navigation drops pending write and retry state
+
+- Status: verified
+- Severity: P1
+- Found by: Code Review window
+- Found at: 2026-11-21 21:56 +08:00
+- Related task: TASK-039 PC Notes
+- Fix owner/window: Coding via guarded rework admission.
+- Files: `web/src/NotesWorkspace.tsx:45`, `web/src/NotesWorkspace.tsx:146`, `web/src/App.tsx:2211`, `web/src/App.tsx:2287`.
+- Problem: Notes stores the draft, in-flight guard and retry key in the mounted workspace. Top-level navigation can unmount it during a save or after an ambiguous failure. Returning to Notes loses that state.
+- Impact: an unresolved create can be submitted again with a new key and persist a second Note. An ambiguous failure followed by navigation also loses the original draft and retry key.
+- Expected: preserve the same-identity draft, pending state and ambiguous retry key across navigation, or guard navigation until the user resolves or explicitly discards the attempt. Keep callbacks isolated from other identities and contexts.
+- Verification: delay POST, navigate away and return, then verify one write remains pending or navigation is guarded. Simulate a committed write with a lost response and verify an unchanged retry uses the same key and leaves one Note. Cover contextual Notes and identity reset.
+
+- Final Verification: on 2026-11-21 22:12 +08:00, Code Review independently verified pending-write preservation and unchanged same-key retry after a committed request lost its response at 1280px and 375px. The different-source regression is tracked separately.
+
+### CR-TASK-039-002: Contextual Notes opens a retained draft from a different source
+
+- Status: verified
+- Severity: P2
+- Found by: Code Review window
+- Found at: 2026-11-21 22:12 +08:00
+- Related task: TASK-039 PC Notes
+- Fix owner/window: Coding via guarded rework admission.
+- Files: `web/src/App.tsx:1228`, `web/src/App.tsx:2247`, `web/src/NotesWorkspace.tsx:32`, `docs/api-notes.md:38`.
+- Actual: create a draft from Project A, leave via Dashboard, open Project B and click Project notes. Chrome against the production build still displayed the A draft and selected association A. The return target had been changed to B.
+- Impact: a source-specific entry opens content for a different source and can lead the user to save to the wrong Project. The approved contract requires the entry to open Notes filtered to the requested source.
+- Expected: keep the original draft, association, pending write and retry key together. Open the requested source correctly or show an explicit choice to resume the original draft or defer opening the new source. Keep the return target tied to the workspace the user actually sees.
+- Verification: add a two-source browser regression with a retained draft or pending write, verify filter, association and return target, and retain the existing pending-write and same-key replay coverage.
+
+- Final Verification: Code Review independently verified the two-Project regression at 1280px and 375px on 2026-11-21 22:42 +08:00. Project B used its own filter, association and return target. Explicitly resuming A restored its draft and same-key retry. Pending POST and identity reset regressions passed.
+
 ## Entry Template
 
 ```text
