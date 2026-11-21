@@ -4,98 +4,76 @@ Last updated: 2026-11-20
 
 ## Metadata
 
-- Task ID: TASK-038
-- Task Name: PC Project lifecycle
-- Status: COMPLETED
+- Task ID: TASK-039
+- Task Name: PC Notes
+- Status: READY
 - Priority: P1
-- Parent Task: PC V1 MVP completion / Project depth
-- Dependencies: TASK-037 terminal Closure Commit `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; Project and existing nested source APIs; migration 20261015_0010
-- Contract: `docs/api-project-lifecycle.md` (approved by Task Review)
-
-## Background
-
-TASK-037 is terminally closed. Before this publication, main HEAD, origin/main and remote main matched its terminal commit and the worktree was clean. The terminal commit contains the exact five authorized documents. Project lifecycle is the next planned PC foundation before Notes, Calendar and acceptance.
+- Parent Task: PC V1 MVP completion
+- Dependencies: TASK-038 terminal Closure Commit `08702c9ae28ff136b2ae8cedd02713740e00bb4e`; existing Project and Todo APIs; migration 20261109_0011
+- Contract: `docs/api-notes.md` (approved by Task Review)
 
 ## Goal
 
-A PC user can archive a Project, find and restore it from Archived, or explicitly delete it after archiving. Project data is preserved according to the contract; linked Todos remain independent.
+Capture a plain-text note, optionally associate it with a Project and a Todo, and find it again from either context. Support adding an external knowledge-base URL.
 
 ## In Scope
 
-- Migration, lifecycle fields, active/archive list scopes, and shared deleted-parent boundary.
-- Keyed archive/restore/soft-delete APIs, parent versions and transactional locking with existing child writes.
-- PC list switching and detail commands, delete confirmation, canonical refresh, and Dashboard exclusion.
-- Backend, disposable PostgreSQL, Web, desktop/narrow browser and existing feature regression evidence.
-- Synchronize the roadmap and project state to record TASK-037 terminal closure; preserve its archive.
+- Owner-scoped note storage and API for create, list, read, edit and soft delete.
+- Optional Project and Todo references, unavailable-source handling, external URL validation, and contextual navigation.
+- PC Notes views and migration/API, Web and browser verification.
+- Record TASK-038 terminal closure in the roadmap and project state.
 
 ## Out Of Scope
 
-- Physical delete, Trash/deleted restore, retention jobs, batch operations, changed Project business statuses, and any child/source mutation caused by lifecycle.
-- Notes, Calendar, Android, new sync entities/events, AI provider/Agent/memory work, and user database deployment.
-- Existing child public DTO changes, completed task archives, old migrations, dependencies and unrelated restructuring.
+- Android and cross-device Notes sync, Calendar, AI/Agent/memory, Notes search and folders, Markdown editor, attachments and external knowledge retrieval.
+- Writes to linked Project/Todo records, changes to existing API contracts, older migrations, completed archives, or configured database deployment.
 
 ## Relevant Files
 
-- `docs/api-project-lifecycle.md`: exact storage, read/write, dependent-record, concurrency, replay and UI policy.
-- `docs/pc-delivery-plan.md`, Project sections of `docs/requirements.md`, `docs/mvp.md`, `docs/architecture.md`; existing stage/milestone/Todo-link/timeline contracts as needed.
-- `backend/app/models/project.py`, `backend/app/schemas/project.py`, `backend/app/api/v1/projects.py`, `backend/app/services/project_stages.py`, `backend/app/api/v1/ai_sessions.py`, existing nested routes and idempotency service.
-- `backend/alembic/versions/20261015_0010_add_project_logs.py`, Project/child and disposable PostgreSQL tests.
-- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/Dashboard.tsx`, `web/src/dashboard-selection.ts`, `web/src/styles.css`, current Project/Dashboard/child tests.
-- Search issue-log.md for TASK-038 and deferred ISSUE-20261011-001; do not read full issue history by default.
+- `docs/api-notes.md`, `docs/requirements.md` sections 14-15, `docs/mvp.md` Phase 4, `docs/pc-delivery-plan.md`, and `docs/api-project-lifecycle.md` for archived/deleted behavior.
+- Existing backend models, owner resolution, Project/Todo list routes, idempotency/envelopes, Alembic revision 20261109_0011 and disposable PostgreSQL tests.
+- `web/src/App.tsx`, `web/src/api.ts`, `web/src/types.ts`, `web/src/styles.css`, and existing Project/Todo tests.
+- Search issue-log.md for TASK-039 and deferred ISSUE-20261011-001.
 
 ## Allowed Files
 
-- Project model/schema/API, the existing shared owned-Project helper in project_stages.py, and ai_sessions.py only for shared ownership/locking integration. New narrowly scoped lifecycle service if needed.
-- New `backend/alembic/versions/20261109_0011_add_project_lifecycle.py`; new `backend/tests/test_project_lifecycle.py` and `backend/tests/test_project_lifecycle_migration.py`; focused Project/child regression and disposable fixture/head updates only.
-- Web files listed under Relevant Files, new focused ProjectLifecycle component/test helpers if useful, `web/e2e/project-lifecycle.spec.ts`, and narrowly scoped existing fixtures or compatibility tests.
-- `docs/api-project-lifecycle.md` implementation-status header only; contract changes return to Decision. `docs/pc-delivery-plan.md` verified progress and active role-owned TASK-038 workflow/gate/Git/issue state.
-
-## Forbidden Files And Changes
-
-- Android, older migrations, completed archives, stable requirements/architecture/Phase 1A contracts, dependency/lockfile churn, private fixtures or generated output.
-- Editing Todo or other child data because of lifecycle, physically deleting Projects, or weakening owner isolation.
-- Broad changes to existing source APIs, Project UI navigation, sync, timeline semantics, Dashboard ranking, AI prompts/providers, or local deployment.
+- New Notes model/schema/service/API and scoped registration, new migration `backend/alembic/versions/20261120_0012_add_notes.py`, new Notes tests and focused existing fixture/head updates.
+- Web files above, focused new Notes components/tests, new `web/e2e/notes.spec.ts` and scoped regression fixtures.
+- Notes contract status header, delivery plan progress and active TASK-039 workflow documents as owned by each role. Contract body changes return to Decision.
 
 ## Implementation Requirements
 
-1. Implement the lifecycle contract exactly. Keep lifecycle separate from business status and pin; no inferred child transitions or tombstone exposure.
-2. Add migration 0011 from 0010. Preserve existing records and versions; verify upgrade/repeated-head and the documented downgrade visibility behavior on disposable PostgreSQL.
-3. Reuse authenticated parent resolution and locking for lifecycle and existing child writes, including AI Sessions. Close the deleted-parent boundary consistently for all current child reads and fresh writes. Preserve exact idempotency replay and existing source contracts.
-4. Add Active/Archived Project views and explicit lifecycle commands. Confirm Delete, refresh canonical destination data and guard pending requests across identity/Project/scope changes.
-5. Keep archived Projects off Dashboard, even if pinned. Verify source Todos, other Project links, child data, sync cursors, and active Project behavior remain intact.
-6. Run scoped and full regressions, desktop/narrow browser flows, and actual disposable PostgreSQL migration/API/concurrency tests. Distinguish browser stubs from real API evidence; do not migrate the configured user database.
+1. Implement the Notes contract and additive migration. Retain existing legacy records and source behavior.
+2. Apply owner checks to note access, association assignment and response projections. Preserve notes after source soft deletion.
+3. Implement write validation, idempotency, note-row locking and version rules, plus scoped cursor pagination.
+4. Deliver a usable Notes list/detail/editor, explicit delete confirmation, source-specific entry points and safe external links. Guard async results and retries across context changes.
 
 ## Acceptance Criteria
 
-- [x] Existing Projects migrate as active without data/version/timestamp/sync changes; repeated head preserves state and downgrade visibility is verified.
-- [x] Default and archived listings are owner-scoped and correctly ordered; archived detail/children remain usable and deleted Projects are excluded from all fresh parent/child requests.
-- [x] Archive/restore/delete enforce exact payload, ownership, idempotency, no-op, transaction and version rules; active DELETE is rejected.
-- [x] Soft-delete preserves all dependent rows and independent Todo/sync data; other Projects retain shared Todo references.
-- [x] PostgreSQL concurrency verifies Project and child mutations ordered before/after deletion, including AI Session writes, with no post-delete mutation or lost parent increments.
-- [x] PC Active/Archived, archive/restore, confirm/cancel delete, navigation/refresh errors and identity/Project/scope switching work without stale responses.
-- [x] Pinned archived Projects are excluded from Dashboard; existing Project/stage/milestone/log/timeline/Todo/AI Session/prompt behavior and sync regressions pass.
-- [x] Backend/Web/build, desktop/narrow browser, disposable PostgreSQL and exact Git/security/whitespace checks pass or explicitly disposition environmental limits for Code Review.
+- [ ] Notes can be created, reopened, edited and deleted on PC, with exact field validation and correct empty/error/loading states.
+- [ ] Project and Todo associations can be assigned/cleared independently, and an unavailable target leaves its note accessible.
+- [ ] Foreign identities cannot read or mutate notes or assign or expose foreign sources. Archived Projects can be associated.
+- [ ] Context actions open the correct filtered Notes view and prefill creation. Pagination and pickers work past the first page.
+- [ ] Safe external URL validation/opening, mutation replay/no-op/version behavior and stale-response/retry handling are verified.
+- [ ] Disposable PostgreSQL upgrade/downgrade and live API persistence preserve legacy Project/Todo/sync data. Existing feature regressions pass.
+- [ ] Backend and Web tests, production build, desktop/narrow Playwright and scope/whitespace checks pass or record concrete environmental limits.
 
 ## Verification Plan
 
-- API: active/archive scopes and ordering; invalid scope/auth/owner; action body/key errors; no-op/version/timestamps; replay/conflict; active DELETE rejection; deleted-parent checks across every nested route; rollback and preserved rows.
-- Disposable PostgreSQL: pre-0011 fixtures with all existing child kinds and shared Todos; schema check, upgrade/repeated head/downgrade/re-upgrade, lock ordering including concurrent AI Session create/update versus deletion, and unchanged Todo/sync state.
-- Web: active/archive lists, pinned exclusion, successful mutations, cancellation, retry/readback and stale response guards; desktop 1280px and narrow 375px flows. Run backend full pytest with disposable PostgreSQL configuration, Web tests/build and Playwright; report conditional skips and real-versus-stubbed evidence.
-- Inspect exact changed/staged scope, whitespace, generated artifacts and private data. No live provider calls or configured database changes.
+- Backend: schema constraints, ownership, source states, URL validation, filtered pagination/ties/cursor binding, idempotency/no-op and concurrent update/delete.
+- Disposable PostgreSQL: migrate 0011 to 0012, exercise persistence and source preservation, and verify downgrade/re-upgrade. Keep configured database untouched.
+- Web and Playwright: standalone/context capture, linked retrieval, delete confirmation, pagination, unavailable links, retry and identity switching at 1280px and 375px. Distinguish mocked browser evidence from disposable real API verification. Run full backend and Web suites and build.
 
 ## Risks
 
-- Parent ownership lookup is shared by multiple child routes; preserve valid archived behavior and check deletion after taking write locks.
-- Downgrade removes visibility flags; its test is disposable-only. Soft delete has no recovery UI in this slice.
-- Project detail and Dashboard caches must not retain archived/deleted visibility after successful actions.
+- Separate source projection from persisted association IDs so deleted targets cannot leak titles and existing notes remain editable.
+- Reuse existing Project/Todo source paths so contextual navigation does not interfere with source mutations or stale identity guards.
 
 ## Publication And Snapshot Scope
 
-Base: main at `647f369741b6a1472f5ab6f6e465e3b1d01070ff`; local HEAD, origin/main and remote main matched with a clean worktree. TASK-037 is terminally closed and its completed archive remains unchanged.
+Base main: `08702c9ae28ff136b2ae8cedd02713740e00bb4e`. Local HEAD, origin/main and remote main matched at TASK-038 terminal closure, with clean worktree before publication.
 
-Exact proposed pre-Coding Snapshot scope, including Task Review's gate and READY synchronization:
-
-- `docs/api-project-lifecycle.md`
+- `docs/api-notes.md`
 - `docs/pc-delivery-plan.md`
 - `handoff/current-task.md`
 - `handoff/project-state.md`
@@ -103,34 +81,16 @@ Exact proposed pre-Coding Snapshot scope, including Task Review's gate and READY
 - `handoff/code-review-gate.md`
 - `handoff/git-snapshot.md`
 - `handoff/git-commit.md`
-- `tasks/TASK-038-pc-project-lifecycle.md`
+- `tasks/TASK-039-pc-notes.md`
 
-Only these nine documents are part of publication. Task Review must approve the exact set before Git Snapshot.
+Task Review verifies the exact nine-document readiness scope before Git Snapshot.
 
 ## Coding Output Requirements
 
-Report lifecycle/migration behavior, child ownership and concurrency evidence, UI navigation and regressions, all acceptance results, test limitations, exact changed scope and next role.
+Report changed paths, API and migration behavior, browser and backend verification, acceptance evidence, limits and next role.
 
 ## Current Stage
 
-Git Snapshot: COMPLETE on branch main; base 647f369741b6a1472f5ab6f6e465e3b1d01070ff; snapshot 4138f592f7fa3bb0be080b28e97cce2e778e7732.
+Next Role: Git Snapshot
 
-Snapshot Reason: approved TASK-038 readiness documents required a durable pre-Coding baseline.
-
-Code Review: CHANGES_REQUESTED at 2026-11-18 14:06 +08:00. Blocking issue CR-TASK-038-001 is persisted in `handoff/code-review-gate.md` and `handoff/issue-log.md`.
-
-Code Review re-review: PASS at 2026-11-20 11:48 +08:00. CR-TASK-038-001 is verified.
-
-Closure Check: PASS
-
-Checked At: 2026-11-20 11:53:07 +08:00
-
-Result Commit: `2308b53c3305b27a101a038c24dfe39467399c40`
-
-Completion Commit: `839a7dd5fe51aa092c4b21e7bfa1eaeaa3127b32`
-
-Closure Evidence: clean pre-Closure worktree; local/tracking/remote parity; exact 27-file reviewed result and four-file completion metadata; Code Review re-review PASS; all eight criteria confirmed; CR-TASK-038-001 verified. Full evidence and the five-file allowlist are in the task archive.
-
-Next Role: Git Commit (Terminal Closure Commit)
-
-Required Next Action: commit and push only the five documents in the TASK-038 archive's Terminal Closure File Allowlist with message `docs(task): close TASK-038`. Verify local/tracking/remote parity and a clean worktree, then return to Decision. Do not repeat Closure Check or publish the next task from this step.
+Required Next Action: establish the pre-Coding Git Snapshot from the exact nine-document approved scope and independently verify branch, HEAD, remote parity, staged state, whitespace, secrets, private fixtures, and generated artifacts. Do not start Coding until Snapshot synchronizes both active task records to IN_PROGRESS.
